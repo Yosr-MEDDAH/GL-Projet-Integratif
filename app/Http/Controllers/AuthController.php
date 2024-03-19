@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Carbon\Carbon;
 
 
 class AuthController extends Controller
@@ -21,14 +22,14 @@ class AuthController extends Controller
 
         if ($validator->fails()) {
             response()->json([
-                'status' => false, 
+                'success' => false, 
                 'message' => $validator->errors(),
             ], 422);
         }
 
         $data = $validator->validated();
-        $test = Auth::attempt($data);
-        if (!$test) {
+        
+        if (! JWTAuth::attempt($data)) {
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized',
@@ -39,6 +40,7 @@ class AuthController extends Controller
         if ($user->isEnable) {
             $code = $user->generateRandomCode();
             $user->code_2FA = $code;
+            $user->code_2fa_created_at = Carbon::now();
             $user->save();
             $user->sendTwoFactorCodeEmailNotification($code, $user->name);
             return response()->json([
@@ -47,18 +49,42 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = JWTAuth::fromUser($user);
-
-
+        $token = JWTAuth::fromUser($user) ;
         return response()->json([
-            'status' => true,
-            'token' => $token,
+            'status' => true, 
             'user' => $user,
-        ])->cookie('auth_cookie', $token, 60);
+            'token' => $token,
+        ])->cookie('auth_jwt', $token, 60);
         
     }
 
-    function logout(Request $request) //cookie
+
+
+    function logout (Request $request) {
+        try {
+            $token = JWTAuth::getToken();
+
+            if(!$token) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not authenticated',
+                ], 401);
+            }
+
+            JwtAuth::invalidate($token);
+
+            return response()->json([
+                'sucess' => true,
+                'message' => 'you are logged out',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Something Wrong'
+            ]);
+        }
+    }
+
+    /*function logout(Request $request) //cookie
     {
         try {
             if (!$request->bearerToken()) {
@@ -77,5 +103,7 @@ class AuthController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Something went wrong'], 500);
         }
-    }
+    }*/
+
+
 }

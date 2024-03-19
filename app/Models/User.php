@@ -90,15 +90,10 @@ class User extends Authenticatable implements JWTSubject
         return $code;
     }
 
-    public function enableTwoFactorAuth()
+    public function toggle ($bool)
     {
-        $this->isEnable = true;
+        $this->isEnable = $bool;
         $this->save();
     }
 
-    public function disableTwoFactorAuth()
-    {
-        $this->isEnable = false;
-        $this->save();
-    }
 }

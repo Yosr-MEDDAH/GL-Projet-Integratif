@@ -17,10 +17,10 @@ class TwoFactorAuthNotification extends Notification
 
     protected $code;
     protected $role;
-    public function __construct($code, $role)
+    public function __construct($code, $name)
     {
         $this->code = $code;
-        $this->role = $role;
+        $this->name = $name;
     }
 
     /**
@@ -49,7 +49,7 @@ class TwoFactorAuthNotification extends Notification
         return (new MailMessage)
             ->mailer('smtp')
             ->subject('Votre Code de Vérification')
-            ->greeting($greeting . ', ' . $this->role)
+            ->greeting($greeting . ', ' . $this->name)
             ->line('Vous avez récemment demandé un code de double authentification pour accéder à votre compte.')
             ->line('Votre code de double authentification est : ' . $this->code)
             ->line('Veuillez utiliser ce code pour finaliser le processus de connexion sécurisée.')

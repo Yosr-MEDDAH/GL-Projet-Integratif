@@ -8,24 +8,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Carbon\Carbon;
 
 class TwoFactorAuthController extends Controller
 {
-    function enable(Request $request)
+    function toggle_2fa (Request $request)
     {
-        $user = $request->user();
-        $user->enableTwoFactorAuth();
+        $bool = $request->input('toggle');
+        $user = JWTAuth::user();
+        $user->toggle($bool);
         return response()->json([
-            'message' => 'La double authentification a été activée avec succès'
-        ]);
-    }
-
-    function disable(Request $request)
-    {
-        $user = $request->user();
-        $user->disableTwoFactorAuth();
-        return response()->json([
-            'message' => 'La double authentification a été désactivée avec succès'
+            'success' => true,
+            'message' => $bool ? 'Authentification à deux facteurs activée' : 'Authentification à deux facteurs désactivée'
         ]);
     }
 
@@ -43,20 +37,32 @@ class TwoFactorAuthController extends Controller
         $user = User::where('code_2FA', $request->input('code'))->first();
         if (!$user) {
             return response()->json([
-                'status' => false,
+                'sucess' => false,
                 'message' => 'Le code de vérification fourni est invalide. Veuillez réessayer avec un code valide',
             ], 422);
         }
+        $expiration = Carbon::parse($user->code_2fa_created_at)->addMinutes(5);
 
-        $user->code_2fa = null;
+        if(! Carbon::now()->lt($expiration)){
+            return response()->json([
+                'sucess' => false,
+                'message' => "Le code de vérification fourni est expiré. Veuillez réessayer avec un code valide"
+            ]);
+        }
+
+        $user->code_2FA = null;
+        $user->code_2fa_created_at = null;
+        $user->save();
+
         $token = JWTAuth::fromUser($user);
-
 
         return response()->json([
             'status' => true,
             'message' => 'Le code de vérification fourni est valide',
             'token' => $token,
             'user' => $user,
-        ]);
+        ])->cookie('auth_jwt_2fa', $token, 60);
+
+        
     }
 }

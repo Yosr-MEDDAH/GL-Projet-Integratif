@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('image');
             $table->boolean('isActive');
             $table->unsignedBigInteger('code_2FA')->nullable();
+            $table->timestamp('code_2fa_created_at')->nullable();
             $table->boolean('isEnable')->nullable();
             $table->integer('idErp')->nullable();
             $table->integer('idFiscale');

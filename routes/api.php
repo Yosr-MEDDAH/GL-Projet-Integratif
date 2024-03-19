@@ -22,7 +22,6 @@ Route::controller(AuthController::class)->prefix('auth')->group(function () {
 });
 
 Route::controller(TwoFactorAuthController::class)->prefix('2fa')->group(function () {
-    Route::post('/enable', 'enable')->middleware('jwt.auth');
-    Route::post('/disable', 'disable')->middleware('jwt.auth');
+    Route::post('/toggle_2fa', 'toggle_2fa')->middleware('jwt.auth');
     Route::post('/verify', 'verify');
 });
