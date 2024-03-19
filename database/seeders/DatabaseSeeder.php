@@ -2,11 +2,10 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,13 +14,45 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        // Seed roles table
+        $this->call(RolesSeeder::class);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // Create users with different attributes
+        User::factory()->create([
+            'name' => 'John Doe',
+            'email' => 'john@example.com',
+            'password' => Hash::make('12345678'), // Set password to "12345678"
+            'phone' => '1234567890',
+            'image' => 'john.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456, // Example code for 2FA
+            'isEnable' => false,
+            'role_id' => 2, // Assign a role ID according to your roles setup
+            'idErp' => 1, // Assuming these are required fields
+            'idFiscale' => 1,
+            'adress' => '123 Street, City',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+        ]);
 
-        User::factory()->count(25)->create();
+
+        User::factory()->create([
+            'name' => 'Test Name',
+            'email' => 'test@test.com',
+            'password' => Hash::make('12345678'), // Set password to "12345678"
+            'phone' => '1234567890',
+            'image' => 'john.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456, // Example code for 2FA
+            'isEnable' => false,
+            'role_id' => 2, // Assign a role ID according to your roles setup
+            'idErp' => 1, // Assuming these are required fields
+            'idFiscale' => 1,
+            'adress' => '123 Street, City',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+        ]);
+
+
     }
 }

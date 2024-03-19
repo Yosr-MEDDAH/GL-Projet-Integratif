@@ -11,7 +11,7 @@ use Carbon\Carbon;
 
 class AuthController extends Controller
 {
-    //success , message , data
+
 
     function login(Request $request)
     {
@@ -21,18 +21,20 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
-            response()->json([
-                'success' => false, 
+            return response()->json([
+                'success' => false,
                 'message' => $validator->errors(),
+                'data' => []
             ], 422);
         }
 
         $data = $validator->validated();
-        
+
         if (! JWTAuth::attempt($data)) {
             return response()->json([
-                'status' => false,
+                'success' => false,
                 'message' => 'Unauthorized',
+                'data' => []
             ], 401);
         }
 
@@ -44,18 +46,23 @@ class AuthController extends Controller
             $user->save();
             $user->sendTwoFactorCodeEmailNotification($code, $user->name);
             return response()->json([
-                'status' => true,
+                'success' => true,
                 'message' => 'Un code de vérification a été envoyé à votre appareil enregistré. Veuillez vérifier et saisir le code pour compléter le processus de connexion.',
+                'data' => []
             ]);
         }
 
         $token = JWTAuth::fromUser($user) ;
         return response()->json([
-            'status' => true, 
-            'user' => $user,
-            'token' => $token,
+            'success' => true,
+            'message' => 'Welcome User',
+            'data' =>   [
+                            'user' => $user,
+                            'JWTtoken' => $token
+                        ]
+
         ])->cookie('auth_jwt', $token, 60);
-        
+
     }
 
 
@@ -68,6 +75,7 @@ class AuthController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated',
+                    'data' =>   []
                 ], 401);
             }
 
@@ -76,10 +84,13 @@ class AuthController extends Controller
             return response()->json([
                 'sucess' => true,
                 'message' => 'you are logged out',
+                'data' =>   []
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Something Wrong'
+                'sucess' => false,
+                'message' => 'Something went wrong',
+                'data' =>   []
             ]);
         }
     }
