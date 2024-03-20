@@ -17,15 +17,21 @@ class RolesSeeder extends Seeder
      */
     public function run()
     {
-        // Insert roles into the roles table
+
         DB::table('roles')->insert([
             [
                 'name' => 'Admin',
             ],
             [
-                'name' => 'User',
+                'name' => 'Agent Bof',
             ],
-            // Add more roles as needed
+            [
+                'name' => 'Fiscaliste',
+            ],
+            [
+                'name' => 'Comptable',
+            ],
+
         ]);
     }
 }

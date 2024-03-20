@@ -30,7 +30,7 @@ class AuthController extends Controller
 
         $data = $validator->validated();
 
-        if (! JWTAuth::attempt($data)) {
+        if (!JWTAuth::attempt($data)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized',
@@ -52,26 +52,29 @@ class AuthController extends Controller
             ]);
         }
 
-        $token = JWTAuth::fromUser($user) ;
+        $token = JWTAuth::fromUser($user);
+        $role = $user->role()->first();
         return response()->json([
             'success' => true,
             'message' => 'Welcome User',
             'data' =>   [
-                            'user' => $user,
-                            'JWTtoken' => $token
-                        ]
+                //is it right to return the whole user object?
+                'user' => $user,
+                'user_role' => ['role_id' => $role->id ,'role_name' => $role->name] ,
+                'JWTtoken' => $token
+            ]
 
         ])->cookie('auth_jwt', $token, 60);
-
     }
 
 
 
-    function logout (Request $request) {
+    function logout(Request $request)
+    {
         try {
             $token = JWTAuth::getToken();
 
-            if(!$token) {
+            if (!$token) {
                 return response()->json([
                     'success' => false,
                     'message' => 'User not authenticated',
@@ -115,6 +118,4 @@ class AuthController extends Controller
             return response()->json(['error' => 'Something went wrong'], 500);
         }
     }*/
-
-
 }
