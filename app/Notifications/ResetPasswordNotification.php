@@ -44,7 +44,7 @@ class ResetPasswordNotification extends Notification
             $greeting = 'Bonsoir';
         }
 
-        $resetUrl = null;
+        $resetUrl = 'localhost/Login/resetPassword?t=' . $this->code;
 
         return (new MailMessage)
             ->mailer('smtp')
@@ -52,7 +52,7 @@ class ResetPasswordNotification extends Notification
             ->greeting($greeting . ',')
             ->line('Vous recevez cet e-mail car nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.')
             ->action('Réinitialiser le mot de passe', $resetUrl)
-            ->line('Ce lien de réinitialisation de mot de passe expirera dans :count minutes.', ['count' => config('auth.passwords.users.expire')])
+            ->line('Ce lien de réinitialisation de mot de passe expirera dans 10 minutes')
             ->line('Si vous n\'avez pas demandé de réinitialisation de mot de passe, aucune autre action n\'est requise.')
             ->salutation('Cordialement, ' . 'Direction Centrale Des Finances Tunisie Telecom');
     }

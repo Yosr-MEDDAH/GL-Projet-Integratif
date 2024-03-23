@@ -101,7 +101,8 @@ class InfosController extends Controller
     {
         $user = JWTAuth::user();
 
-        $messages = [ /*pour faciliter gestion coté front*/
+        /* juste pour le test coté front si tu vas utiliser les messages, on peut les ignorer et garder les messages par défaut*/
+        $messages = [
             'oldPassword.required' => 'Le champ ancien mot de passe est requis',
             'newPassword.required' => 'Le champ nouveau mot de passe est requis',
             'newPassword.min' => 'Le nouveau mot de passe doit comporter au moins 8 caractéres',

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InfosController;
+use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\TwoFactorAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,3 +34,8 @@ Route::controller(InfosController::class)->prefix('infos')->group((function () {
     Route::put('/image', 'updateImage')->middleware('jwt.auth');
     Route::put('/password', 'updatePassword')->middleware('jwt.auth');
 }));
+
+Route::controller(ResetPassword::class)->prefix('reset')->group(function () {
+    Route::post('/verifyEmail', 'verifyEmail');
+    Route::post('/resetPassword', 'resetPassword');
+});

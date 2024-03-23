@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Notifications\ResetPasswordNotification;
 use App\Notifications\TwoFactorAuthNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,6 +13,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
 
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
@@ -74,9 +76,14 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function sendTwoFactorCodeEmailNotification($code, $role)
+    public function sendTwoFactorCodeEmailNotification($code, $name)
     {
-        return $this->notify(new TwoFactorAuthNotification($code, $role));
+        return $this->notify(new TwoFactorAuthNotification($code, $name));
+    }
+
+    public function sendResetPasswordNotification($code)
+    {
+        return $this->notify(new ResetPasswordNotification($code));
     }
 
     public function generateRandomCode()
@@ -85,7 +92,7 @@ class User extends Authenticatable implements JWTSubject
         $unique = false;
 
         while (!$unique) {
-            $code = mt_rand(100000, 999999); // this should not be random
+            $code = mt_rand(100000, 999999);
             $user = User::where('code_2FA', $code)->first();
 
             if (!$user) {
@@ -101,7 +108,7 @@ class User extends Authenticatable implements JWTSubject
         $unique = false;
 
         while (!$unique) {
-            $refreshToken =  Str::random(60); // this should not be random
+            $refreshToken =  Str::random(60);
             $user = User::where('refresh_token', $refreshToken)->first();
 
             if (!$user) {
@@ -109,6 +116,24 @@ class User extends Authenticatable implements JWTSubject
             }
         }
         return $refreshToken;
+    }
+
+    public function generateRandomResetToken()
+    {
+        $resetToken = null;
+        $unique = false;
+
+        while (!$unique) {
+            $resetToken =  Str::random(60);
+
+            $record = DB::table('password_reset_tokens')
+                ->where('token', $resetToken)
+                ->first();
+            if (!$record) {
+                $unique = true;
+            }
+        }
+        return $resetToken;
     }
 
 
