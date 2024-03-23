@@ -10,11 +10,29 @@ class Fournisseur extends User
 {
     use HasFactory;
 
-    protected $fillable = [
-        'idErp',
-        'idFiscale',
-        'adresse',
-        'nationnalite',
-    ];
+    protected $table = 'users';
 
+    public $fillable = [];
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $this->fillable = array_merge(parent::getFillable(), [
+            'idErp',
+            'idFiscale',
+            'adress',
+            'nationnalites',
+
+        ]);
+    }
+    public function getFillable()
+    {
+        return array_merge(parent::getFillable(), [
+            'idErp',
+            'idFiscale',
+            'adress',
+            'nationnalites',
+        ]);
+    }
 }

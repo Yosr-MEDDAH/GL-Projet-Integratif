@@ -26,7 +26,7 @@ class RolesSeeder extends Seeder
                 'name' => 'Agent Bof',
             ],
             [
-                'name' => 'Fiscaliste',
+                'name' => 'Fournisseur',
             ],
             [
                 'name' => 'Comptable',

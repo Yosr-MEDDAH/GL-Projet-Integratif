@@ -10,9 +10,23 @@ class Personnel_DCF extends User
 {
     use HasFactory;
 
-    protected $fillable = [
-        'direction'
-    ];
+    protected $table = 'users';
 
-   
+    public $fillable = [];
+
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $this->fillable = array_merge(parent::getFillable(), [
+            'direction',
+
+        ]);
+    }
+    public function getFillable()
+    {
+        return array_merge(parent::getFillable(), [
+            'direction'
+        ]);
+    }
 }

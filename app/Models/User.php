@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Str;
+
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
@@ -30,7 +32,9 @@ class User extends Authenticatable implements JWTSubject
         'isActive',
         'code_2FA',
         'isEnable',
-        'role_id'
+        'role_id',
+        'refresh_token',
+        'refreshToken_created_at'
     ];
 
 
@@ -91,10 +95,43 @@ class User extends Authenticatable implements JWTSubject
         return $code;
     }
 
-    public function toggle ($bool)
+    public function generateRandomRefreshToken()
+    {
+        $refreshToken = null;
+        $unique = false;
+
+        while (!$unique) {
+            $refreshToken =  Str::random(60); // this should not be random
+            $user = User::where('refresh_token', $refreshToken)->first();
+
+            if (!$user) {
+                $unique = true;
+            }
+        }
+        return $refreshToken;
+    }
+
+
+    public function toggle($bool)
     {
         $this->isEnable = $bool;
         $this->save();
     }
 
+    public function getFillable()
+    {
+        return [
+            'name',
+            'email',
+            'password',
+            'phone',
+            'image',
+            'isActive',
+            'code_2FA',
+            'isEnable',
+            'role_id',
+            'refresh_token',
+            'refreshToken_created_at'
+        ];
+    }
 }

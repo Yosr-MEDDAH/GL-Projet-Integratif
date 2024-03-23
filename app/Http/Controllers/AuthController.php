@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Fournisseur;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Carbon\Carbon;
-
+use Dotenv\Validator as DotenvValidator;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Support\Str;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\JWT;
 
 class AuthController extends Controller
 {
@@ -53,15 +58,20 @@ class AuthController extends Controller
         }
 
         $token = JWTAuth::fromUser($user);
+        $user->refresh_token = $user->generateRandomRefreshToken();
+        $user->refreshToken_created_at = Carbon::now();
+        $user->save();
         $role = $user->role()->first();
+
         return response()->json([
             'success' => true,
             'message' => 'Welcome User',
             'data' =>   [
                 //is it right to return the whole user object?
                 'user' => $user,
-                'user_role' => ['role_id' => $role->id ,'role_name' => $role->name] ,
-                'JWTtoken' => $token
+                'user_role' => ['role_id' => $role->id, 'role_name' => $role->name],
+                'JWTtoken' => $token,
+                'refreshToken' => $user->refresh_token,
             ]
 
         ])->cookie('auth_jwt', $token, 60);
@@ -85,18 +95,81 @@ class AuthController extends Controller
             JwtAuth::invalidate($token);
 
             return response()->json([
-                'sucess' => true,
+                'success' => true,
                 'message' => 'you are logged out',
                 'data' =>   []
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'sucess' => false,
+                'success' => false,
                 'message' => 'Something went wrong',
                 'data' =>   []
             ]);
         }
     }
+
+    function refreshToken(Request $request)
+    {
+        $validator = Validator($request->all(), [
+            'refreshToken' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => []
+            ], 422);
+        }
+
+        $token = JWTAuth::getToken();
+
+        $refreshToken = $request->input('refreshToken');
+
+        $user = User::where('refresh_token', $refreshToken)->first();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Refresh Token fourni est invalide',
+            ], 422);
+        }
+        $expiration = Carbon::parse($user->refreshToken_created_at)->addDays(7);
+
+        if (!Carbon::now()->lt($expiration)) {
+            $user->refresh_token = null;
+            $user->refreshToken_created_at = null;
+            $user->save();
+            return response()->json([
+                'success' => false,
+                'message' => "Le code de vérification fourni est expiré."
+            ], 401);
+        }
+
+        $newJWTtoken = JWTAuth::refresh();
+        return response()->json([
+            'success' => true,
+            'message' => 'Nouveau token d\'accès généré avec succès',
+            'data' => [
+                'newJWTtoken' => $newJWTtoken,
+            ]
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /*function logout(Request $request) //cookie
     {

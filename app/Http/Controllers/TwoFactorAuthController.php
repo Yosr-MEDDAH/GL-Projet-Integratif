@@ -12,7 +12,7 @@ use Carbon\Carbon;
 
 class TwoFactorAuthController extends Controller
 {
-    function toggle_2fa (Request $request)
+    function toggle_2fa(Request $request)
     {
         $bool = $request->input('toggle');
         $user = JWTAuth::user();
@@ -37,15 +37,15 @@ class TwoFactorAuthController extends Controller
         $user = User::where('code_2FA', $request->input('code'))->first();
         if (!$user) {
             return response()->json([
-                'sucess' => false,
+                'success' => false,
                 'message' => 'Le code de vérification fourni est invalide. Veuillez réessayer avec un code valide',
             ], 422);
         }
         $expiration = Carbon::parse($user->code_2fa_created_at)->addMinutes(5);
 
-        if(! Carbon::now()->lt($expiration)){
+        if (!Carbon::now()->lt($expiration)) {
             return response()->json([
-                'sucess' => false,
+                'success' => false,
                 'message' => "Le code de vérification fourni est expiré. Veuillez réessayer avec un code valide"
             ]);
         }
@@ -55,14 +55,18 @@ class TwoFactorAuthController extends Controller
         $user->save();
 
         $token = JWTAuth::fromUser($user);
+        $refreshToken = JWTAuth::setToken($token)->refresh();
+        $role = $user->role()->first();
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Le code de vérification fourni est valide',
-            'token' => $token,
-            'user' => $user,
+            'data' => [
+                'user' => $user,
+                'user_role' => ['role_id' => $role->id, 'role_name' => $role->name],
+                'JWTtoken' => $token,
+                'refreshToken' => $refreshToken,
+            ]
         ])->cookie('auth_jwt_2fa', $token, 60);
-
-        
     }
 }

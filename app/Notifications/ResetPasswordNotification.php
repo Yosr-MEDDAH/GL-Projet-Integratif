@@ -7,20 +7,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class TwoFactorAuthNotification extends Notification
+class ResetPasswordNotification extends Notification
 {
     use Queueable;
+
+    public $code;
 
     /**
      * Create a new notification instance.
      */
-
-    protected $code;
-    protected $name;
-    public function __construct($code, $name)
+    public function __construct($code)
     {
         $this->code = $code;
-        $this->name = $name;
     }
 
     /**
@@ -46,14 +44,16 @@ class TwoFactorAuthNotification extends Notification
             $greeting = 'Bonsoir';
         }
 
+        $resetUrl = null;
+
         return (new MailMessage)
             ->mailer('smtp')
-            ->subject('Votre Code de Vérification')
-            ->greeting($greeting . ', ' . $this->name)
-            ->line('Vous avez récemment demandé un code de double authentification pour accéder à votre compte.')
-            ->line('Votre code de double authentification est : ' . $this->code)
-            ->line('Veuillez utiliser ce code pour finaliser le processus de connexion sécurisée.')
-            ->line('Si vous n\'avez pas tenté de vous connecter, veuillez ignorer ce message.')
+            ->subject('Réinitialisation de votre mot de passe')
+            ->greeting($greeting . ',')
+            ->line('Vous recevez cet e-mail car nous avons reçu une demande de réinitialisation de mot de passe pour votre compte.')
+            ->action('Réinitialiser le mot de passe', $resetUrl)
+            ->line('Ce lien de réinitialisation de mot de passe expirera dans :count minutes.', ['count' => config('auth.passwords.users.expire')])
+            ->line('Si vous n\'avez pas demandé de réinitialisation de mot de passe, aucune autre action n\'est requise.')
             ->salutation('Cordialement, ' . 'Direction Centrale Des Finances Tunisie Telecom');
     }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InfosController;
 use App\Http\Controllers\TwoFactorAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,9 +20,16 @@ use Illuminate\Support\Facades\Route;
 Route::controller(AuthController::class)->prefix('auth')->group(function () {
     Route::post('/login', 'login');
     Route::post('/logout', 'logout')->middleware('jwt.auth');
+    Route::post('/refresh', 'refreshToken');
 });
 
 Route::controller(TwoFactorAuthController::class)->prefix('2fa')->group(function () {
-    Route::post('/toggle_2fa', 'toggle_2fa')->middleware('jwt.auth');
+    Route::put('/toggle_2fa', 'toggle_2fa')->middleware(['jwt.auth']);
     Route::post('/verify', 'verify');
 });
+
+Route::controller(InfosController::class)->prefix('infos')->group((function () {
+    Route::put('/generalInfos', 'updateGeneralInfo')->middleware('jwt.auth');
+    Route::put('/image', 'updateImage')->middleware('jwt.auth');
+    Route::put('/password', 'updatePassword')->middleware('jwt.auth');
+}));
