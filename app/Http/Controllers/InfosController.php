@@ -47,13 +47,24 @@ class InfosController extends Controller
     }
 
 
-    /*function updateImage(Request $request) /* à tester un problème trouvé 
+    function updateImage(Request $request)
     {
-
         $user = JWTAuth::user();
-        $validator = Validator($request->all(), [
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+
+
+        if (!$request->hasFile('image')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucune image téléchargée',
+                'data' => []
+            ], 400);
+        }
+
+
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
+
 
         if ($validator->fails()) {
             return response()->json([
@@ -62,16 +73,19 @@ class InfosController extends Controller
             ]);
         }
 
-        $imageContent = file_get_contents($request->file('image')->getRealPath());
-        $user->image = $imageContent;
+
+        $imagePath = $request->file('image')->store('images');
+        $user->image = $imagePath;
         $user->save();
+
+
         return response()->json([
             'success' => true,
-            'message' => 'l\'image de l\'utilisateur aété mises à jour avec succès',
+            'message' => "L'image de l'utilisateur a été mise à jour avec succès",
         ]);
-    }*/
+    }
 
-    function updateImage(Request $request)
+    /*function updateImage(Request $request)
     {
 
         $user = JWTAuth::user();
@@ -93,7 +107,7 @@ class InfosController extends Controller
             'success' => true,
             'message' => 'l\'image de l\'utilisateur aété mises à jour avec succès',
         ]);
-    }
+    }*/
 
 
 

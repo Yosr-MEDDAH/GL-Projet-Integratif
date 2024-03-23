@@ -117,7 +117,7 @@ class ResetPassword extends Controller
         }
 
 
-        $expiration = Carbon::parse($createdAt->created_at)->addMinutes(1);
+        $expiration = Carbon::parse($createdAt->created_at)->addMinutes(10);
         if (!Carbon::now()->lt($expiration)) {
             DB::table('password_reset_tokens')->where('email', $user->email)->delete(); //supprimer record si le token est expiré 
             return response()->json([
