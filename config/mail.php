@@ -39,8 +39,8 @@ return [
             'host' => env('MAIL_HOST', 'sandbox.smtp.mailtrap.io'),
             'port' => env('MAIL_PORT', 2525),
             'encryption' => env('MAIL_ENCRYPTION', 'tls'),
-            'username' => env('MAIL_USERNAME', '0963d7d85323dc'),
-            'password' => env('MAIL_PASSWORD', 'aa540b64a0538e'),
+            'username' => env('MAIL_USERNAME', '378d47aed4598f'),
+            'password' => env('MAIL_PASSWORD', 'f6ad1c1829385f'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
         ],
@@ -97,7 +97,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'digidcf@tunisietelecom.tn'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
