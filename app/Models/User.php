@@ -33,6 +33,7 @@ class User extends Authenticatable implements JWTSubject
         'image',
         'isActive',
         'code_2FA',
+        "code_2fa_created_at",
         'isEnable',
         'role_id',
         'refresh_token',
@@ -48,6 +49,8 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+        'code_2FA',
+        "code_2fa_created_at",
     ];
 
     /**

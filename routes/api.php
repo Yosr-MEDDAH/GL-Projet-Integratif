@@ -29,8 +29,9 @@ Route::controller(TwoFactorAuthController::class)->prefix('2fa')->group(function
     Route::post('/verify', 'verify');
 });
 
-Route::controller(InfosController::class)->prefix('infos')->group((function () {
-    Route::put('/generalInfos', 'updateGeneralInfo')->middleware('jwt.auth');
+Route::controller(InfosController::class)->prefix('user')->group((function () {
+    Route::get('/', 'getUser')->middleware('jwt.auth');
+    Route::put('/update', 'updateGeneralInfo')->middleware('jwt.auth');
     Route::post('/image', 'updateImage')->middleware('jwt.auth');
     Route::put('/password', 'updatePassword')->middleware('jwt.auth');
 }));

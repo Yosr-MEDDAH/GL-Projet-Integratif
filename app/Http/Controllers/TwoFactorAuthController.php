@@ -54,11 +54,12 @@ class TwoFactorAuthController extends Controller
         $user->code_2fa_created_at = null;
         $user->save();
 
-        $token = JWTAuth::fromUser($user);
+
         $user->refresh_token = $user->generateRandomRefreshToken();
         $user->refreshToken_created_at = Carbon::now();
         $user->save();
         $role = $user->role()->first();
+        $token = JWTAuth::claims(['role' => $role])->fromUser($user);
 
         return response()->json([
             'success' => true,

@@ -59,12 +59,11 @@ class AuthController extends Controller
         }
 
 
-        $role = $user->role()->first();
-        $token = JWTAuth::claims(['role' => $role])->fromUser($user);
         $user->refresh_token = $user->generateRandomRefreshToken();
         $user->refreshToken_created_at = Carbon::now();
         $user->save();
-
+        $role = $user->role()->first();
+        $token = JWTAuth::claims(['role' => $role])->fromUser($user);
 
         return response()->json([
             'success' => true,
