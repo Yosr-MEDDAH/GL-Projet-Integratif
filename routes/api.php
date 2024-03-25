@@ -31,7 +31,7 @@ Route::controller(TwoFactorAuthController::class)->prefix('2fa')->group(function
 
 Route::controller(InfosController::class)->prefix('infos')->group((function () {
     Route::put('/generalInfos', 'updateGeneralInfo')->middleware('jwt.auth');
-    Route::put('/image', 'updateImage')->middleware('jwt.auth');
+    Route::post('/image', 'updateImage')->middleware('jwt.auth');
     Route::put('/password', 'updatePassword')->middleware('jwt.auth');
 }));
 

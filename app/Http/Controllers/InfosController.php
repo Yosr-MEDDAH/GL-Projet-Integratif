@@ -73,8 +73,9 @@ class InfosController extends Controller
             ]);
         }
 
-
-        $imagePath = $request->file('image')->store('images');
+        $image = $request->file('image');
+        $fileName = 'Photo_' . $user->id . '.' . $image->getClientOriginalExtension();
+        $imagePath = $image->storeAs('profile/photos', $fileName, 'local');
         $user->image = $imagePath;
         $user->save();
 
@@ -84,32 +85,6 @@ class InfosController extends Controller
             'message' => "L'image de l'utilisateur a été mise à jour avec succès",
         ]);
     }
-
-    /*function updateImage(Request $request)
-    {
-
-        $user = JWTAuth::user();
-        $validator = Validator($request->all(), [
-            'image' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => $validator->errors(),
-            ]);
-        }
-
-        $imageContent = $request->string('image');
-        $user->image = $imageContent;
-        $user->save();
-        return response()->json([
-            'success' => true,
-            'message' => 'l\'image de l\'utilisateur aété mises à jour avec succès',
-        ]);
-    }*/
-
-
 
     function updatePassword(Request $request)
     {

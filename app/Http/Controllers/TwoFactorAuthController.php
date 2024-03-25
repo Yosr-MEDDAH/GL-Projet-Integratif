@@ -55,7 +55,9 @@ class TwoFactorAuthController extends Controller
         $user->save();
 
         $token = JWTAuth::fromUser($user);
-        $refreshToken = JWTAuth::setToken($token)->refresh();
+        $user->refresh_token = $user->generateRandomRefreshToken();
+        $user->refreshToken_created_at = Carbon::now();
+        $user->save();
         $role = $user->role()->first();
 
         return response()->json([
@@ -65,7 +67,7 @@ class TwoFactorAuthController extends Controller
                 'user' => $user,
                 'user_role' => ['role_id' => $role->id, 'role_name' => $role->name],
                 'JWTtoken' => $token,
-                'refreshToken' => $refreshToken,
+                'refreshToken' => $user->refresh_token,
             ]
         ])->cookie('auth_jwt_2fa', $token, 60);
     }
