@@ -35,4 +35,14 @@ class Fournisseur extends User
             'nationnalites',
         ]);
     }
+
+    public function factures()
+    {
+        return $this->hasMany(Facture::class);
+    }
+
+    public function reclamations()
+    {
+        return $this->hasMany(Reclamation::class);
+    }
 }

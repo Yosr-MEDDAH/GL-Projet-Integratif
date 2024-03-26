@@ -44,6 +44,9 @@ class TwoFactorAuthController extends Controller
         $expiration = Carbon::parse($user->code_2fa_created_at)->addMinutes(5);
 
         if (!Carbon::now()->lt($expiration)) {
+            $user->code_2FA = null;
+            $user->code_2fa_created_at = null;
+            $user->save();
             return response()->json([
                 'success' => false,
                 'message' => "Le code de vérification fourni est expiré. Veuillez réessayer avec un code valide"
