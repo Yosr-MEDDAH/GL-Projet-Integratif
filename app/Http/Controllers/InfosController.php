@@ -186,7 +186,7 @@ class InfosController extends Controller
                 "phone" => $user->phone,
                 "image" => $user->image,
                 "accountActive" => $user->isActive,
-                "2faEnabled" => $user->isEnable,
+                "isTwoFactorEnabled" => $user->isTwoFactorEnabled,
                 "role_id" => $user->role_id,
                 "role_name" => $user->role->name,
             ];

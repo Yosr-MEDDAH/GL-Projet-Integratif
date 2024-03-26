@@ -32,4 +32,9 @@ class Facture extends Model
     {
         return $this->belongsTo(Etat::class);
     }
+
+    public function bordereau()
+    {
+        return $this->belongsTo(Bordereau::class);
+    }
 }

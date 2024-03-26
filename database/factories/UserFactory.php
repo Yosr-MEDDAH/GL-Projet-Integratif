@@ -29,7 +29,7 @@ class UserFactory extends Factory
             'image' => fake()->image(),
             'isActive' => fake()->boolean(),
             'code_2FA' => fake()->numberBetween(000000, 999999),
-            'isEnable' => fake()->boolean(),
+            'isTwoFactorEnabled' => fake()->boolean(),
             'idErp' => fake()->numberBetween(00000000, 99999999),
             'idFiscale' => fake()->numberBetween(00000000, 99999999),
             'adress' => fake()->address(),
@@ -61,7 +61,7 @@ class UserFactory extends Factory
             $table->timestamps();
             
             $table->unsignedBigInteger('code_2FA')->nullable();
-            $table->boolean('isEnable')->nullable();*/
+            $table->boolean('isTwoFactorEnabled')->nullable();*/
 
 
     /**

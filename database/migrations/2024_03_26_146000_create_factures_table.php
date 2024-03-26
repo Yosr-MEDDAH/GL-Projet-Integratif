@@ -23,8 +23,11 @@ return new class extends Migration
             $table->decimal('amount', 10, 2)->nullable(); // Montant
             $table->string('invoice_file_path')->nullable(); // Chemin du fichier de la facture
             $table->timestamp('reception_date')->nullable(); // Date de réception de la facture
+            $table->boolean('isArchived')->nullable();
             $table->unsignedBigInteger('etat_id')->nullable(); // Clé étrangère pour l'état de la facture
             $table->foreign('etat_id')->references('id')->on('etats')->onDelete('set null'); // Référence à la table des états
+            $table->unsignedBigInteger('borderau_id')->nullable(); // Clé étrangère pour le bordereau
+            $table->foreign('borderau_id')->references('id')->on('bordereaux')->onDelete('set null');
             $table->unsignedBigInteger('fournisseur_id')->nullable(); // ID du fournisseur
             $table->foreign('fournisseur_id')->references('id')->on('users');
             $table->timestamps();

@@ -46,7 +46,7 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->input('email'))->first();
-        if ($user->isEnable) {
+        if ($user->isTwoFactorEnabled) {
             $code = $user->generateRandomCode();
             $user->code_2FA = $code;
             $user->code_2fa_created_at = Carbon::now();

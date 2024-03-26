@@ -34,7 +34,7 @@ class User extends Authenticatable implements JWTSubject
         'isActive',
         'code_2FA',
         "code_2fa_created_at",
-        'isEnable',
+        'isTwoFactorEnabled',
         'role_id',
         'refresh_token',
         'refreshToken_created_at'
@@ -142,7 +142,7 @@ class User extends Authenticatable implements JWTSubject
 
     public function toggle($bool)
     {
-        $this->isEnable = $bool;
+        $this->isTwoFactorEnabled = $bool;
         $this->save();
     }
 
@@ -156,7 +156,7 @@ class User extends Authenticatable implements JWTSubject
             'image',
             'isActive',
             'code_2FA',
-            'isEnable',
+            'isTwoFactorEnabled',
             'role_id',
             'refresh_token',
             'refreshToken_created_at'

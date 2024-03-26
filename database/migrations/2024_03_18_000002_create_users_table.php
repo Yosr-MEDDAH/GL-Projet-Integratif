@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamp('code_2fa_created_at')->nullable();
             $table->string('refresh_token')->nullable();
             $table->timestamp('refreshToken_created_at')->nullable();
-            $table->boolean('isEnable')->nullable();
+            $table->boolean('isTwoFactorEnabled')->nullable();
             $table->integer('idErp')->nullable();
             $table->integer('idFiscale')->nullable();
             $table->string('adress')->nullable();
