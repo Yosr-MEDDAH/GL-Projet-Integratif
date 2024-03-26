@@ -27,4 +27,9 @@ class Facture extends Model
     {
         return $this->belongsTo(User::class)->where('role_id', 3);
     }
+
+    public function etat()
+    {
+        return $this->belongsTo(Etat::class);
+    }
 }

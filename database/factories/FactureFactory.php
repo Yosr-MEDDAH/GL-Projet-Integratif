@@ -27,6 +27,7 @@ class FactureFactory extends Factory
             'amount' => $this->faker->randomFloat(2, 10, 1000),
             'invoice_file_path' => $this->faker->filePath,
             'reception_date' => $this->faker->dateTimeThisMonth(),
+            'etat_id' => $this->faker->numberBetween(1, 5),
             'fournisseur_id' => \App\Models\User::factory()->create(['role_id' => 3])->id,
         ];
     }
