@@ -20,7 +20,10 @@ class Facture extends Model
         'amount', // Montant
         'invoice_file_path', // Chemin du fichier de la facture
         'reception_date', // Date de réception de la facture'
-        'fournisseur_id' // ID du fournisseur
+        'fournisseur_id', // ID du fournisseur
+        'borderau_id',
+        'bon_de_commande_id',
+
     ];
 
     public function fournisseur()
@@ -36,5 +39,10 @@ class Facture extends Model
     public function bordereau()
     {
         return $this->belongsTo(Bordereau::class);
+    }
+
+    public function bonDeCommande()
+    {
+        return $this->belongsTo(BonDeCommande::class);
     }
 }
