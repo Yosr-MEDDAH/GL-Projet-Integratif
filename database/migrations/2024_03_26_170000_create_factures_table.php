@@ -29,7 +29,7 @@ return new class extends Migration
             $table->unsignedBigInteger('borderau_id')->nullable(); // Clé étrangère pour le bordereau
             $table->foreign('borderau_id')->references('id')->on('bordereaux')->onDelete('set null');
             $table->unsignedBigInteger('fournisseur_id')->nullable(); // ID du fournisseur
-            $table->foreign('fournisseur_id')->references('id')->on('users');
+            $table->foreign('fournisseur_id')->references('id')->on('users');// cascade
             $table->unsignedBigInteger('bon_de_commande_id')->nullable();
             $table->foreign('bon_de_commande_id')->references('id')->on('bon_de_commandes')->onDelete('cascade');
             $table->timestamps();

@@ -15,4 +15,9 @@ class BonDeCommande extends Model
         'idErp', // ID ERP
         'delai_paiement', // Délai de paiement
     ];
+
+    public function fournisseur()
+    {
+        return $this->belongsTo(User::class)->where('role_id', 3);
+    }
 }
