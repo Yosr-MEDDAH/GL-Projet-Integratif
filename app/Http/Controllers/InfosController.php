@@ -23,7 +23,7 @@ class InfosController extends Controller
             $validator = Validator($request->all(), [
                 'email' => 'email|string|max:255|unique:users,email,' . $user->id,
                 'name' => 'string|max:255',
-                'phone' => 'string|max:255',
+                'phone' => 'numeric|digits_between:8,15',
             ], $messages);
 
             if ($validator->fails()) {
@@ -89,7 +89,7 @@ class InfosController extends Controller
 
             $image = $request->file('image');
             $fileName = 'Photo_' . $user->id . '.' . $image->getClientOriginalExtension();
-            $imagePath = $image->storeAs('profile/photos', $fileName, 'local');
+            $imagePath = $image->storeAs('profile/photos', $fileName, 'image');
             $user->image = $imagePath;
             $user->save();
 

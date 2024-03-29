@@ -44,7 +44,7 @@ class ResetPasswordNotification extends Notification
             $greeting = 'Bonsoir';
         }
 
-        $resetUrl = 'localhost/Login/resetPassword?t=' . $this->code;
+        $resetUrl = 'http://127.0.0.1:8000/Login/resetPassword?t=' . $this->code;
 
         return (new MailMessage)
             ->mailer('smtp')

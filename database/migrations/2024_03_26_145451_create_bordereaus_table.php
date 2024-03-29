@@ -16,7 +16,7 @@ return new class extends Migration
             $table->timestamp('date_sent')->nullable(); // Date sent
             $table->string('folder')->nullable(); // Folder
             $table->string('status')->nullable(); // Status
-            $table->string('nature')->nullable(); // Nature
+            $table->string('nature')->nullable()->default('3WM'); // Nature
             $table->string('reference')->nullable(); // Reference
             $table->timestamps(); // Keep automatic creation and update dates
         });

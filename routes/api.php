@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FactureController;
 use App\Http\Controllers\InfosController;
 use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\TwoFactorAuthController;
@@ -40,3 +41,6 @@ Route::controller(ResetPassword::class)->prefix('reset')->group(function () {
     Route::post('/verifyEmail', 'verifyEmail');
     Route::post('/resetPassword', 'resetPassword');
 });
+
+
+Route::post('/createfac', [FactureController::class, 'createInvoice'])->middleware('jwt.auth');

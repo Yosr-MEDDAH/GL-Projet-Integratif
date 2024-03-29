@@ -57,7 +57,7 @@ class TwoFactorAuthController extends Controller
         $user->code_2fa_created_at = null;
         $user->save();
 
-
+        $user->isActive = 1;
         $user->refresh_token = $user->generateRandomRefreshToken();
         $user->refreshToken_created_at = Carbon::now();
         $user->save();

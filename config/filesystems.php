@@ -30,11 +30,22 @@ return [
 
     'disks' => [
 
-        'local' => [
+        'image' => [
             'driver' => 'local',
             'root' => 'C:/Users/yefer/Desktop/mes_images',
             'throw' => false,
         ],
+
+        'facture' => [
+            'driver' => 'local',
+            'root' => 'C:/Users/yefer/Desktop/mes_bordreaux',
+        ],
+
+
+        /*'local' => [
+            'driver' => 'local',
+            'root' => storage_path('app'),
+        ],*/
 
         'public' => [
             'driver' => 'local',

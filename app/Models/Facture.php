@@ -10,20 +10,24 @@ class Facture extends Model
     use HasFactory;
 
     protected $fillable = [
-        'number', // Numéro de facture
-        'invoice_name', // Nom de la facture
-        'organization', // Nom de l'organisation
-        'department', // Nom du département
-        'billing_date', // Date de facturation
-        'consumption_period', // Période de consommation
-        'currency', // Devise
-        'amount', // Montant
-        'invoice_file_path', // Chemin du fichier de la facture
-        'reception_date', // Date de réception de la facture'
-        'fournisseur_id', // ID du fournisseur
-        'borderau_id',
-        'bon_de_commande_id',
-
+            'number', 
+            'invoice_name', 
+            'organization', 
+            'department', 
+            'billing_date', 
+            'consumption_period', 
+            'currency', 
+            'amount', 
+            'invoice_file_path', 
+            'reception_date', 
+            'payment_period',
+            'fournisseur_id',
+            'borderau_id',
+            'bon_de_commande_id',
+            'etat_id', // Ajout du champ 'etat_id'
+            'isArchived', 
+            'created_by', 
+            'agent_bof_id'
     ];
 
     public function fournisseur()

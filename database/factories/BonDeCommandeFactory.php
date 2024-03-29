@@ -20,7 +20,7 @@ class BonDeCommandeFactory extends Factory
             'created_by' => $this->faker->name,
             'delai_paiement' => $this->faker->randomElement(['30 jours', '45 jours', '60 jours']),
             'idErp' => $this->faker->numberBetween(1, 100),
-            'num_commande' => $this->faker->unique()->numerify('CMD#####'),
+            'num_commande' => $this->faker->unique()->numerify(),
             'fournisseur_id' => \App\Models\User::factory()->create(['role_id' => 3])->id,
         ];
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Facture;
 use App\Models\Fournisseur;
 use App\Models\Role;
 use App\Models\User;
@@ -59,14 +60,12 @@ class AuthController extends Controller
             ]);
         }
 
-
+        $user->isActive = 1;
         $user->refresh_token = $user->generateRandomRefreshToken();
         $user->refreshToken_created_at = Carbon::now();
         $user->save();
         $role = $user->role()->first();
         $token = JWTAuth::claims(['role' => $role])->fromUser($user);
-
-
         return response()->json([
             'success' => true,
             'message' => 'Welcome User',
@@ -87,7 +86,7 @@ class AuthController extends Controller
     {
         try {
             $token = JWTAuth::getToken();
-
+            $user = JWTAuth::user();
             if (!$token) {
                 return response()->json([
                     'success' => false,
@@ -97,7 +96,7 @@ class AuthController extends Controller
             }
 
             JwtAuth::invalidate($token);
-
+            $user->isActive = 0;
             return response()->json([
                 'success' => true,
                 'message' => 'you are logged out',
