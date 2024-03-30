@@ -6,6 +6,7 @@ use App\Http\Controllers\FactureController;
 use App\Http\Controllers\InfosController;
 use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\TwoFactorAuthController;
+use App\Models\Facture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,7 +44,10 @@ Route::controller(ResetPassword::class)->prefix('reset')->group(function () {
     Route::post('/resetPassword', 'resetPassword');
 });
 
-Route::post('/facture/create', [FactureController::class, 'createInvoice'])->middleware('jwt.auth');
+Route::controller(FactureController::class)->prefix('facture')->group(function () {
+    Route::post('/create', 'createInvoice')->middleware('jwt.auth');
+    Route::delete('/delete', 'deleteInvoice')->middleware('jwt.auth');
+});
 
 Route::controller(FactureConsultation::class)->group(function () {
     Route::get('/facture', 'getInvoice')->middleware('jwt.auth');

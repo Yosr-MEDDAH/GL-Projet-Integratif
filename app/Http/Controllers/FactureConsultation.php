@@ -63,6 +63,7 @@ class FactureConsultation extends Controller
                 ]
             ]);
         }
+        //récupération des factures crée avec un agent bof spécifique
         $factures = Facture::where('agent_bof_id', $user->id)->paginate(10, ['*'], 'page', $page);
         $totalPages = $factures->lastPage();
         return response()->json([

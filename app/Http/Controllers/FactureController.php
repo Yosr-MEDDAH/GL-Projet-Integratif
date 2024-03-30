@@ -209,4 +209,69 @@ class FactureController extends Controller
             $bord->date_sent = Carbon::now();
         }*/
     }
+
+    function deleteInvoice(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+        $facture = Facture::find($request->input('id'));
+
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => 'la facture n \'existe pas',
+                'data' => [],
+            ]);
+        }
+
+        if ($role->id === 3) {
+            if ($facture->fournisseur_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'cette facture n\' est pas concerné pour vous',
+                    'data' => [],
+                ]);
+            }
+            if ($facture->etat()->first()->id !== 1) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'vous n\'avez pas l\'autorisation de supprimer votre facture car elle est en cours de traitement',
+                    'data' => [],
+                ]);
+            }
+
+            $facture->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'votre facture a été supprimé avec succés',
+                'data' => [],
+            ]);
+        }
+        // question pour Mr Yassine : agent bof peut supprimer n'importe quelle facture ? 
+        //chaque agent bof peut uniquement supprimer une facture qu'il a créée
+        if (($facture->created_by !== $role->name) || ($facture->agent_bof_id !== $user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisation de supprimer une facture n'est pas crée par vous",
+                'data' => [],
+            ]);
+        }
+
+        $facture->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'votre facture a été supprimé avec succés',
+            'data' => [],
+        ]);
+    }
 }
