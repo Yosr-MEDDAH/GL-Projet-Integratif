@@ -210,6 +210,11 @@ class FactureController extends Controller
         }*/
     }
 
+
+
+
+
+
     function deleteInvoice(Request $request)
     {
         $user = JWTAuth::user();
@@ -258,7 +263,7 @@ class FactureController extends Controller
         }
         // question pour Mr Yassine : agent bof peut supprimer n'importe quelle facture ? 
         //chaque agent bof peut uniquement supprimer une facture qu'il a créée
-        if (($facture->created_by !== $role->name) || ($facture->agent_bof_id !== $user->id)) {
+        if (($facture->created_by !== $role->name) || ($facture->agent_bof_id !== $user->id) || ($facture->etat()->first()->id !== 1)) {
             return response()->json([
                 'success' => false,
                 'message' => "vous n'avez pas autorisation de supprimer une facture n'est pas crée par vous",
@@ -271,6 +276,160 @@ class FactureController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'votre facture a été supprimé avec succés',
+            'data' => [],
+        ]);
+    }
+
+
+
+
+
+
+
+    // mettre à jour votre facture à condition que son etat est en attente (sans fichier pdf)
+    function updateInvoice(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+        $facture = Facture::find($request->input('id'));
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => "La facture n'existe pas ",
+                'data' => [],
+            ]);
+        }
+
+        if ($facture->etat_id !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation de modifier la facture car elle en cours de traitement",
+                'data' => [],
+            ]);
+        }
+
+        //agent bof peut modifier seulement une  factures qu'il a créée
+        if ($role->id === 2 && ($facture->agent_bof_id !== $user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisation de modifier une facture n'est pas crée par vous",
+                'data' => [],
+            ]);
+        }
+
+        $messages = [
+            'num_commande.required' => 'Le numéro de commande est requis.',
+            'num_commande.numeric' => 'Le numéro de commande doit être un nombre.',
+            'id_fiscale.required' => 'L\'ID fiscale est requis.',
+            'id_fiscale.string' => 'L\'ID fiscale doit être une chaîne de caractères.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'num_commande' => 'required|numeric', // changer nom _
+            'id_fiscale' => 'required|string|max:255',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => [],
+            ]);
+        }
+
+        $purOrder = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
+
+        //if (($role_id === 3) || ($role_id === 2 && User::where('idFiscale' ,$request->input('id_fiscale'))->first())) ******** 3eme cas (ajouter un attribut)
+        if ($role->id === 3) {
+            if ($request->input('id_fiscale') !== $user->idFiscale) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "votre matricule fiscale n'est pas correcte", // on peut éliminer success
+                    'data' => [],
+                ]);
+            }
+            if (!$purOrder || ($purOrder->four_idFiscale !== $user->idFiscale)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "vérifier votre numero du bon de commande",
+                    'data' => [],
+                ]);
+            }
+        }
+
+
+        //ajouter messages spécifiques ou pas ?? ********** ///////
+        $validator = Validator::make($request->all(), [
+            'organization' => 'required|string|max:255',
+            'number' => 'required|numeric',
+            'invoice_name' => 'required|string|max:255',
+            'currency' => 'required|string|max:3',
+            'billing_date' => 'required|date_format:Y-m-d', // à revoir 
+            'amount' => 'required|numeric',
+            'payment_period' => 'required|max:255',
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => [],
+            ]);
+        }
+
+        if (Facture::where('number', $request->input('number'))->first()) {
+            return response()->json([
+                'success' => false,
+                'message' => "vérifier le numero de la facture", // question le numero de la facture est unique ?? 
+                'data' => [],
+            ]);
+        }
+
+        if ($role->id === 3) {
+            $facture->update([
+                'number' => $request->input('number'),
+                'invoice_name' => $request->input('invoice_name'),
+                'organization' => $request->input('organization'),
+                'billing_date' => $request->input('billing_date'),
+                'amount' => $request->input('amount'),
+                'reception_date' => Carbon::now(),
+                'isArchived' => 0,
+                'etat_id' => 1,
+                'bon_de_commande_id' => $purOrder->id,
+                'created_by' => $role->name,
+                'fournisseur_id' => $user->id,
+                'agent_bof_id' => null,
+            ]);
+        } else {
+            $facture->update([
+                'number' => $request->input('number'),
+                'invoice_name' => $request->input('invoice_name'),
+                'organization' => $request->input('organization'),
+                'billing_date' => $request->input('billing_date'),
+                'amount' => $request->input('amount'),
+                'reception_date' => Carbon::now(),
+                'isArchived' => false,
+                'etat_id' => 1,
+                'bon_de_commande_id' => $purOrder->id,
+                'created_by' => $role->name,
+                'fournisseur_id' => null,
+                'agent_bof_id' => $user->id,
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'votre facture a été modifié avec succés',
             'data' => [],
         ]);
     }

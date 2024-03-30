@@ -47,6 +47,7 @@ Route::controller(ResetPassword::class)->prefix('reset')->group(function () {
 Route::controller(FactureController::class)->prefix('facture')->group(function () {
     Route::post('/create', 'createInvoice')->middleware('jwt.auth');
     Route::delete('/delete', 'deleteInvoice')->middleware('jwt.auth');
+    Route::put('/update', 'updateInvoice')->middleware('jwt.auth');
 });
 
 Route::controller(FactureConsultation::class)->group(function () {
