@@ -46,8 +46,5 @@ class Fournisseur extends User
         return $this->hasMany(Reclamation::class);
     }
 
-    public function bonDeCommandes()
-    {
-        return $this->hasMany(BonDeCommande::class);
-    }
+    
 }

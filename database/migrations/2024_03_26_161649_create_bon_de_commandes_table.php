@@ -18,8 +18,6 @@ return new class extends Migration
             $table->unsignedBigInteger('idErp')->nullable(); // ID ERP
             $table->string('delai_paiement')->nullable(); // Délai de paiement
             $table->string('four_idFiscale')->nullable();
-            $table->unsignedBigInteger('fournisseur_id');
-            $table->foreign('fournisseur_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }

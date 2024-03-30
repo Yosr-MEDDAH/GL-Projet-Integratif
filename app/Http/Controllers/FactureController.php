@@ -48,7 +48,7 @@ class FactureController extends Controller
             ];
 
             $validator = Validator::make($request->all(), [
-                'num_commande' => 'required|numeric',
+                'num_commande' => 'required|numeric', // changer nom _
                 'id_fiscale' => 'required|string|max:255',
             ], $messages);
 
@@ -80,7 +80,7 @@ class FactureController extends Controller
                 }
             }
 
-            //ajouter messages spécifiques ou pas ?? **********
+            //ajouter messages spécifiques ou pas ?? ********** ///////
             $validator = Validator::make($request->all(), [
                 'organization' => 'required|string|max:255',
                 'number' => 'required|numeric',

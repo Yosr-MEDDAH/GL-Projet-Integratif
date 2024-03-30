@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\InfosController;
 use App\Http\Controllers\ResetPassword;
@@ -42,5 +43,9 @@ Route::controller(ResetPassword::class)->prefix('reset')->group(function () {
     Route::post('/resetPassword', 'resetPassword');
 });
 
+Route::post('/facture/create', [FactureController::class, 'createInvoice'])->middleware('jwt.auth');
 
-Route::post('/createfac', [FactureController::class, 'createInvoice'])->middleware('jwt.auth');
+Route::controller(FactureConsultation::class)->group(function () {
+    Route::get('/facture', 'getInvoice')->middleware('jwt.auth');
+    Route::get('/factures', 'getInvoices')->middleware('jwt.auth');
+});
