@@ -68,4 +68,5 @@ Route::controller(ReclamationController::class)->prefix('reclamation')->group(fu
 Route::controller(BonDeCommandeConsultation::class)->group(function () {
     Route::get('/purchaseOrders', 'getAllPo')->middleware('jwt.auth');
     Route::get('/purchaseOrdersNumbers', 'getAllPoNumbers')->middleware('jwt.auth');
+    Route::get('/purchaseOrder', 'getPo')->middleware('jwt.auth');
 });

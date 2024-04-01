@@ -31,7 +31,7 @@ class BonDeCommandeConsultation extends Controller
                 'message' => "votre bons de commande",
                 'data' => [
                     'totalPages' => $purOrders->lastPage(),
-                    'bons de commande' => $purOrders->items(),
+                    'bons_de_commande' => $purOrders->items(),
                 ]
             ]);
         }
@@ -44,7 +44,7 @@ class BonDeCommandeConsultation extends Controller
             'message' => "votre bons de commande",
             'data' => [
                 'totalPages' => $totalPurOrders->lastPage(),
-                'bons de commande' => $totalPurOrders->items(),
+                'bons_de_commande' => $totalPurOrders->items(),
             ]
         ]);
     }
@@ -82,7 +82,9 @@ class BonDeCommandeConsultation extends Controller
                 /*'data' => [
                     'bons de commande' => $purOrdersNumbers, 
                 ]*/
-                'data' => $numbers,
+                'data' => [
+                    "numbers" => $numbers
+                ],
             ]);
         }
 
@@ -99,10 +101,63 @@ class BonDeCommandeConsultation extends Controller
             /*'data' => [
                 'bons de commande' => BonDeCommande::all('num_commande'),
             ]*/
-            'data' => $numbers,
+            'data' => [
+                "numbers" => $numbers
+            ],
         ]);
     }
 
 
-    
+
+
+
+
+    function getPo(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2 && $role->id !== 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n' avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $purOrder = BonDeCommande::find($request->input('id'));
+
+        if (!$purOrder) {
+            return response()->json([
+                'success' => false,
+                'message' => "bon de commande n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if ($role->id === 3 && $user->idFiscale !== $purOrder->four_idFiscale) {
+            return response()->json([
+                'success' => false,
+                'message' => "pas d'autorisation",
+                'data' => [],
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => "votre bon de commande",
+                'data' => [
+                    "bon_de_commande" => $purOrder,
+                ]
+            ]);
+        }
+
+
+        return response()->json([
+            'success' => true,
+            'message' => "votre bon de commande",
+            'data' => [
+                "bon_de_commande" => $purOrder,
+            ]
+        ]);
+    }
 }
