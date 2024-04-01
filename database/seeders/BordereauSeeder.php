@@ -13,8 +13,12 @@ class BordereauSeeder extends Seeder
      */
     public function run(): void
     {
-        Bordereau::factory()->count(10)->create([
-            'status' => 'En cours', // Vous pouvez également utiliser 'Archivé' ici si nécessaire
+        Bordereau::create([
+            'date_sent' => now(),
+            'folder' => 'Folder1',
+            'status' => 'En cours',
+            'nature' => '3WM',
+            'reference' => 'REF123',
         ]);
     }
 }

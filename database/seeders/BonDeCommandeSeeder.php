@@ -13,6 +13,55 @@ class BonDeCommandeSeeder extends Seeder
      */
     public function run()
     {
-        BonDeCommande::factory()->count(2)->create();
+        // Créer un bon de commande pour le fournisseur John Doe
+        BonDeCommande::create([
+            'num_commande' => 123,
+            'created_by' => 'Admin',
+            'idErp' => 1,
+            'delai_paiement' => '30 jours',
+            'four_idFiscale' => 'smjdhf500',
+        ]);
+
+        BonDeCommande::create([
+            'num_commande' => 124,
+            'created_by' => 'Admin',
+            'idErp' => 1,
+            'delai_paiement' => '30 jours',
+            'four_idFiscale' => 'smjdhf500',
+        ]);
+
+        // Créer un bon de commande pour le fournisseur Anton Carey
+        BonDeCommande::create([
+            'num_commande' => 456,
+            'created_by' => 'Admin',
+            'idErp' => 1,
+            'delai_paiement' => '30 jours',
+            'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
+        ]);
+
+        BonDeCommande::create([
+            'num_commande' => 457,
+            'delai_paiement' => '30 jours',
+            'created_by' => 'Admin',
+            'idErp' => 1,
+            'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
+        ]);
+
+        // Créer un bon de commande pour le fournisseur Benji Thomas
+        BonDeCommande::create([
+            'num_commande' => 789,
+            'created_by' => 'Admin',
+            'idErp' => 1,
+            'delai_paiement' => '30 jours',
+            'four_idFiscale' => '2sdqfklghf455',
+        ]);
+
+        BonDeCommande::create([
+            'num_commande' => 790,
+            'created_by' => 'Admin',
+            'idErp' => 1,
+            'delai_paiement' => '30 jours',
+            'four_idFiscale' => '2sdqfklghf455',
+        ]);
     }
 }

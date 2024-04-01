@@ -17,6 +17,23 @@ class DatabaseSeeder extends Seeder
         // Seed roles table
         $this->call(RolesSeeder::class);
 
+        User::factory()->create([
+            'name' => 'John steve',
+            'email' => 'john100@example.com',
+            'password' => Hash::make('12345678'),
+            'phone' => '1234567890',
+            'image' => 'john.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456,
+            'isTwoFactorEnabled' => false,
+            'role_id' => 1,
+            'idErp' => 1,
+            'idFiscale' => null,
+            'adress' => '123 Street, City',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+        ]);
+
 
         User::factory()->create([
             'name' => 'John Doe',
@@ -84,7 +101,7 @@ class DatabaseSeeder extends Seeder
             'isTwoFactorEnabled' => false,
             'role_id' => 4,
             'idErp' => 1,
-            'idFiscale' => '300000Am',
+            'idFiscale' => null,
             'adress' => '123 Street, City',
             'nationnalites' => 'Nationality',
             'direction' => 'Direction',

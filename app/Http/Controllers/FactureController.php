@@ -297,7 +297,7 @@ class FactureController extends Controller
                 'success' => false,
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
-            ], 403); // 403 accés refusé
+            ]); // 403 accés refusé
         }
 
         $facture = Facture::find($request->input('id'));
@@ -321,7 +321,7 @@ class FactureController extends Controller
         if ($role->id === 2 && ($facture->agent_bof_id !== $user->id)) {
             return response()->json([
                 'success' => false,
-                'message' => "vous n'avez pas autorisation de modifier une facture n'est pas crée par vous",
+                'message' => "pas d'autorisation",
                 'data' => [],
             ]);
         }

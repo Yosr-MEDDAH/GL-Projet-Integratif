@@ -41,6 +41,11 @@ return [
             'root' => 'C:/Users/yefer/Desktop/mes_bordreaux',
         ],
 
+        'reclamation' => [
+            'driver' => 'local',
+            'root' => 'C:/Users/yefer/Desktop/mes_reclamations',
+        ],
+
 
         /*'local' => [
             'driver' => 'local',

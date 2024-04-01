@@ -15,15 +15,17 @@ return new class extends Migration
             $table->id();
             $table->string('title')->nullable();
             $table->text('text')->nullable();
-            $table->string('path')->nullable();
-            $table->string('file')->nullable();
+            $table->string('idFiscale')->nullable();
+            $table->string('numFacture')->nullable();
+            $table->string('numCommande')->nullable();
             $table->string('attached_file')->nullable();
+            $table->string('etat')->default('En Attente')->nullable();
             $table->unsignedBigInteger('fournisseur_id');
             $table->foreign('fournisseur_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
-    
+
     /**
      * Reverse the migrations.
      */

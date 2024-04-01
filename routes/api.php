@@ -3,7 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
+use App\Http\Controllers\FactureExportController;
 use App\Http\Controllers\InfosController;
+use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\TwoFactorAuthController;
 use App\Models\Facture;
@@ -53,4 +55,11 @@ Route::controller(FactureController::class)->prefix('facture')->group(function (
 Route::controller(FactureConsultation::class)->group(function () {
     Route::get('/facture', 'getInvoice')->middleware('jwt.auth');
     Route::get('/factures', 'getInvoices')->middleware('jwt.auth');
+});
+
+//Route::get('/factures/export', [FactureExportController::class, 'export'])->middleware('jwt.auth');
+Route::get('/factures/export', [FactureExportController::class, 'export']);
+
+Route::controller(ReclamationController::class)->prefix('reclamation')->group(function () {
+    Route::post('/create', 'create')->middleware('jwt.auth');
 });
