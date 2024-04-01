@@ -89,6 +89,7 @@ class BonDeCommandeConsultation extends Controller
         }
 
 
+        // pour agent bof 
         // si tu veux un tableau contient seulement les nombres
         $purOrdersNumbers = BonDeCommande::all('num_commande');
         foreach ($purOrdersNumbers as $purOrderNumber) {
@@ -151,7 +152,7 @@ class BonDeCommandeConsultation extends Controller
             ]);
         }
 
-
+        // pour agent bof 
         return response()->json([
             'success' => true,
             'message' => "votre bon de commande",
