@@ -59,7 +59,7 @@ class FactureConsultation extends Controller
                 'message' => 'voici votre factures',
                 'data' => [
                     'totalPages' => $factures->lastPage(),
-                    'factures' => $factures,
+                    'factures' => $factures->items(),
                 ]
             ]);
         }
@@ -71,7 +71,7 @@ class FactureConsultation extends Controller
             'message' => 'voici votre factures',
             'data' => [
                 'totalPages' => $totalPages,
-                'factures' => $factures,
+                'factures' => $factures->items(),
             ]
         ]);
     }

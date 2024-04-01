@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BonDeCommandeConsultation;
 use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\FactureExportController;
@@ -62,4 +63,9 @@ Route::get('/factures/export', [FactureExportController::class, 'export']);
 
 Route::controller(ReclamationController::class)->prefix('reclamation')->group(function () {
     Route::post('/create', 'create')->middleware('jwt.auth');
+});
+
+Route::controller(BonDeCommandeConsultation::class)->group(function () {
+    Route::get('/purchaseOrders', 'getAllPo')->middleware('jwt.auth');
+    Route::get('/purchaseOrdersNumbers', 'getAllPoNumbers')->middleware('jwt.auth');
 });

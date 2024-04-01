@@ -39,14 +39,15 @@ class BonDeCommandeSeeder extends Seeder
             'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
         ]);
 
-        BonDeCommande::create([
-            'num_commande' => 457,
-            'delai_paiement' => '30 jours',
-            'created_by' => 'Admin',
-            'idErp' => 1,
-            'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
-        ]);
-
+        for ($i = 1; $i <= 10; $i++) {
+            BonDeCommande::create([
+                'num_commande' => $i,
+                'delai_paiement' => '30 jours',
+                'created_by' => 'Admin',
+                'idErp' => 1,
+                'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
+            ]);
+        }
         // Créer un bon de commande pour le fournisseur Benji Thomas
         BonDeCommande::create([
             'num_commande' => 789,
