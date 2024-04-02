@@ -121,8 +121,9 @@ class ReclamationController extends Controller
         }
 
         $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $reclamations = Reclamation::where('fournisseur_id', $user->id)->paginate(10, ['*'], 'page', $page);
+            $reclamations = Reclamation::where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
             return response()->json([
                 'success' => true,
                 'message' => "voici les réclamtions",
@@ -134,7 +135,7 @@ class ReclamationController extends Controller
         }
 
         //pour agent bof
-        $reclamations = Reclamation::paginate(10, ['*'], 'page', $page);
+        $reclamations = Reclamation::paginate($nb, ['*'], 'page', $page);
         return response()->json([
             'success' => true,
             'message' => "voici les réclamations",
@@ -239,6 +240,49 @@ class ReclamationController extends Controller
             'success' => true,
             'message' => "La réclamation a été supprimer avec succes",
             'data' => [],
+        ]);
+    }
+
+
+
+    function rechercheRec(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $reclamation = Reclamation::where('numFacture', $request->input('numFacture'))->first();
+
+        if (!$reclamation ||  ($role->id === 3 && $reclamation->fournisseur_id !== $user->id)) {
+            return response()->json([
+                'success' => false,
+                'message' => "la réclamtion n'existe pas",
+                'data' => [],
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => "voici votre réclamations",
+                'data' => [
+                    'reclamation' => $reclamation,
+                ]
+            ]);
+        }
+
+        //pour agent bof
+        return response()->json([
+            'success' => true,
+            'message' => "voici la réclaamtion",
+            'data' => [
+                'reclamation' => $reclamation,
+            ]
         ]);
     }
 }

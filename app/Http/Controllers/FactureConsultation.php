@@ -28,9 +28,16 @@ class FactureConsultation extends Controller
                 'message' => 'cette facture n\' est pas concerné pour vous',
                 'data' => [],
             ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => 'voici les informations de cette facture',
+                'data' => $facture,
+            ]);
         }
 
 
+        // pour l'agent bof
         return response()->json([
             'success' => true,
             'message' => 'voici les informations de cette facture',
@@ -52,8 +59,9 @@ class FactureConsultation extends Controller
         }
 
         $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $factures = Facture::where('fournisseur_id', $user->id)->paginate(10, ['*'], 'page', $page);
+            $factures = Facture::where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
             return response()->json([
                 'success' => true,
                 'message' => 'voici votre factures',
@@ -64,7 +72,7 @@ class FactureConsultation extends Controller
             ]);
         }
         //récupération des factures crée avec un agent bof spécifique
-        $factures = Facture::where('agent_bof_id', $user->id)->paginate(10, ['*'], 'page', $page);
+        $factures = Facture::where('agent_bof_id', $user->id)->paginate($nb, ['*'], 'page', $page);
         $totalPages = $factures->lastPage();
         return response()->json([
             'success' => true,
@@ -73,6 +81,34 @@ class FactureConsultation extends Controller
                 'totalPages' => $totalPages,
                 'factures' => $factures->items(),
             ]
+        ]);
+    }
+
+    function rechercheFacture(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        $facture = Facture::where('number', $request->input('number'))->first();
+        if (!$facture || ($role->id === 3 && ($facture->fournisseur_id !== $user->id))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'la facture n \'existe pas',
+                'data' => [],
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => 'voici les informations de cette facture',
+                'data' => $facture,
+            ]);
+        }
+
+        //pour agent bof
+        return response()->json([
+            'success' => true,
+            'message' => 'voici les informations de cette facture',
+            'data' => $facture,
         ]);
     }
 }

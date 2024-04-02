@@ -56,6 +56,7 @@ Route::controller(FactureController::class)->prefix('facture')->group(function (
 Route::controller(FactureConsultation::class)->group(function () {
     Route::get('/facture', 'getInvoice')->middleware('jwt.auth');
     Route::get('/factures', 'getInvoices')->middleware('jwt.auth');
+    Route::get('/rechercheIN', 'rechercheFacture')->middleware('jwt.auth');
 });
 
 //Route::get('/factures/export', [FactureExportController::class, 'export'])->middleware('jwt.auth');
@@ -66,10 +67,12 @@ Route::controller(ReclamationController::class)->group(function () {
     Route::get('/reclamations', 'getAllReclamation')->middleware('jwt.auth');
     Route::get('/reclamation', 'getReclamation')->middleware('jwt.auth');
     Route::delete('/reclamation/delete', 'deleteReclamation')->middleware('jwt.auth');
+    Route::get('/rechercheRec', 'rechercheRec')->middleware('jwt.auth');
 });
 
 Route::controller(BonDeCommandeConsultation::class)->group(function () {
     Route::get('/purchaseOrders', 'getAllPo')->middleware('jwt.auth');
     Route::get('/purchaseOrdersNumbers', 'getAllPoNumbers')->middleware('jwt.auth');
     Route::get('/purchaseOrder', 'getPo')->middleware('jwt.auth');
+    Route::get('/recherchePO', 'recherchePo')->middleware('jwt.auth');
 });

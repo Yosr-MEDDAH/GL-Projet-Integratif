@@ -23,8 +23,9 @@ class BonDeCommandeConsultation extends Controller
         }
 
         $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $purOrders = BonDeCommande::where('four_idFiscale', $user->idFiscale)->paginate(10, ['*'], 'page', $page);
+            $purOrders = BonDeCommande::where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
 
             return response()->json([
                 'success' => true,
@@ -38,7 +39,7 @@ class BonDeCommandeConsultation extends Controller
 
 
         // pour les agents bof qui sont capables d'ajouter des factures
-        $totalPurOrders = BonDeCommande::paginate(10, ['*'], 'page', $page);
+        $totalPurOrders = BonDeCommande::paginate($nb, ['*'], 'page', $page);
         return response()->json([
             'success' => true,
             'message' => "votre bons de commande",
@@ -153,6 +154,47 @@ class BonDeCommandeConsultation extends Controller
         }
 
         // pour agent bof 
+        return response()->json([
+            'success' => true,
+            'message' => "votre bon de commande",
+            'data' => [
+                "bon_de_commande" => $purOrder,
+            ]
+        ]);
+    }
+
+
+    function recherchePo(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2 && $role->id !== 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $purOrder = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
+
+        if (!$purOrder || ($role->id === 3 && $user->idFiscale !== $purOrder->four_idFiscale)) {
+            return response()->json([
+                'success' => false,
+                'message' => "bon de commande n'existe pas",
+                'data' => [],
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => "votre bon de commande",
+                'data' => [
+                    "bon_de_commande" => $purOrder,
+                ]
+            ]);
+        }
+
         return response()->json([
             'success' => true,
             'message' => "votre bon de commande",
