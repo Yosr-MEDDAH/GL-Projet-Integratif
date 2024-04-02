@@ -61,8 +61,10 @@ Route::controller(FactureConsultation::class)->group(function () {
 //Route::get('/factures/export', [FactureExportController::class, 'export'])->middleware('jwt.auth');
 Route::get('/factures/export', [FactureExportController::class, 'export']);
 
-Route::controller(ReclamationController::class)->prefix('reclamation')->group(function () {
-    Route::post('/create', 'create')->middleware('jwt.auth');
+Route::controller(ReclamationController::class)->group(function () {
+    Route::post('/reclamation/create', 'create')->middleware('jwt.auth');
+    Route::get('/reclamations', 'getAllReclamation')->middleware('jwt.auth');
+    Route::get('/reclamation', 'getReclamation')->middleware('jwt.auth');
 });
 
 Route::controller(BonDeCommandeConsultation::class)->group(function () {

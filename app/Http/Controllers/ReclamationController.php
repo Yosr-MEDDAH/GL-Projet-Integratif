@@ -106,5 +106,92 @@ class ReclamationController extends Controller
     }
 
 
-    
+    function getAllReclamation(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        if ($role->id === 3) {
+            $reclamations = Reclamation::where('fournisseur_id', $user->id)->paginate(10, ['*'], 'page', $page);
+            return response()->json([
+                'success' => true,
+                'message' => "voici les réclamtions",
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'reclamations' => $reclamations->items(),
+                ]
+            ]);
+        }
+
+        //pour agent bof
+        $reclamations = Reclamation::paginate(10, ['*'], 'page', $page);
+        return response()->json([
+            'success' => true,
+            'message' => "voici les réclamations",
+            'data' => [
+                'totalPages' => $reclamations->lastPage(),
+                'reclamations' => $reclamations->items(),
+            ]
+        ]);
+    }
+
+
+    function getReclamation(Request $request)
+    {
+
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $reclamation = Reclamation::where('id', $request->input('id'))->first();
+
+        if (!$reclamation) {
+            return response()->json([
+                'success' => false,
+                'message' => "la réclamtion n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if ($role->id === 3 && $reclamation->fournisseur_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        } else {
+            return response()->json([
+                'success' => true,
+                'message' => "voici votre réclamations",
+                'data' => [
+                    'reclamation' => $reclamation,
+                ]
+            ]);
+        }
+
+        //pour agent bof
+        return response()->json([
+            'success' => true,
+            'message' => "voici la réclaamtion",
+            'data' => [
+                'reclamation' => $reclamation,
+            ]
+        ]);
+    }
 }
