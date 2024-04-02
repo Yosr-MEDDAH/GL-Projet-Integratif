@@ -65,6 +65,7 @@ Route::controller(ReclamationController::class)->group(function () {
     Route::post('/reclamation/create', 'create')->middleware('jwt.auth');
     Route::get('/reclamations', 'getAllReclamation')->middleware('jwt.auth');
     Route::get('/reclamation', 'getReclamation')->middleware('jwt.auth');
+    Route::delete('/reclamation/delete', 'deleteReclamation')->middleware('jwt.auth');
 });
 
 Route::controller(BonDeCommandeConsultation::class)->group(function () {

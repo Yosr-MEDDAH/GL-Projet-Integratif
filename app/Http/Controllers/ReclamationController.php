@@ -95,6 +95,7 @@ class ReclamationController extends Controller
             'numFacture' => $request->input('numFacture'),
             'numCommande' => $request->input('numCommande'),
             'attached_file' => $attachedFile,
+            'etat' => 'En Attente',
             'fournisseur_id' => $user->id,
         ]);
 
@@ -192,6 +193,52 @@ class ReclamationController extends Controller
             'data' => [
                 'reclamation' => $reclamation,
             ]
+        ]);
+    }
+
+
+
+
+
+
+    function deleteReclamation(Request $request)
+    {
+
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $reclamation = Reclamation::where('id', $request->input('id'))->first();
+
+        if (!$reclamation) {
+            return response()->json([
+                'success' => false,
+                'message' => "la réclamtion n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if (($role->id === 3 && $reclamation->fournisseur_id !== $user->id) || $reclamation->etat !== "En Attente") {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $reclamation->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "La réclamation a été supprimer avec succes",
+            'data' => [],
         ]);
     }
 }
