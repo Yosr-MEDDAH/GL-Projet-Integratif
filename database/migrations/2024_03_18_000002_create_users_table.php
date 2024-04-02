@@ -28,8 +28,8 @@ return new class extends Migration
             $table->integer('idErp')->nullable();
             $table->string('idFiscale')->nullable();
             $table->string('adress')->nullable();
-            $table->string('nationnalites')->nullable();;
-            $table->string('direction')->nullable();;
+            $table->string('nationnalites')->nullable();
+            $table->string('direction')->nullable();
             $table->unsignedBigInteger('role_id');
             $table->foreign('role_id')->references('id')->on('roles');
             $table->rememberToken();

@@ -32,7 +32,13 @@ class FactureConsultation extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'voici les informations de cette facture',
-                'data' => $facture,
+                'data' => [
+                    'facture' => $facture,
+                    'etat_facture' => [
+                        'etat_id' => $facture->etat()->first()->id,
+                        'etat_name' => $facture->etat()->first()->name_etat,
+                    ]
+                ]
             ]);
         }
 
@@ -41,7 +47,13 @@ class FactureConsultation extends Controller
         return response()->json([
             'success' => true,
             'message' => 'voici les informations de cette facture',
-            'data' => $facture,
+            'data' => [
+                'facture' => $facture,
+                'etat_facture' => [
+                    'etat_id' => $facture->etat()->first()->id,
+                    'etat_name' => $facture->etat()->first()->name_etat,
+                ]
+            ]
         ]);
     }
 
@@ -62,6 +74,9 @@ class FactureConsultation extends Controller
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
             $factures = Facture::where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+            foreach ($factures as $facture) {
+                $facture->etat_name = $facture->etat()->first()->name_etat;
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'voici votre factures',
@@ -74,6 +89,10 @@ class FactureConsultation extends Controller
         //récupération des factures crée avec un agent bof spécifique
         $factures = Facture::where('agent_bof_id', $user->id)->paginate($nb, ['*'], 'page', $page);
         $totalPages = $factures->lastPage();
+        $factures = Facture::where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+        foreach ($factures as $facture) {
+            $facture->etat_name = $facture->etat()->first()->name_etat;
+        }
         return response()->json([
             'success' => true,
             'message' => 'voici votre factures',
@@ -100,7 +119,13 @@ class FactureConsultation extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'voici les informations de cette facture',
-                'data' => $facture,
+                'data' => [
+                    'facture' => $facture,
+                    'etat_facture' => [
+                        'etat_id' => $facture->etat()->first()->id,
+                        'etat_name' => $facture->etat()->first()->name_etat,
+                    ]
+                ]
             ]);
         }
 
@@ -108,7 +133,13 @@ class FactureConsultation extends Controller
         return response()->json([
             'success' => true,
             'message' => 'voici les informations de cette facture',
-            'data' => $facture,
+            'data' => [
+                'facture' => $facture,
+                'etat_facture' => [
+                    'etat_id' => $facture->etat()->first()->id,
+                    'etat_name' => $facture->etat()->first()->name_etat,
+                ]
+            ]
         ]);
     }
 }

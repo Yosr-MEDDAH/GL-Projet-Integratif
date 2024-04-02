@@ -82,9 +82,9 @@ class FactureController extends Controller
 
             //ajouter messages spécifiques ou pas ?? ********** ///////
             $validator = Validator::make($request->all(), [
-                'organization' => 'required|string|max:255',
+                'organization' => 'string|max:255',
                 'number' => 'required|numeric',
-                'invoice_name' => 'required|string|max:255',
+                'invoice_name' => 'string|max:255',
                 'currency' => 'required|string|max:3',
                 'billing_date' => 'required|date_format:Y-m-d', // à revoir 
                 'amount' => 'required|numeric',

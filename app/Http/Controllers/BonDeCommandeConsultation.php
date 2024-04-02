@@ -127,8 +127,7 @@ class BonDeCommandeConsultation extends Controller
             ]);
         }
 
-        $purOrder = BonDeCommande::find($request->input('id'));
-
+        $purOrder = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
         if (!$purOrder) {
             return response()->json([
                 'success' => false,
