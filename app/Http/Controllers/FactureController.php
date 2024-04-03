@@ -30,7 +30,8 @@ class FactureController extends Controller
                 ], 403); // 403 accés refusé
             }
 
-            if (Facture::where('number', $request->input('number'))->first()) {
+            $pur = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
+            if (Facture::where('number', $request->input('number'))->first() || Facture::where('bon_de_commande_id', $pur->id)->first()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'La facture existe déja',
