@@ -8,6 +8,7 @@ use App\Models\Reclamation;
 use Dotenv\Validator;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Str;
 
 class ReclamationController extends Controller
 {
@@ -282,6 +283,53 @@ class ReclamationController extends Controller
             'message' => "voici la réclaamtion",
             'data' => [
                 'reclamation' => $reclamation,
+            ]
+        ]);
+    }
+
+
+
+    function getReclamationSpec(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $reclamations = Reclamation::select('title', 'text', 'etat')->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+            foreach ($reclamations as $reclamation) {
+                $reclamation->text = Str::limit($reclamation->text, 197);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => "voici les réclamtions",
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'reclamations' => $reclamations->items(),
+                ]
+            ]);
+        }
+
+        //pour agent bof
+        $reclamations = Reclamation::select('title', 'text', 'etat')->paginate($nb, ['*'], 'page', $page);
+        foreach ($reclamations as $reclamation) {
+            $reclamation->text = Str::limit($reclamation->text, 197);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "voici les réclamations",
+            'data' => [
+                'totalPages' => $reclamations->lastPage(),
+                'reclamations' => $reclamations->items(),
             ]
         ]);
     }
