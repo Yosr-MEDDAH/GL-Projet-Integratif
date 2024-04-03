@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BonDeCommande;
+use App\Models\User;
 use Database\Seeders\BonDeCommandeSeeder;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -143,6 +144,7 @@ class BonDeCommandeConsultation extends Controller
                 'data' => [],
             ]);
         } else {
+            $purOrder->fournnisseurName = User::where('idFiscale', $purOrder->four_idFiscale)->first()->name;
             return response()->json([
                 'success' => true,
                 'message' => "votre bon de commande",
@@ -153,6 +155,7 @@ class BonDeCommandeConsultation extends Controller
         }
 
         // pour agent bof 
+        $purOrder->fournnisseurName = User::where('idFiscale', $purOrder->four_idFiscale)->first()->name;
         return response()->json([
             'success' => true,
             'message' => "votre bon de commande",
