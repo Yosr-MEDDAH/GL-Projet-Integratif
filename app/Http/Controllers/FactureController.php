@@ -80,6 +80,8 @@ class FactureController extends Controller
                 }
             }
 
+
+            $fourName = User::where('idFiscale', $purOrder->four_idFiscale)->first()->name;
             //ajouter messages spécifiques ou pas ?? ********** ///////
             $validator = Validator::make($request->all(), [
                 'organization' => 'string|max:255',
@@ -102,22 +104,26 @@ class FactureController extends Controller
             }
 
 
-            $file = $request->file('invoice_file_path');
-            $fileName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
+
+
 
             $bord = Bordereau::whereDate('created_at', Carbon::today()->toDateString())->first();
+            $count = ($bord ? Facture::where('borderau_id', $bord->id)->count() : 0);
+
+            $file = $request->file('invoice_file_path');
+            $fileName = 'facture_' . $fourName . " " . $count = $count + 1 . " " . $file->getClientOriginalName(); //. '.' . $file->getClientOriginalExtension();
 
             if (!$bord) {
                 $filePath = $file->storeAs(Carbon::now()->toDateString(), $fileName, 'facture');
                 $bord = new Bordereau();
-                $bord->date_sent = now();
+                $bord->date_sent = Carbon::now();;
                 $bord->folder = Carbon::now()->toDateString();
                 $bord->status = 'En cours';
                 $bord->reference = Str::random(8) . '/' . Carbon::now()->toDateString();
                 $bord->save();
             } else {
                 $filePath = $file->storeAs($bord->folder, $fileName, 'facture');
-                $bord->date_sent = now();
+                $bord->date_sent = Carbon::now();
             }
 
             // Archivage (si nécessaire) ********
