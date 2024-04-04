@@ -54,7 +54,7 @@ class Facture extends Model
 
     public function objetFacture()
     {
-        return $this->belongsTo(ObjetFacture::class);
+        return $this->belongsTo(ObjetFacture::class, 'objet_facture_id');
     }
 
     protected $casts = [

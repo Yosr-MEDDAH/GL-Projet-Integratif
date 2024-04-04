@@ -31,6 +31,11 @@ class FactureConsultation extends Controller
                 'data' => [],
             ]);
         } else {
+            $piecesJointes = collect($facture->pieces_jointes)->values()->all();
+
+            foreach ($piecesJointes as $piecesJointe) {
+                $piece_jointes[] = PieceJointeFacture::find($piecesJointe)->namePJ;
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'voici les informations de cette facture',
@@ -39,7 +44,9 @@ class FactureConsultation extends Controller
                     'etat_facture' => [
                         'etat_id' => $facture->etat()->first()->id,
                         'etat_name' => $facture->etat()->first()->name_etat,
-                    ]
+                    ],
+                    'pieces_jointes' => $piece_jointes,
+                    'objet' => $facture->objetFacture->objet_name,
                 ]
             ]);
         }
