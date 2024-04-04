@@ -179,7 +179,7 @@ class BonDeCommandeConsultation extends Controller
             if (!$purOrders) {
                 return response()->json([
                     'success' => false,
-                    'message' => "cette facture n'existe pas",
+                    'message' => "ce bon de commande n'existe pas",
                     'data' => [],
                 ]);
             }
@@ -188,10 +188,10 @@ class BonDeCommandeConsultation extends Controller
             }*/
             return response()->json([
                 'success' => true,
-                'message' => 'voici vos factures',
+                'message' => 'voici vos bons de commandes',
                 'data' => [
                     'totalPages' => $purOrders->lastPage(),
-                    'factures' => $purOrders->items(),
+                    'purOrders' => $purOrders->items(),
                 ]
             ]);
         }
@@ -203,10 +203,10 @@ class BonDeCommandeConsultation extends Controller
         }*/
         return response()->json([
             'success' => true,
-            'message' => 'voici vos factures',
+            'message' => 'voici vos bons de commandes',
             'data' => [
                 'totalPages' => $purOrders->lastPage(),
-                'factures' => $purOrders->items(),
+                'purOrders' => $purOrders->items(),
             ]
         ]);
     }

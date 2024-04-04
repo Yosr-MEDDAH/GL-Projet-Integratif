@@ -251,38 +251,43 @@ class ReclamationController extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id !== 3 && $role->id !== 2) {
-            return response()->json([
-                'success' => false,
-                'message' => "vous n'avez pas l'autorisation",
-                'data' => [],
-            ]);
-        }
-
-        $reclamation = Reclamation::where('numFacture', $request->input('numFacture'))->first();
-
-        if (!$reclamation ||  ($role->id === 3 && $reclamation->fournisseur_id !== $user->id)) {
-            return response()->json([
-                'success' => false,
-                'message' => "la réclamtion n'existe pas",
-                'data' => [],
-            ]);
-        } else {
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('numFacture') . '%')
+                ->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            if (!$reclamations) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "cette réclamtion n'existe pas",
+                    'data' => [],
+                ]);
+            }
+            /* foreach ($purOrders as $facture) {
+                $facture->etat_name = $facture->etat()->first()->name_etat;
+            }*/
             return response()->json([
                 'success' => true,
-                'message' => "voici votre réclamations",
+                'message' => 'voici vos réclamtions',
                 'data' => [
-                    'reclamation' => $reclamation,
+                    'totalPages' => $reclamations->lastPage(),
+                    'réclamtions' => $reclamations->items(),
                 ]
             ]);
         }
 
-        //pour agent bof
+        //pour l'agent bof voir seulement les réclamation qui ne sont pas traitées
+        $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('numFacture') . '%')
+            ->where('etat', '=', "En Attente")->paginate($nb, ['*'], 'page', $page);
+        /*foreach ($purOrders as $facture) {
+            $facture->etat_name = $facture->etat()->first()->name_etat;
+        }*/
         return response()->json([
             'success' => true,
-            'message' => "voici la réclaamtion",
+            'message' => 'voici vos réclamtions',
             'data' => [
-                'reclamation' => $reclamation,
+                'totalPages' => $reclamations->lastPage(),
+                'réclamtions' => $reclamations->items(),
             ]
         ]);
     }
