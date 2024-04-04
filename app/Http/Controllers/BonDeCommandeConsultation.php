@@ -171,37 +171,42 @@ class BonDeCommandeConsultation extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id !== 2 && $role->id !== 3) {
-            return response()->json([
-                'success' => false,
-                'message' => "vous n'avez pas l'autorisation",
-                'data' => [],
-            ]);
-        }
-
-        $purOrder = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
-
-        if (!$purOrder || ($role->id === 3 && $user->idFiscale !== $purOrder->four_idFiscale)) {
-            return response()->json([
-                'success' => false,
-                'message' => "bon de commande n'existe pas",
-                'data' => [],
-            ]);
-        } else {
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('num_commande') . '%')
+                ->where('four_idFiscale', $user->idDiscale)->paginate($nb, ['*'], 'page', $page);
+            if (!$purOrders) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "cette facture n'existe pas",
+                    'data' => [],
+                ]);
+            }
+            /* foreach ($purOrders as $facture) {
+                $facture->etat_name = $facture->etat()->first()->name_etat;
+            }*/
             return response()->json([
                 'success' => true,
-                'message' => "votre bon de commande",
+                'message' => 'voici vos factures',
                 'data' => [
-                    "bon_de_commande" => $purOrder,
+                    'totalPages' => $purOrders->lastPage(),
+                    'factures' => $purOrders->items(),
                 ]
             ]);
         }
 
+        //pour l'agent bof
+        $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('num_commande') . '%')->paginate($nb, ['*'], 'page', $page);
+        /*foreach ($purOrders as $facture) {
+            $facture->etat_name = $facture->etat()->first()->name_etat;
+        }*/
         return response()->json([
             'success' => true,
-            'message' => "votre bon de commande",
+            'message' => 'voici vos factures',
             'data' => [
-                "bon_de_commande" => $purOrder,
+                'totalPages' => $purOrders->lastPage(),
+                'factures' => $purOrders->items(),
             ]
         ]);
     }
