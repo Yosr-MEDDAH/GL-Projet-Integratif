@@ -19,6 +19,7 @@ class BonDeCommandeSeeder extends Seeder
             'created_by' => 'Admin',
             'idErp' => 1,
             'delai_paiement' => '30 jours',
+            'hasInvoice' => 1,
             'four_idFiscale' => 'smjdhf500',
         ]);
 
@@ -27,6 +28,7 @@ class BonDeCommandeSeeder extends Seeder
             'created_by' => 'Admin',
             'idErp' => 1,
             'delai_paiement' => '30 jours',
+            'hasInvoice' => 1,
             'four_idFiscale' => 'smjdhf500',
         ]);
 
@@ -36,6 +38,7 @@ class BonDeCommandeSeeder extends Seeder
             'created_by' => 'Admin',
             'idErp' => 1,
             'delai_paiement' => '30 jours',
+            'hasInvoice' => 1,
             'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
         ]);
 
@@ -45,6 +48,7 @@ class BonDeCommandeSeeder extends Seeder
                 'delai_paiement' => '30 jours',
                 'created_by' => 'Admin',
                 'idErp' => 1,
+                'hasInvoice' => 1,
                 'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
             ]);
         }
@@ -54,6 +58,7 @@ class BonDeCommandeSeeder extends Seeder
             'created_by' => 'Admin',
             'idErp' => 1,
             'delai_paiement' => '30 jours',
+            'hasInvoice' => 1,
             'four_idFiscale' => '2sdqfklghf455',
         ]);
 
@@ -62,6 +67,7 @@ class BonDeCommandeSeeder extends Seeder
             'created_by' => 'Admin',
             'idErp' => 1,
             'delai_paiement' => '30 jours',
+            'hasInvoice' => 1,
             'four_idFiscale' => '2sdqfklghf455',
         ]);
     }

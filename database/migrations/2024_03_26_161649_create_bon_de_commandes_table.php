@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('created_by')->nullable(); // Créé par
             $table->unsignedBigInteger('idErp')->nullable(); // ID ERP
             $table->string('delai_paiement')->default("60 jours")->nullable(); // Délai de paiement
+            $table->boolean('hasInvoice')->default(1)->nullable();
             $table->string('four_idFiscale')->nullable();
             $table->timestamps();
         });

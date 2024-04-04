@@ -14,6 +14,7 @@ class BonDeCommande extends Model
         'created_by', // Créé par
         'idErp', // ID ERP
         'delai_paiement', // Délai de paiement
+        'hasInvoice',
         'four_idFiscale',
     ];
 }
