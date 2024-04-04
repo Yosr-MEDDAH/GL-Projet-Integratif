@@ -28,6 +28,7 @@ class FactureSeeder extends Seeder
             'payment_period' => '60 jours',
             'isArchived' => false,
             'objet_facture_id' => 1,
+            'pieces_jointes' => json_encode([1, 2, 3]),
             'etat_id' => 1,
             'borderau_id' => 1,
             'bon_de_commande_id' => null,

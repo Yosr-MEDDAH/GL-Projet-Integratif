@@ -6,6 +6,7 @@ use App\Models\BonDeCommande;
 use App\Models\Bordereau;
 use App\Models\Etat;
 use App\Models\Facture;
+use App\Models\ObjetFacture;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -31,6 +32,13 @@ class FactureController extends Controller
             }
 
             $pur = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
+            /*if (!$pur) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "vérifier votre numero du bon de commande",
+                    'data' => [],
+                ]);
+            }*/ // vérifier si user posséde la possébilité de saisir un bon de commande ?
             if (Facture::where('number', $request->input('number'))->first() || Facture::where('bon_de_commande_id', $pur->id)->first()) {
                 return response()->json([
                     'success' => false,
@@ -83,6 +91,10 @@ class FactureController extends Controller
 
 
             $fourName = User::where('idFiscale', $purOrder->four_idFiscale)->first()->name;
+
+
+
+
             //ajouter messages spécifiques ou pas ?? ********** ///////
             $validator = Validator::make($request->all(), [
                 'organization' => 'string|max:255',
@@ -92,9 +104,20 @@ class FactureController extends Controller
                 'billing_date' => 'required|date_format:Y-m-d', // à revoir 
                 'amount' => 'required|numeric',
                 'payment_period' => 'required|max:255',
+                'objet_facture_id' => 'integer',
+                'pieces_jointes' => 'json',
                 'invoice_file_path' => 'required|file|mimes:pdf|max:102400',
             ]);
 
+            $objet = ObjetFacture::find($request->input('objet_facture_id'));
+
+            /*if (!$objet) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "objet n'existe pas",
+                    'data' => [],
+                ]);
+            }*/
 
             if ($validator->fails()) {
                 return response()->json([
@@ -103,10 +126,6 @@ class FactureController extends Controller
                     'data' => [],
                 ]);
             }
-
-
-
-
 
             $bord = Bordereau::whereDate('created_at', Carbon::today()->toDateString())->first();
             $count = ($bord ? Facture::where('borderau_id', $bord->id)->count() : 0);
@@ -141,6 +160,8 @@ class FactureController extends Controller
                     'reception_date' => Carbon::now(),
                     'isArchived' => 0,
                     'etat_id' => 1,
+                    'objet_facture_id' => $request->input('objet_facture_id'),
+                    'pieces_jointes' => json_decode($request->input('pieces_jointes'), true), //explode(',', $request->input('pieces_jointes')),
                     'borderau_id' => $bord->id,
                     'bon_de_commande_id' => $purOrder->id,
                     'created_by' => $role->name,
@@ -159,6 +180,8 @@ class FactureController extends Controller
                     'reception_date' => Carbon::now(),
                     'isArchived' => false,
                     'etat_id' => 1,
+                    'objet_facture_id' => $request->input('objet_facture_id'),
+                    'pieces_jointes' =>  json_decode($request->input('pieces_jointes'), true), //explode(',', $request->input('pieces_jointes')),
                     'borderau_id' => $bord->id,
                     'bon_de_commande_id' => $purOrder->id,
                     'created_by' => $role->name,
