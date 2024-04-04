@@ -8,6 +8,7 @@ use App\Http\Controllers\FactureExportController;
 use App\Http\Controllers\InfosController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\ResetPassword;
+use App\Http\Controllers\SelectionFactureController;
 use App\Http\Controllers\TwoFactorAuthController;
 use App\Models\Facture;
 use Illuminate\Http\Request;
@@ -76,4 +77,10 @@ Route::controller(BonDeCommandeConsultation::class)->group(function () {
     Route::get('/purchaseOrdersNumbers', 'getAllPoNumbers')->middleware('jwt.auth');
     Route::get('/purchaseOrder', 'getPo')->middleware('jwt.auth');
     Route::get('/recherchePO', 'recherchePo')->middleware('jwt.auth');
+});
+
+
+Route::controller(SelectionFactureController::class)->group(function () {
+    Route::get('/objets', 'getObjects')->middleware('jwt.auth');
+    Route::get('/PJs', 'getPJs')->middleware('jwt.auth');
 });

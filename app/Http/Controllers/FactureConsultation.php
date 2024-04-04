@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Facture;
+use App\Models\ObjetFacture;
+use App\Models\PieceJointeFacture;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 

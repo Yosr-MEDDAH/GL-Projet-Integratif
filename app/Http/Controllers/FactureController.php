@@ -147,6 +147,7 @@ class FactureController extends Controller
                     'fournisseur_id' => $user->id,
                     'agent_bof_id' => null,
                 ]);
+                $purOrder->hasInvoice = 1;
             } else {
                 Facture::create([
                     'number' => $request->input('number'),
@@ -164,6 +165,7 @@ class FactureController extends Controller
                     'fournisseur_id' => null,
                     'agent_bof_id' => $user->id,
                 ]);
+                $purOrder->hasInvoice = 1;
             }
 
             return response()->json([
