@@ -25,6 +25,9 @@ return new class extends Migration
             $table->timestamp('reception_date')->nullable(); // Date de réception de la facture
             $table->string('payment_period')->nullable()->default('60 jours');
             $table->boolean('isArchived')->nullable();
+            $table->json('pieces_jointes')->nullable();
+            $table->unsignedBigInteger('objet_facture_id')->nullable();
+            $table->foreign('objet_facture_id')->references('id')->on('objet_factures');
             $table->unsignedBigInteger('etat_id')->nullable(); // Clé étrangère pour l'état de la facture
             $table->foreign('etat_id')->references('id')->on('etats')->onDelete('set null'); // Référence à la table des états
             $table->unsignedBigInteger('borderau_id')->nullable(); // Clé étrangère pour le bordereau

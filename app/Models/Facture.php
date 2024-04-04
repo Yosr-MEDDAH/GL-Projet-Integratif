@@ -10,24 +10,26 @@ class Facture extends Model
     use HasFactory;
 
     protected $fillable = [
-            'number', 
-            'invoice_name', 
-            'organization', 
-            'department', 
-            'billing_date', 
-            'consumption_period', 
-            'currency', 
-            'amount', 
-            'invoice_file_path', 
-            'reception_date', 
-            'payment_period',
-            'fournisseur_id',
-            'borderau_id',
-            'bon_de_commande_id',
-            'etat_id', // Ajout du champ 'etat_id'
-            'isArchived', 
-            'created_by', 
-            'agent_bof_id'
+        'number',
+        'invoice_name',
+        'organization',
+        'department',
+        'billing_date',
+        'consumption_period',
+        'currency',
+        'amount',
+        'invoice_file_path',
+        'reception_date',
+        'payment_period',
+        'fournisseur_id',
+        'borderau_id',
+        'bon_de_commande_id',
+        'etat_id', // Ajout du champ 'etat_id'
+        'isArchived',
+        'created_by',
+        'agent_bof_id',
+        'pieces_jointes',
+        'objet_facture_id',
     ];
 
     public function fournisseur()
@@ -49,4 +51,13 @@ class Facture extends Model
     {
         return $this->belongsTo(BonDeCommande::class);
     }
+
+    public function objetFacture()
+    {
+        return $this->belongsTo(ObjetFacture::class);
+    }
+
+    protected $casts = [
+        'pieces_jointes' => 'array',
+    ];
 }
