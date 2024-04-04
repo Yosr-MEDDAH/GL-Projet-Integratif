@@ -108,37 +108,44 @@ class FactureConsultation extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        $facture = Facture::where('number', $request->input('number'))->first();
-        if (!$facture || ($role->id === 3 && ($facture->fournisseur_id !== $user->id))) {
-            return response()->json([
-                'success' => false,
-                'message' => 'la facture n \'existe pas',
-                'data' => [],
-            ]);
-        } else {
+
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $factures = Facture::where('number', 'LIKE', '%' . $request->input('number') . '%')
+                ->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+            if (!$factures) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "cette facture n'existe pas",
+                    'data' => [],
+                ]);
+            }
+            foreach ($factures as $facture) {
+                $facture->etat_name = $facture->etat()->first()->name_etat;
+            }
             return response()->json([
                 'success' => true,
-                'message' => 'voici les informations de cette facture',
+                'message' => 'voici vos factures',
                 'data' => [
-                    'facture' => $facture,
-                    'etat_facture' => [
-                        'etat_id' => $facture->etat()->first()->id,
-                        'etat_name' => $facture->etat()->first()->name_etat,
-                    ]
+                    'totalPages' => $factures->lastPage(),
+                    'factures' => $factures->items(),
                 ]
             ]);
         }
 
-        //pour agent bof
+        //pour l'agent bof
+        $factures = Facture::where('number', 'LIKE', '%' . $request->input('number') . '%')->paginate($nb, ['*'], 'page', $page);
+        foreach ($factures as $facture) {
+            $facture->etat_name = $facture->etat()->first()->name_etat;
+        }
         return response()->json([
             'success' => true,
-            'message' => 'voici les informations de cette facture',
+            'message' => 'voici vos factures',
             'data' => [
-                'facture' => $facture,
-                'etat_facture' => [
-                    'etat_id' => $facture->etat()->first()->id,
-                    'etat_name' => $facture->etat()->first()->name_etat,
-                ]
+                'totalPages' => $factures->lastPage(),
+                'factures' => $factures->items(),
             ]
         ]);
     }
