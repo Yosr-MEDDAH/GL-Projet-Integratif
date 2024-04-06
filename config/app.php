@@ -182,6 +182,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
+        Webklex\PDFMerger\Providers\PDFMergerServiceProvider::class,
 
         /*
          * Package Service Providers...
@@ -212,6 +213,7 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
         'Excel' => \Maatwebsite\Excel\Facades\Excel::class,
+        'PDFMerger' => Webklex\PDFMerger\Facades\PDFMergerFacade::class,
     ])->toArray(),
 
 ];
