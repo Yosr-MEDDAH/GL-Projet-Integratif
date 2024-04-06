@@ -137,7 +137,7 @@ class FactureController extends Controller
             foreach ($files as $file) {
                 $pdf->addPDF($file->getPathName(), 'all');
             }
-            $fileName = 'facture_' . $fourName . " " . $count = $count + 1; //. '.' . $file->getClientOriginalExtension();
+            $fileName = 'facture_' . $fourName . " " . $count = $count + 1 . ".pdf"; //. '.' . $file->getClientOriginalExtension();
             $pdf->merge();
 
             if (!$bord) {

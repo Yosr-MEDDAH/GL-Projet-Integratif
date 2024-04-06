@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\BonDeCommande;
 use App\Models\Facture;
 use App\Models\Reclamation;
+use Carbon\Carbon;
 use Dotenv\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
+use Webklex\PDFMerger\Facades\PDFMergerFacade;
 
 class ReclamationController extends Controller
 {
@@ -68,7 +71,7 @@ class ReclamationController extends Controller
             'idFiscale' => 'nullable|string',
             'numFacture' => 'nullable|string',
             'numCommande' => 'nullable|string',
-            'attached_file' => 'nullable||file|mimes:pdf|max:102400'
+            'attached_file.*' => 'nullable||file|mimes:pdf|max:102400'
         ]);
 
         if ($validator->fails()) {
@@ -79,13 +82,17 @@ class ReclamationController extends Controller
             ]);
         }
 
-
+        $count = Reclamation::all()->count();
         if ($request->hasFile('attached_file')) {
-            $file = $request->file('attached_file');
-            //$attachedFile = "";
-            $fileName = $file->getClientOriginalName() . "_" . $user->name . "." . $file->getClientOriginalExtension();
-            $filePath = $file->storeAs('attached_files', $fileName, 'reclamation');
-            $attachedFile = $filePath;
+            $files = $request->file('attached_file');
+            $pdf = PDFMergerFacade::init();
+            foreach ($files as $file) {
+                $pdf->addPDF($file->getPathName(), 'all');
+            }
+            $fileName = 'reclamation_' . $user->name . " " . " nb_" . $count = $count + 1 . ".pdf"; //. '.' . $file->getClientOriginalExtension();
+            $pdf->merge();
+            Storage::disk('reclamation')->put('attached_files' . '/' .  $fileName, $pdf->output());
+            $attachedFile = 'attached_files' . '/' .  $fileName;
         }
 
 
