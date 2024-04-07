@@ -33,7 +33,7 @@ class FactureConsultation extends Controller
             ]);
         } else {
             $piecesJointes = collect($facture->pieces_jointes)->values()->all();
-
+            $piece_jointes = [];
             foreach ($piecesJointes as $piecesJointe) {
                 $piece_jointes[] = PieceJointeFacture::find($piecesJointe)->namePJ;
             }
