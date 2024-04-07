@@ -41,6 +41,7 @@ Route::controller(InfosController::class)->prefix('user')->group((function () {
     Route::put('/update', 'updateGeneralInfo')->middleware('jwt.auth');
     Route::post('/image', 'updateImage')->middleware('jwt.auth');
     Route::put('/password', 'updatePassword')->middleware('jwt.auth');
+    Route::get('/profile/photo/{imageName}', 'getImage')->middleware('jwt.auth');
 }));
 
 Route::controller(ResetPassword::class)->prefix('reset')->group(function () {
@@ -58,6 +59,7 @@ Route::controller(FactureConsultation::class)->group(function () {
     Route::get('/facture', 'getInvoice')->middleware('jwt.auth');
     Route::get('/factures', 'getInvoices')->middleware('jwt.auth');
     Route::get('/rechercheIN', 'rechercheFacture')->middleware('jwt.auth');
+    Route::get('/user/facture/{date}/{fileName}', 'getFileInvoice')->middleware('jwt.auth');
 });
 
 //Route::get('/factures/export', [FactureExportController::class, 'export'])->middleware('jwt.auth');
@@ -70,6 +72,7 @@ Route::controller(ReclamationController::class)->group(function () {
     Route::delete('/reclamation/delete', 'deleteReclamation')->middleware('jwt.auth');
     Route::get('/rechercheRec', 'rechercheRec')->middleware('jwt.auth');
     Route::get('/reclamationsSpec', 'getReclamationSpec')->middleware('jwt.auth');
+    Route::get('/user/reclamation/attached_files/{fileName}', 'getFileReclamation')->middleware('jwt.auth');
 });
 
 Route::controller(BonDeCommandeConsultation::class)->group(function () {

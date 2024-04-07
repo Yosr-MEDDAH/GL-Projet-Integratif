@@ -6,6 +6,7 @@ use App\Models\Facture;
 use App\Models\ObjetFacture;
 use App\Models\PieceJointeFacture;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class FactureConsultation extends Controller
@@ -157,5 +158,50 @@ class FactureConsultation extends Controller
                 'factures' => $factures->items(),
             ]
         ]);
+    }
+
+
+
+
+    function getFileInvoice(Request $request, $date, $fileName)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+        $filePath = $date . '/' . $fileName;
+
+        if ($role->id === 3) {
+            $invoiceFile = Facture::where('invoice_file_path', $filePath)
+                ->where('fournisseur_id', $user->id)->first(); // pour etre true => il faut le fichier recherché doit etre existe avec le meme path et doit etre id = $user->id
+        } else {
+            $invoiceFile = Facture::where('invoice_file_path', $filePath)->first();
+        }
+        if (!$invoiceFile) {
+            return response()->json([
+                'success' => false,
+                'message' => "le fichier  n'existe pas", //BD
+                'data' => [],
+            ]);
+        }
+        if (Storage::disk('facture')->exists($filePath)) {
+            $fileContents = Storage::disk('facture')->get($filePath);
+            return response()->make($fileContents, 200, [
+                'Content-Type' => 'application/pdf'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => "le fichier n'existe pas",
+                'data' => []
+            ]); //disk
+        }
     }
 }

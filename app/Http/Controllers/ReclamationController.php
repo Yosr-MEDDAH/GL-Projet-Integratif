@@ -345,4 +345,47 @@ class ReclamationController extends Controller
             ]
         ]);
     }
+
+
+    function getFileReclamation(Request $request, $fileName)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+        $filePath = 'attached_files/' . $fileName;
+
+        if ($role->id === 3) {
+            $recFile = Reclamation::where('attached_file', $filePath)
+                ->where('fournisseur_id', $user->id)->first(); // pour etre true => il faut le fichier recherché doit etre existe avec le meme path et doit etre id = $user->id
+        } else {
+            $recFile = Reclamation::where('attached_file', $filePath)->first();
+        }
+        if (!$recFile) {
+            return response()->json([
+                'success' => false,
+                'message' => "le fichier  n'existe pas", //BD
+                'data' => [],
+            ]);
+        }
+        if (Storage::disk('reclamation')->exists($filePath)) {
+            $fileContents = Storage::disk('reclamation')->get($filePath);
+            return response()->make($fileContents, 200, [
+                'Content-Type' => 'application/pdf'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => "le fichier n'existe pas",
+                'data' => []
+            ]); //disk
+        }
+    }
 }

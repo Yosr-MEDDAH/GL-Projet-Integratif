@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -202,6 +204,47 @@ class InfosController extends Controller
                 'message' => $e->getMessage(),
                 'data' => [],
             ]);
+        }
+    }
+
+
+
+    function getImage(Request $request, $imageName)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+        $filePath = "profile/photos/" . $imageName;
+        $imageFile = User::where('image', $filePath)->where('id', $user->id)->first(); // pour etre true => il faut le fichier recherché doit etre existe avec le meme path et doit etre id = $user->id
+        if (!$imageFile) {
+            return response()->json([
+                'success' => false,
+                'message' => "le fichier  n'existe pas", //BD
+                'data' => [],
+            ]);
+        }
+        if (Storage::disk('image')->exists($filePath)) {
+            $fileContents = Storage::disk('image')->get($filePath);
+            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+            $contentType = 'image/' . $extension;
+
+            return response()->make($fileContents, 200, [
+                'Content-Type' => $contentType
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => "le fichier n'existe pas",
+                'data' => []
+            ]); //disk
         }
     }
 }
