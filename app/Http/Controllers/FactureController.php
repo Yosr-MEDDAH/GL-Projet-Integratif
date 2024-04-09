@@ -417,6 +417,9 @@ class FactureController extends Controller
             'billing_date' => 'required|date_format:Y-m-d', // à revoir 
             'amount' => 'required|numeric',
             'payment_period' => 'required|max:255',
+            'objet_facture_id' => 'integer', // annuler ou non 
+            //'pieces_jointes' => 'json', //changer
+           // 'invoice_file_path.*' => 'required|file|mimes:pdf|max:102400', //changer
         ]);
 
 
@@ -450,7 +453,16 @@ class FactureController extends Controller
                 'created_by' => $role->name,
                 'fournisseur_id' => $user->id,
                 'agent_bof_id' => null,
+                //'objet_facture_id' => $request->input('objet_facture_id'),
+                //'pieces_jointes' => json_decode($request->input('pieces_jointes'), true), //explode(',', $request->input('pieces_jointes')),
             ]);
+            /* $files = $request->file('invoice_file_path');
+            $pdf = PDFMergerFacade::init();
+            foreach ($files as $file) {
+                $pdf->addPDF($file->getPathName(), 'all'); 
+            }
+            $pdf->merge();
+            Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $facture, $pdf->output());*/
         } else {
             $facture->update([
                 'number' => $request->input('number'),
