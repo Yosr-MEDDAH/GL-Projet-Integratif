@@ -388,7 +388,6 @@ class FactureController extends Controller
         }
 
         $purOrder = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
-
         //if (($role_id === 3) || ($role_id === 2 && User::where('idFiscale' ,$request->input('id_fiscale'))->first())) ******** 3eme cas (ajouter un attribut)
         if ($role->id === 3) {
             if ($request->input('id_fiscale') !== $user->idFiscale) {
