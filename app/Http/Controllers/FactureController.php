@@ -419,7 +419,7 @@ class FactureController extends Controller
             'payment_period' => 'required|max:255',
             'objet_facture_id' => 'integer', // annuler ou non 
             //'pieces_jointes' => 'json', //changer
-           // 'invoice_file_path.*' => 'required|file|mimes:pdf|max:102400', //changer
+            // 'invoice_file_path.*' => 'required|file|mimes:pdf|max:102400', //changer
         ]);
 
 
@@ -456,13 +456,6 @@ class FactureController extends Controller
                 //'objet_facture_id' => $request->input('objet_facture_id'),
                 //'pieces_jointes' => json_decode($request->input('pieces_jointes'), true), //explode(',', $request->input('pieces_jointes')),
             ]);
-            /* $files = $request->file('invoice_file_path');
-            $pdf = PDFMergerFacade::init();
-            foreach ($files as $file) {
-                $pdf->addPDF($file->getPathName(), 'all'); 
-            }
-            $pdf->merge();
-            Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $facture, $pdf->output());*/
         } else {
             $facture->update([
                 'number' => $request->input('number'),
@@ -479,6 +472,34 @@ class FactureController extends Controller
                 'agent_bof_id' => $user->id,
             ]);
         }
+
+        /*$fourName = User::where('idFiscale', $purOrder->four_idFiscale)->first()->name;
+        $bord = Bordereau::whereDate('created_at', Carbon::today()->toDateString())->first();
+        $count = ($bord ? Facture::where('borderau_id', $bord->id)->count() : 0);
+
+        $files = $request->file('invoice_file_path');
+        $pdf = PDFMergerFacade::init();
+        foreach ($files as $file) {
+            $pdf->addPDF($file->getPathName(), 'all');
+        }
+        $fileName = 'facture_' . $fourName . " " . $count = $count + 1 . ".pdf"; //. '.' . $file->getClientOriginalExtension();
+        $pdf->merge();
+
+        if (!$bord) {
+            Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $fileName, $pdf->output());
+            $filePath = Carbon::now()->toDateString() . '/' .  $fileName;
+            $bord = new Bordereau();
+            $bord->date_sent = Carbon::now();;
+            $bord->folder = Carbon::now()->toDateString();
+            $bord->status = 'En cours';
+            $bord->reference = Str::random(8) . '/' . Carbon::now()->toDateString();
+            $bord->save();
+        } else {
+            Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $fileName, $pdf->output());
+            $filePath = Carbon::now()->toDateString() . '/' .  $fileName;
+            $bord->date_sent = Carbon::now();
+        }*/
+
 
         return response()->json([
             'success' => true,

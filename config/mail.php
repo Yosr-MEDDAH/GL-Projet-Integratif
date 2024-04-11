@@ -44,6 +44,27 @@ return [
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN'),
         ],
+        /*'smtp' => [
+            'transport' => 'smtp',
+            'host' => $mailerConfig ? $mailerConfig->host : 'sandbox.smtp.mailtrap.io',
+            'port' => $mailerConfig ? $mailerConfig->port : 2525,
+            'encryption' => $mailerConfig ? $mailerConfig->encryption : 'tls',
+            'username' => $mailerConfig ? $mailerConfig->username : 'default_username',
+            'password' => $mailerConfig ? $mailerConfig->password : 'default_password',
+            'timeout' => $mailerConfig ? $mailerConfig->timeout : null,
+            'local_domain' => $mailerConfig ? $mailerConfig->local_domain : null,
+        ],*/
+
+        /*'smtp' => [
+            'transport' => 'smtp',
+            'host' => $mailerConfig->host ?? env('MAIL_HOST', 'sandbox.smtp.mailtrap.io'),
+            'port' => $mailerConfig->port ?? env('MAIL_PORT', 2525),
+            'encryption' => $mailerConfig->encryption ?? env('MAIL_ENCRYPTION', 'tls'),
+            'username' => $mailerConfig->username ?? env('MAIL_USERNAME', '378d47aed4598f'),
+            'password' => $mailerConfig->password ?? env('MAIL_PASSWORD', 'f6ad1c1829385f'),
+            'timeout' => null,
+            'local_domain' => env('MAIL_EHLO_DOMAIN'),
+        ],*/
         'ses' => [
             'transport' => 'ses',
         ],

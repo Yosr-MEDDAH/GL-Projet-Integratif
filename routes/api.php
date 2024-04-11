@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BonDeCommandeConsultation;
+use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\FactureExportController;
@@ -86,4 +87,9 @@ Route::controller(BonDeCommandeConsultation::class)->group(function () {
 Route::controller(SelectionFactureController::class)->group(function () {
     Route::get('/objets', 'getObjects')->middleware('jwt.auth');
     Route::get('/PJs', 'getPJs')->middleware('jwt.auth');
+});
+
+
+Route::controller(ConfigurationController::class)->group(function () {
+    Route::put('edit/mailer/config', 'editMailer')->middleware('jwt.auth');
 });
