@@ -438,5 +438,19 @@ class DataBaseSeederGeneral extends Seeder
             'hasInvoice' => 1,
             'four_idFiscale' => '2sdqfklghf455',
         ]);
+
+
+        DB::table('mailers')->insert([
+            'transport' => 'smtp',
+            'host' => 'sandbox.smtp.mailtrap.io',
+            'port' => 2525,
+            'encryption' => 'tls',
+            'username' => '378d47aed4598f',
+            'password' => 'f6ad1c1829385f',
+            'timeout' => null,
+            'local_domain' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
