@@ -452,5 +452,60 @@ class DataBaseSeederGeneral extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+
+
+        DB::table('fournisseurs_sans_comptes')->insert([
+            'name' => 'Fournisseur A',
+            'email' => 'fournisseurA@example.com',
+            'phone' => '0123456789',
+            'idErp' => null,
+            'idFiscale' => 'ABCDE12345',
+            'adress' => '123 Rue de la République',
+            'nationnalites' => 'Française',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+
+        DB::table('fournisseurs_sans_comptes')->insert([
+            'name' => 'Fournisseur B',
+            'email' => 'fournisseurB@example.com',
+            'phone' => '0987654321',
+            'idErp' => 1,
+            'idFiscale' => 'FGHIJ67890',
+            'adress' => '456 Avenue des Champs-Élysées',
+            'nationnalites' => 'Belge',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+
+
+        DB::table('fournisseurs_sans_comptes')->insert([
+            'name' => 'Fournisseur C',
+            'email' => 'fournisseurC@example.com',
+            'phone' => '1122334455',
+            'idErp' => 1,
+            'idFiscale' => 'KLMNO54321',
+            'adress' => null,
+            'nationnalites' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+
+
+        DB::table('fournisseurs_sans_comptes')->insert([
+            'name' => 'Fournisseur D',
+            'email' => 'fournisseurD@example.com',
+            'phone' => '5544332211',
+            'idErp' => null,
+            'idFiscale' => "abcdefghijilk",
+            'adress' => null,
+            'nationnalites' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
