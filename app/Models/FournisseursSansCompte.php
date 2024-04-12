@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\NotificationCredentials;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -13,7 +14,7 @@ class FournisseursSansCompte extends Model
 
 
 
-    public function generateRandomRefreshToken()
+    public function generateRandomPassword()
     {
         $password = null;
         $unique = false;
@@ -27,5 +28,11 @@ class FournisseursSansCompte extends Model
             }
         }
         return $password;
+    }
+
+
+    public function NotificationCredentials($email, $password)
+    {
+        return $this->notify(new NotificationCredentials($email, $password));
     }
 }

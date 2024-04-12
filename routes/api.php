@@ -6,6 +6,7 @@ use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\FactureExportController;
+use App\Http\Controllers\FournisseurAccessController;
 use App\Http\Controllers\InfosController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\ResetPassword;
@@ -92,4 +93,8 @@ Route::controller(SelectionFactureController::class)->group(function () {
 
 Route::controller(ConfigurationController::class)->group(function () {
     Route::put('edit/mailer/config', 'editMailer')->middleware('jwt.auth');
+});
+
+Route::controller(FournisseurAccessController::class)->group(function () {
+    Route::post('create/account', 'accessFournisseur')->middleware('jwt.auth');
 });
