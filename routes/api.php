@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BonDeCommandeConsultation;
+use App\Http\Controllers\BordoreauConsultation;
 use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
@@ -98,4 +99,8 @@ Route::controller(ConfigurationController::class)->group(function () {
 Route::controller(FournisseurAccessController::class)->group(function () {
     Route::post('create/account', 'accessFournisseur')->middleware('jwt.auth');
     Route::put('update/email/adress', 'updateEmail')->middleware('jwt.auth');
+});
+
+Route::controller(BordoreauConsultation::class)->group(function () {
+    Route::get('Bordoreaux', 'getAllBordoreau')->middleware('jwt.auth');
 });
