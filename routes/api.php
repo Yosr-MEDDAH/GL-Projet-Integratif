@@ -97,4 +97,5 @@ Route::controller(ConfigurationController::class)->group(function () {
 
 Route::controller(FournisseurAccessController::class)->group(function () {
     Route::post('create/account', 'accessFournisseur')->middleware('jwt.auth');
+    Route::put('update/email/adress', 'updateEmail')->middleware('jwt.auth');
 });

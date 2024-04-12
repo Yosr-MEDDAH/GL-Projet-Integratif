@@ -12,6 +12,17 @@ class FournisseursSansCompte extends Model
 {
     use HasFactory, Notifiable;
 
+    protected $fillable = [
+        'name',
+        'email',
+        'phone',
+        'idErp',
+        'idFiscale',
+        'adress',
+        'nationnalites',
+    ];
+    
+
 
 
     public function generateRandomPassword()
