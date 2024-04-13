@@ -7,6 +7,7 @@ use App\Http\Controllers\ConfigurationController;
 use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\FactureExportController;
+use App\Http\Controllers\FilterController;
 use App\Http\Controllers\FournisseurAccessController;
 use App\Http\Controllers\InfosController;
 use App\Http\Controllers\ReclamationController;
@@ -104,4 +105,8 @@ Route::controller(FournisseurAccessController::class)->group(function () {
 Route::controller(BordoreauConsultation::class)->group(function () {
     Route::get('Bordoreaux', 'getAllBordoreau')->middleware('jwt.auth');
     Route::get('Bordoreau/listFacture', 'getBordoreauListFacture')->middleware('jwt.auth');
+});
+
+Route::controller(FilterController::class)->group(function () {
+    Route::get('/factures', 'getFactureBof')->middleware('jwt.auth');
 });
