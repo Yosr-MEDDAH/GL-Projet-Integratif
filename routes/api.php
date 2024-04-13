@@ -39,12 +39,12 @@ Route::controller(TwoFactorAuthController::class)->prefix('2fa')->group(function
     Route::post('/verify', 'verify');
 });
 
-Route::controller(InfosController::class)->prefix('user')->group((function () {
-    Route::get('/', 'getUser')->middleware('jwt.auth');
-    Route::put('/update', 'updateGeneralInfo')->middleware('jwt.auth');
-    Route::post('/image', 'updateImage')->middleware('jwt.auth');
-    Route::put('/password', 'updatePassword')->middleware('jwt.auth');
-    Route::get('/profile/photo/{imageName}', 'getImage')->middleware('jwt.auth');
+Route::controller(InfosController::class)->group((function () {
+    Route::get('user/', 'getUser')->middleware('jwt.auth');
+    Route::put('user/update', 'updateGeneralInfo')->middleware('jwt.auth');
+    Route::post('user/image', 'updateImage')->middleware('jwt.auth');
+    Route::put('user/password', 'updatePassword')->middleware('jwt.auth');
+    Route::get('users/{userID}/userUploads/img/{imageName}', 'getImage')->middleware('jwt.auth');
 }));
 
 Route::controller(ResetPassword::class)->prefix('reset')->group(function () {
@@ -75,7 +75,7 @@ Route::controller(ReclamationController::class)->group(function () {
     Route::delete('/reclamation/delete', 'deleteReclamation')->middleware('jwt.auth');
     Route::get('/rechercheRec', 'rechercheRec')->middleware('jwt.auth');
     Route::get('/reclamationsSpec', 'getReclamationSpec')->middleware('jwt.auth');
-    Route::get('/user/reclamation/attached_files/{fileName}', 'getFileReclamation')->middleware('jwt.auth');
+    Route::get('/users/{userID}/userUploads/reclamation/{fileName}', 'getFileReclamation')->middleware('jwt.auth');
 });
 
 Route::controller(BonDeCommandeConsultation::class)->group(function () {

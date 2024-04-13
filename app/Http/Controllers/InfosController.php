@@ -91,7 +91,7 @@ class InfosController extends Controller
 
             $image = $request->file('image');
             $fileName = 'Photo_' . $user->id . '.' . $image->getClientOriginalExtension();
-            $imagePath = $image->storeAs('profile/photos', $fileName, 'image');
+            $imagePath = $image->storeAs("users/" . $user->id . "/userUploads/img", $fileName, 'image');
             $user->image = $imagePath;
             $user->save();
 
@@ -209,7 +209,7 @@ class InfosController extends Controller
 
 
 
-    function getImage(Request $request, $imageName)
+    function getImage(Request $request, $userId, $imageName)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -222,7 +222,7 @@ class InfosController extends Controller
             ], 403); // 403 accés refusé
         }
 
-        $filePath = "profile/photos/" . $imageName;
+        $filePath = "users/" . $userId . "/userUploads/img/" . $imageName;
         $imageFile = User::where('image', $filePath)->where('id', $user->id)->first(); // pour etre true => il faut le fichier recherché doit etre existe avec le meme path et doit etre id = $user->id
         if (!$imageFile) {
             return response()->json([

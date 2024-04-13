@@ -8,7 +8,7 @@ return [
 
         'image' => [
             'driver' => 'local',
-            'root' => storage_path('app/images'),
+            'root' => "C:\Users\yefer\Desktop\storage",
             'throw' => false,
         ],
 
@@ -19,7 +19,7 @@ return [
 
         'reclamation' => [
             'driver' => 'local',
-            'root' => storage_path('app/reclamations'),
+            'root' => "C:\Users\yefer\Desktop\storage",
         ],
 
         'public' => [

@@ -91,8 +91,8 @@ class ReclamationController extends Controller
             }
             $fileName = 'reclamation_' . $user->name . " " . " nb_" . $count = $count + 1 . ".pdf"; //. '.' . $file->getClientOriginalExtension();
             $pdf->merge();
-            Storage::disk('reclamation')->put('attached_files' . '/' .  $fileName, $pdf->output());
-            $attachedFile = 'attached_files' . '/' .  $fileName;
+            Storage::disk('reclamation')->put("users/" . $user->id . "/userUploads/reclamation/" .  $fileName, $pdf->output());
+            $attachedFile = "users/" . $user->id . "/userUploads/reclamation/" .  $fileName;
         }
 
 
@@ -347,7 +347,7 @@ class ReclamationController extends Controller
     }
 
 
-    function getFileReclamation(Request $request, $fileName)
+    function getFileReclamation(Request $request, $userId, $fileName)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -360,7 +360,7 @@ class ReclamationController extends Controller
             ], 403); // 403 accés refusé
         }
 
-        $filePath = 'attached_files/' . $fileName;
+        $filePath = "users/" . $userId . "/userUploads/reclamation/" .  $fileName;
 
         if ($role->id === 3) {
             $recFile = Reclamation::where('attached_file', $filePath)
