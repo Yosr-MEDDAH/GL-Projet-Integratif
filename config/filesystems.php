@@ -14,7 +14,7 @@ return [
 
         'facture' => [
             'driver' => 'local',
-            'root' => storage_path('app/factures'),
+            'root' => "C:\Users\yefer\Desktop\mes_bordreaux",
         ],
 
         'reclamation' => [

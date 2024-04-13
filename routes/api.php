@@ -62,7 +62,7 @@ Route::controller(FactureConsultation::class)->group(function () {
     Route::get('/facture', 'getInvoice')->middleware('jwt.auth');
     Route::get('/factures', 'getInvoices')->middleware('jwt.auth');
     Route::get('/rechercheIN', 'rechercheFacture')->middleware('jwt.auth');
-    Route::get('/user/facture/{date}/{fileName}', 'getFileInvoice')->middleware('jwt.auth');
+    Route::get('/storage/userUploads/pdf/invoice/{date}/{fileName}', 'getFileInvoice')->middleware('jwt.auth');
 });
 
 //Route::get('/factures/export', [FactureExportController::class, 'export'])->middleware('jwt.auth');
