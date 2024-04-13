@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdministrateurController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BonDeCommandeConsultation;
 use App\Http\Controllers\BordoreauConsultation;
@@ -110,4 +111,8 @@ Route::controller(BordoreauConsultation::class)->group(function () {
 Route::controller(FilterController::class)->group(function () {
     Route::get('agentBof/factures', 'getFactureBof')->middleware('jwt.auth');
     Route::get('agentBof/recherche', 'rechercheBof')->middleware('jwt.auth');
+});
+
+Route::controller(AdministrateurController::class)->group(function () {
+    Route::post('update/default/picture_profile', 'storeDefaultProfilePicture')->middleware('jwt.auth');
 });
