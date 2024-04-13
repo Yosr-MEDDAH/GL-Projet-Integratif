@@ -72,4 +72,39 @@ class FilterController extends Controller
             ],
         ]);
     }
+
+
+
+    function rechercheBof(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $factures = Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+            ->orWhereHas('fournisseur', function ($query) use ($request) {
+                $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
+            })
+            ->paginate($nb, ['*'], 'page', $page);
+
+        return response()->json([
+            'success' => true,
+            'message' => "les factures",
+            "data" => [
+                'totalPages' => $factures->lastPage(),
+                'factures' => $factures->items(),
+            ]
+        ]);
+    }
 }

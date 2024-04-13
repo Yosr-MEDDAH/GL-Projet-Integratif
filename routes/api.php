@@ -108,5 +108,6 @@ Route::controller(BordoreauConsultation::class)->group(function () {
 });
 
 Route::controller(FilterController::class)->group(function () {
-    Route::get('/factures', 'getFactureBof')->middleware('jwt.auth');
+    Route::get('agentBof/factures', 'getFactureBof')->middleware('jwt.auth');
+    Route::get('agentBof/recherche', 'rechercheBof')->middleware('jwt.auth');
 });
