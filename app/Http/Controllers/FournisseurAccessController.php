@@ -157,7 +157,33 @@ class FournisseurAccessController extends Controller
         ]);
     }
 
-    function getFournisseurSansCompte (Request $request) {
-        
+    function getFournisseurSansCompte(Request $request)
+    {
+
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas d'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $fournisseurs = FournisseursSansCompte::paginate($nb, ['*'], 'page', $page);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => "voila les fournisseurs sans compte",
+            'data' => [
+                'totalePage' => $fournisseurs->lastPage(),
+                'fournisseurs' => $fournisseurs->items(),
+            ],
+        ]);
     }
 }
