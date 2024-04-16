@@ -174,7 +174,37 @@ class FournisseurAccessController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
 
-        $fournisseurs = FournisseursSansCompte::all('name', 'email', 'phone', 'idFiscale')->paginate($nb, ['*'], 'page', $page);
+        $fournisseurs = FournisseursSansCompte::select('name', 'email', 'phone', 'idFiscale')->paginate($nb, ['*'], 'page', $page);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => "voila les fournisseurs sans compte",
+            'data' => [
+                'totalePage' => $fournisseurs->lastPage(),
+                'fournisseurs' => $fournisseurs->items(),
+            ],
+        ]);
+    }
+
+
+    function getFournisseurAvecCompte(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas d'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $fournisseurs = User::select('name', 'email', 'phone', 'idFiscale')->where('role_id', 3)->paginate($nb, ['*'], 'page', $page);
 
 
         return response()->json([
