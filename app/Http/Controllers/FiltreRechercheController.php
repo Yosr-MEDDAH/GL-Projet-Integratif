@@ -148,7 +148,7 @@ class FiltreRechercheController extends Controller
                 ->where('hasInvoice', 0)->paginate($nb, ['*'], 'page', $page);
         } elseif ($request->input('FacturePresente', 'tous')) {
             $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')->orWhere('four_idFiscale', $request->input('search'))
-            ->paginate($nb, ['*'], 'page', $page);
+                ->paginate($nb, ['*'], 'page', $page);
         }
         return response()->json([
             'success' => true,
@@ -168,17 +168,70 @@ class FiltreRechercheController extends Controller
 
     //filtrage facture fournisseur
 
-    function rechercheFacture(Request $request)
+    function filtrageFactureFournisseur(Request $request)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
+        if ($role->id !== 3) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
 
+        /*$messages = [
+            'type_facture.required' => 'Le type de facture est requis.',
+            'etat.required' => 'L\'état de la facture est requis.',
+        ];
+
+
+        $validator = Validator::make($request->all(), [
+            'type_facture' => 'string',
+            'etat' => 'numeric',
+        ], $messages);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'errors' => $validator->errors()
+            ], 422);
+        }*/
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $factures = Facture::where('etat_id', $request->input('etat', 1))->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);// obligatoire etat envoyé avec request (car ca donne toujeours les factures en attente)
+        return response()->json([
+            'success' => false,
+            'message' => "les factures",
+            'data' => [
+                'totalPages' => $factures->lastPage(),
+                'factures' => $factures->items(),
+            ],
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+
+
+    function rechercheFactureFournisseur(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
 
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $factures = Facture::where('number', 'LIKE', '%' . $request->input('number') . '%')
+            $factures = Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
                 ->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
             if (!$factures) {
                 return response()->json([
@@ -199,21 +252,17 @@ class FiltreRechercheController extends Controller
                 ]
             ]);
         }
-
-        //pour l'agent bof
-        $factures = Facture::where('number', 'LIKE', '%' . $request->input('number') . '%')->paginate($nb, ['*'], 'page', $page);
-        foreach ($factures as $facture) {
-            $facture->etat_name = $facture->etat()->first()->name_etat;
-        }
-        return response()->json([
-            'success' => true,
-            'message' => 'voici vos factures',
-            'data' => [
-                'totalPages' => $factures->lastPage(),
-                'factures' => $factures->items(),
-            ]
-        ]);
     }
+
+
+
+
+
+
+
+
+
+
 
 
     //filtrage reclamation
@@ -269,7 +318,7 @@ class FiltreRechercheController extends Controller
 
 
 
-    function getFactureBof(Request $request)
+    function filtrageFactureBof(Request $request)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -335,7 +384,15 @@ class FiltreRechercheController extends Controller
 
 
 
-    function rechercheBofFacture(Request $request)
+
+
+
+
+
+
+
+
+    function rechercheFactureBof(Request $request)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -352,11 +409,39 @@ class FiltreRechercheController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
 
-        $factures = Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+
+        if ($request->input('cree_par', "tous") === "tous") {
+            $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->orWhereHas('fournisseur', function ($query) use ($request) {
+                    $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
+                })
+                ->where('type', $request->input('type', '3WM'))
+                ->where('etat_id', $request->input('etat', 1))->paginate($nb, ['*'], 'page', $page);
+        } elseif ($request->input('cree_par', "tous") === "moi") {
+            $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->where('type', $request->input('type', '3WM'))
+                ->where('etat_id', $request->input('etat', 1))
+                ->where('agent_bof_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+        } elseif ($request->input('cree_par', "tous") === "fournisseur") {
+            $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->orWhereHas('fournisseur', function ($query) use ($request) {
+                    $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
+                })
+                ->where('type', $request->input('type', '3WM'))
+                ->where('etat_id', $request->input('etat', 1))
+                ->where('fournisseur_id', '!=', null)->paginate($nb, ['*'], 'page', $page);
+        } elseif ($request->input('cree_par', "tous") === "agent bof") {
+            $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->where('type', $request->input('type', '3WM'))
+                ->where('etat_id', $request->input('etat', 1))
+                ->where('agent_bof_id', '!=', null)->paginate($nb, ['*'], 'page', $page);
+        }
+
+        /*$factures = Facture::where('number', 'LIKE', '%' . "FAC3" . '%')
             ->orWhereHas('fournisseur', function ($query) use ($request) {
                 $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
             })
-            ->paginate($nb, ['*'], 'page', $page);
+            ->paginate($nb, ['*'], 'page', $page);*/
 
         return response()->json([
             'success' => true,

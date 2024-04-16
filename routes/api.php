@@ -108,10 +108,12 @@ Route::controller(BordoreauConsultation::class)->group(function () {
 });
 
 Route::controller(FiltreRechercheController::class)->group(function () {
-    Route::get('agentBof/factures', 'getFactureBof')->middleware('jwt.auth');
-    Route::get('agentBof/facture/recherche', 'rechercheBofFacture')->middleware('jwt.auth');
-    Route::get('/rechercheRec', 'rechercheRec')->middleware('jwt.auth'); //done
-    Route::get('/rechercheIN', 'rechercheFacture')->middleware('jwt.auth'); //done
+    Route::get('/filtrageFactureBof', 'filtrageFactureBof')->middleware('jwt.auth');
+    Route::get('/rechercheFactureBof', 'rechercheFactureBof')->middleware('jwt.auth');
+    Route::get('/rechercheRec', 'rechercheRec')->middleware('jwt.auth');
+    Route::get('/rechercheIN', 'rechercheFactureFournisseur')->middleware('jwt.auth'); // à éléminer
+    Route::get('/rechercheFactureFournisseur', 'rechercheFactureFournisseur')->middleware('jwt.auth');
+    Route::get('/filtrageFactureFournisseur', 'filtrageFactureFournisseur')->middleware('jwt.auth');
     Route::get('/recherchePoFournisseur', 'recherchePoFournisseur')->middleware('jwt.auth');
     Route::get('/recherchePoBof', 'recherchePoBof')->middleware('jwt.auth');
     Route::get('/filtragePoFournisseur', 'filtragePoFournisseur')->middleware('jwt.auth');
