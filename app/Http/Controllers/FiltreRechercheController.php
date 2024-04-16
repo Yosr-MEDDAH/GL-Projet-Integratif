@@ -25,7 +25,7 @@ class FiltreRechercheController extends Controller
                 $purOrders = BonDeCommande::where('hasInvoice', 1)->where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
             } elseif ($request->input('FacturePresente', 'tous') === 'non-possède') {
                 $purOrders = BonDeCommande::where('hasInvoice', 0)->where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
-            } elseif ($request->input('FacturePresente', 'tous')) {
+            } elseif ($request->input('FacturePresente', 'tous') === 'tous') {
                 $purOrders = BonDeCommande::where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
             }
             return response()->json([
@@ -66,7 +66,7 @@ class FiltreRechercheController extends Controller
             $purOrders = BonDeCommande::where('hasInvoice', 1)->paginate($nb, ['*'], 'page', $page);
         } elseif ($request->input('FacturePresente', 'tous') === 'non-possède') {
             $purOrders = BonDeCommande::where('hasInvoice', 0)->paginate($nb, ['*'], 'page', $page);
-        } elseif ($request->input('FacturePresente', 'tous')) {
+        } elseif ($request->input('FacturePresente', 'tous') === 'tous') {
             $purOrders = BonDeCommande::paginate($nb, ['*'], 'page', $page);
         }
         return response()->json([
@@ -181,28 +181,15 @@ class FiltreRechercheController extends Controller
             ], 403); // 403 accés refusé
         }
 
-        /*$messages = [
-            'type_facture.required' => 'Le type de facture est requis.',
-            'etat.required' => 'L\'état de la facture est requis.',
-        ];
-
-
-        $validator = Validator::make($request->all(), [
-            'type_facture' => 'string',
-            'etat' => 'numeric',
-        ], $messages);
-
-
-        if ($validator->fails()) {
-            return response()->json([
-                'errors' => $validator->errors()
-            ], 422);
-        }*/
-
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
 
-        $factures = Facture::where('etat_id', $request->input('etat', 1))->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);// obligatoire etat envoyé avec request (car ca donne toujeours les factures en attente)
+        if ($request->has('etat')) {
+            $factures = Facture::where('etat_id', $request->input('etat'))->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+        } else {
+            $factures = Facture::where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+            // obligatoire etat envoyé avec request (car ca donne toujeours les factures en attente)
+        }
         return response()->json([
             'success' => false,
             'message' => "les factures",
@@ -267,7 +254,7 @@ class FiltreRechercheController extends Controller
 
     //filtrage reclamation
 
-    function rechercheRec(Request $request)
+    function filtrageReclamationFournisseur(Request $request)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -275,7 +262,43 @@ class FiltreRechercheController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('numFacture') . '%')
+            if ($request->input('etat', 'tous') === 'En Attente') {
+                $reclamations = Reclamation::where('etat', 'En Attente')->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat', 'tous') === 'Recu') {
+                $reclamations = Reclamation::where('etat', 'Recu')->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat', 'tous') === 'tous') {
+                $reclamations = Reclamation::where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'voici vos bons de commandes',
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'purOrders' => $reclamations->items(),
+                ]
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+    function rechercheReclamationFournisseur(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
                 ->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
             if (!$reclamations) {
                 return response()->json([
@@ -284,9 +307,6 @@ class FiltreRechercheController extends Controller
                     'data' => [],
                 ]);
             }
-            /* foreach ($purOrders as $facture) {
-                $facture->etat_name = $facture->etat()->first()->name_etat;
-            }*/
             return response()->json([
                 'success' => true,
                 'message' => 'voici vos réclamtions',
@@ -296,19 +316,82 @@ class FiltreRechercheController extends Controller
                 ]
             ]);
         }
+    }
 
-        //pour l'agent bof voir seulement les réclamation qui ne sont pas traitées
-        $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('numFacture') . '%')
-            ->where('etat', '=', "En Attente")->paginate($nb, ['*'], 'page', $page);
-        /*foreach ($purOrders as $facture) {
-            $facture->etat_name = $facture->etat()->first()->name_etat;
-        }*/
+
+
+
+
+
+
+
+    function filtrageReclamationBof(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 2) {
+            if ($request->input('etat', 'En Attente') === 'En Attente') {
+                $reclamations = Reclamation::where('etat', 'En Attente')->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat', 'En Attente') === 'Recu') {
+                $reclamations = Reclamation::where('etat', 'Recu')->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat', 'En Attente') === 'tous') {
+                $reclamations = Reclamation::paginate($nb, ['*'], 'page', $page);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'voici vos bons de commandes',
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'purOrders' => $reclamations->items(),
+                ]
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    function rechercheReclamationBof(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
+            ->orWhere('idFiscale', $request->input('search'))->paginate($nb, ['*'], 'page', $page);
+
+
         return response()->json([
             'success' => true,
-            'message' => 'voici vos réclamtions',
+            'message' => 'voici vos bons de commandes',
             'data' => [
                 'totalPages' => $reclamations->lastPage(),
-                'réclamtions' => $reclamations->items(),
+                'purOrders' => $reclamations->items(),
             ]
         ]);
     }
