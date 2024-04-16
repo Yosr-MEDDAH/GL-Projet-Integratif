@@ -9,6 +9,8 @@ use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
 use App\Http\Controllers\FactureExportController;
 use App\Http\Controllers\FilterController;
+use App\Http\Controllers\FilterRechercheController;
+use App\Http\Controllers\FiltreRechercheController;
 use App\Http\Controllers\FournisseurAccessController;
 use App\Http\Controllers\InfosController;
 use App\Http\Controllers\ReclamationController;
@@ -63,7 +65,6 @@ Route::controller(FactureController::class)->prefix('facture')->group(function (
 Route::controller(FactureConsultation::class)->group(function () {
     Route::get('/facture', 'getInvoice')->middleware('jwt.auth');
     Route::get('/factures', 'getInvoices')->middleware('jwt.auth');
-    Route::get('/rechercheIN', 'rechercheFacture')->middleware('jwt.auth');
     Route::get('/storage/userUploads/pdf/invoice/{date}/{fileName}', 'getFileInvoice')->middleware('jwt.auth');
 });
 
@@ -75,7 +76,6 @@ Route::controller(ReclamationController::class)->group(function () {
     Route::get('/reclamations', 'getAllReclamation')->middleware('jwt.auth');
     Route::get('/reclamation', 'getReclamation')->middleware('jwt.auth');
     Route::delete('/reclamation/delete', 'deleteReclamation')->middleware('jwt.auth');
-    Route::get('/rechercheRec', 'rechercheRec')->middleware('jwt.auth');
     Route::get('/reclamationsSpec', 'getReclamationSpec')->middleware('jwt.auth');
     Route::get('/users/{userID}/userUploads/reclamation/{fileName}', 'getFileReclamation')->middleware('jwt.auth');
 });
@@ -84,7 +84,6 @@ Route::controller(BonDeCommandeConsultation::class)->group(function () {
     Route::get('/purchaseOrders', 'getAllPo')->middleware('jwt.auth');
     Route::get('/purchaseOrdersNumbers', 'getAllPoNumbers')->middleware('jwt.auth');
     Route::get('/purchaseOrder', 'getPo')->middleware('jwt.auth');
-    Route::get('/recherchePO', 'recherchePo')->middleware('jwt.auth');
 });
 
 
@@ -108,9 +107,16 @@ Route::controller(BordoreauConsultation::class)->group(function () {
     Route::get('Bordoreau/listFacture', 'getBordoreauListFacture')->middleware('jwt.auth');
 });
 
-Route::controller(FilterController::class)->group(function () {
+Route::controller(FiltreRechercheController::class)->group(function () {
     Route::get('agentBof/factures', 'getFactureBof')->middleware('jwt.auth');
-    Route::get('agentBof/recherche', 'rechercheBof')->middleware('jwt.auth');
+    Route::get('agentBof/facture/recherche', 'rechercheBofFacture')->middleware('jwt.auth');
+    Route::get('/rechercheRec', 'rechercheRec')->middleware('jwt.auth'); //done
+    Route::get('/rechercheIN', 'rechercheFacture')->middleware('jwt.auth'); //done
+    Route::get('/recherchePoFournisseur', 'recherchePoFournisseur')->middleware('jwt.auth');
+    Route::get('/recherchePoBof', 'recherchePoBof')->middleware('jwt.auth');
+    Route::get('/filtragePoFournisseur', 'filtragePoFournisseur')->middleware('jwt.auth');
+    Route::get('/filtragePoFournisseur', 'filtragePoFournisseur')->middleware('jwt.auth');
+    Route::get('/filtragePoBof', 'filtragePoBof')->middleware('jwt.auth');
 });
 
 Route::controller(AdministrateurController::class)->group(function () {

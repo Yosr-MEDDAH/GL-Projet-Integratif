@@ -113,56 +113,6 @@ class FactureConsultation extends Controller
         ]);
     }
 
-    function rechercheFacture(Request $request)
-    {
-        $user = JWTAuth::user();
-        $role = $user->role()->first();
-
-
-
-        $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
-        if ($role->id === 3) {
-            $factures = Facture::where('number', 'LIKE', '%' . $request->input('number') . '%')
-                ->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
-            if (!$factures) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "cette facture n'existe pas",
-                    'data' => [],
-                ]);
-            }
-            foreach ($factures as $facture) {
-                $facture->etat_name = $facture->etat()->first()->name_etat;
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'voici vos factures',
-                'data' => [
-                    'totalPages' => $factures->lastPage(),
-                    'factures' => $factures->items(),
-                ]
-            ]);
-        }
-
-        //pour l'agent bof
-        $factures = Facture::where('number', 'LIKE', '%' . $request->input('number') . '%')->paginate($nb, ['*'], 'page', $page);
-        foreach ($factures as $facture) {
-            $facture->etat_name = $facture->etat()->first()->name_etat;
-        }
-        return response()->json([
-            'success' => true,
-            'message' => 'voici vos factures',
-            'data' => [
-                'totalPages' => $factures->lastPage(),
-                'factures' => $factures->items(),
-            ]
-        ]);
-    }
-
-
-
-
     function getFileInvoice(Request $request, $date, $fileName)
     {
         $user = JWTAuth::user();

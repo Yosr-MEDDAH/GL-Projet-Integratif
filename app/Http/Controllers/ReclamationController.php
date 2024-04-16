@@ -251,56 +251,6 @@ class ReclamationController extends Controller
         ]);
     }
 
-
-
-    function rechercheRec(Request $request)
-    {
-        $user = JWTAuth::user();
-        $role = $user->role()->first();
-
-        $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
-        if ($role->id === 3) {
-            $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('numFacture') . '%')
-                ->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
-            if (!$reclamations) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "cette réclamtion n'existe pas",
-                    'data' => [],
-                ]);
-            }
-            /* foreach ($purOrders as $facture) {
-                $facture->etat_name = $facture->etat()->first()->name_etat;
-            }*/
-            return response()->json([
-                'success' => true,
-                'message' => 'voici vos réclamtions',
-                'data' => [
-                    'totalPages' => $reclamations->lastPage(),
-                    'réclamtions' => $reclamations->items(),
-                ]
-            ]);
-        }
-
-        //pour l'agent bof voir seulement les réclamation qui ne sont pas traitées
-        $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('numFacture') . '%')
-            ->where('etat', '=', "En Attente")->paginate($nb, ['*'], 'page', $page);
-        /*foreach ($purOrders as $facture) {
-            $facture->etat_name = $facture->etat()->first()->name_etat;
-        }*/
-        return response()->json([
-            'success' => true,
-            'message' => 'voici vos réclamtions',
-            'data' => [
-                'totalPages' => $reclamations->lastPage(),
-                'réclamtions' => $reclamations->items(),
-            ]
-        ]);
-    }
-
-
-
     function getReclamationSpec(Request $request)
     {
         $user = JWTAuth::user();
