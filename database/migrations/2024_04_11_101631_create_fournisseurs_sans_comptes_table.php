@@ -16,10 +16,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('phone');
-            $table->integer('idErp')->nullable();
+            $table->integer('idErp')->nullable();//
             $table->string('idFiscale')->nullable();
-            $table->string('adress')->nullable();
-            $table->string('nationnalites')->nullable();
+            $table->string('adress')->nullable();//
+            $table->string('nationnalites')->nullable();//
             $table->timestamps();
         });
     }

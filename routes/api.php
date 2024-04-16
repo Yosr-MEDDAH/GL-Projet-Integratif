@@ -98,9 +98,9 @@ Route::controller(ConfigurationController::class)->group(function () {
 });
 
 Route::controller(FournisseurAccessController::class)->group(function () {
-    Route::post('create/account', 'accessFournisseur')->middleware('jwt.auth');
+    Route::post('/approuverFournisseur', 'accessFournisseur')->middleware('jwt.auth');
     Route::put('update/email/adress', 'updateEmail')->middleware('jwt.auth');
-    Route::get('consult/fournisseurs', 'getFournisseurSansCompte')->middleware('jwt.auth');
+    Route::get('/fournisseursSansCompte', 'getFournisseurSansCompte')->middleware('jwt.auth');
 });
 
 Route::controller(BordoreauConsultation::class)->group(function () {

@@ -13,6 +13,7 @@ class FiltreRechercheController extends Controller
 {
 
     //filtrage bon de commande
+    // hasInvoice = 0 ou 1 
     function filtragePoFournisseur(Request $request)
     {
         $user = JWTAuth::user();

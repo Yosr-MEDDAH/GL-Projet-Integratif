@@ -174,7 +174,7 @@ class FournisseurAccessController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
 
-        $fournisseurs = FournisseursSansCompte::paginate($nb, ['*'], 'page', $page);
+        $fournisseurs = FournisseursSansCompte::all('name', 'email', 'phone', 'idFiscale')->paginate($nb, ['*'], 'page', $page);
 
 
         return response()->json([
