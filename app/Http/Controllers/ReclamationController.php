@@ -131,7 +131,7 @@ class ReclamationController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $reclamations = Reclamation::where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+            $reclamations = Reclamation::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
             return response()->json([
                 'success' => true,
                 'message' => "voici les réclamtions",
@@ -143,7 +143,7 @@ class ReclamationController extends Controller
         }
 
         //pour agent bof
-        $reclamations = Reclamation::paginate($nb, ['*'], 'page', $page);
+        $reclamations = Reclamation::orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
         return response()->json([
             'success' => true,
             'message' => "voici les réclamations",

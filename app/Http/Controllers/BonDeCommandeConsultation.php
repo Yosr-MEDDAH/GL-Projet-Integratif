@@ -26,7 +26,7 @@ class BonDeCommandeConsultation extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $purOrders = BonDeCommande::where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            $purOrders = BonDeCommande::where('four_idFiscale', $user->idFiscale)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
 
             return response()->json([
                 'success' => true,
@@ -40,7 +40,7 @@ class BonDeCommandeConsultation extends Controller
 
 
         // pour les agents bof qui sont capables d'ajouter des factures
-        $totalPurOrders = BonDeCommande::paginate($nb, ['*'], 'page', $page);
+        $totalPurOrders = BonDeCommande::orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
         return response()->json([
             'success' => true,
             'message' => "votre bons de commande",

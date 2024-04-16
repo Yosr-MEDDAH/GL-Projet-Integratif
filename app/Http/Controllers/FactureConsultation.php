@@ -83,7 +83,7 @@ class FactureConsultation extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $factures = Facture::where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+            $factures = Facture::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
             foreach ($factures as $facture) {
                 $facture->etat_name = $facture->etat()->first()->name_etat;
             }
@@ -97,9 +97,9 @@ class FactureConsultation extends Controller
             ]);
         }
         //récupération des factures crée avec un agent bof spécifique
-        $factures = Facture::where('agent_bof_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+        $factures = Facture::where('agent_bof_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
         $totalPages = $factures->lastPage();
-        $factures = Facture::where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+        //$factures = Facture::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page); à éliminer
         foreach ($factures as $facture) {
             $facture->etat_name = $facture->etat()->first()->name_etat;
         }

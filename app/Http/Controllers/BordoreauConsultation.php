@@ -26,7 +26,7 @@ class BordoreauConsultation extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
 
-        $bordoreaux = Bordereau::select('date_sent', 'folder', 'status', 'nature', 'reference')->paginate($nb, ['*'], 'page', $page);
+        $bordoreaux = Bordereau::select('date_sent', 'folder', 'status', 'nature', 'reference')->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
 
         return response()->json([
             'success' => true,
@@ -62,7 +62,7 @@ class BordoreauConsultation extends Controller
         }
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
-        $listFacture = Facture::where('borderau_id', $request->input('id'))->paginate($nb, ['*'], 'page', $page);
+        $listFacture = Facture::where('borderau_id', $request->input('id'))->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
 
         return response()->json([
             'success' => true,

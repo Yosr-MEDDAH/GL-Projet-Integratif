@@ -156,4 +156,8 @@ class FournisseurAccessController extends Controller
             'data' => [],
         ]);
     }
+
+    function getFournisseurSansCompte (Request $request) {
+        
+    }
 }
