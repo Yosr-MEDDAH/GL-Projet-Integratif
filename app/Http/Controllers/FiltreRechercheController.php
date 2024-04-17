@@ -208,7 +208,7 @@ class FiltreRechercheController extends Controller
 
 
 
-    function filtrageFactureBof(Request $request)
+    function filtrageFactureBof(Request $request) //done (écriture incorrecte dans les params)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -243,10 +243,7 @@ class FiltreRechercheController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
 
-        if ($request->input('cree_par', "tous") === "tous") {
-            $factures = Facture::where('type', $request->input('type', '3WM'))
-                ->where('etat_id', $request->input('etat', 1))->paginate($nb, ['*'], 'page', $page);
-        } elseif ($request->input('cree_par', "tous") === "moi") {
+        if ($request->input('cree_par', "tous") === "moi") {
             $factures = Facture::where('type', $request->input('type', '3WM'))
                 ->where('etat_id', $request->input('etat', 1))
                 ->where('agent_bof_id', $user->id)->paginate($nb, ['*'], 'page', $page);
@@ -258,6 +255,9 @@ class FiltreRechercheController extends Controller
             $factures = Facture::where('type', $request->input('type', '3WM'))
                 ->where('etat_id', $request->input('etat', 1))
                 ->where('agent_bof_id', '!=', null)->paginate($nb, ['*'], 'page', $page);
+        } else {
+            $factures = Facture::where('type', $request->input('type', '3WM'))
+                ->where('etat_id', $request->input('etat', 1))->paginate($nb, ['*'], 'page', $page);
         }
         return response()->json([
             'success' => false,
@@ -280,7 +280,7 @@ class FiltreRechercheController extends Controller
 
 
 
-    function rechercheFactureFournisseur(Request $request)
+    function rechercheFactureFournisseur(Request $request) //done
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -317,9 +317,7 @@ class FiltreRechercheController extends Controller
 
 
 
-
-
-    function rechercheFactureBof(Request $request)
+    function rechercheFactureBof(Request $request) //done (exemple par 3)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -405,7 +403,7 @@ class FiltreRechercheController extends Controller
                 'message' => 'voici vos bons de commandes',
                 'data' => [
                     'totalPages' => $reclamations->lastPage(),
-                    'purOrders' => $reclamations->items(),
+                    'reclamations' => $reclamations->items(),
                 ]
             ]);
         }
@@ -434,7 +432,7 @@ class FiltreRechercheController extends Controller
                 'message' => 'voici vos bons de commandes',
                 'data' => [
                     'totalPages' => $reclamations->lastPage(),
-                    'purOrders' => $reclamations->items(),
+                    'reclamations' => $reclamations->items(),
                 ]
             ]);
         }
@@ -451,7 +449,7 @@ class FiltreRechercheController extends Controller
 
 
 
-    function rechercheReclamationFournisseur(Request $request)
+    function rechercheReclamationFournisseur(Request $request) // done
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -473,7 +471,7 @@ class FiltreRechercheController extends Controller
                 'message' => 'voici vos réclamtions',
                 'data' => [
                     'totalPages' => $reclamations->lastPage(),
-                    'réclamtions' => $reclamations->items(),
+                    'reclamations' => $reclamations->items(),
                 ]
             ]);
         }
@@ -513,7 +511,7 @@ class FiltreRechercheController extends Controller
             'message' => 'voici vos bons de commandes',
             'data' => [
                 'totalPages' => $reclamations->lastPage(),
-                'purOrders' => $reclamations->items(),
+                'reclamations' => $reclamations->items(),
             ]
         ]);
     }
