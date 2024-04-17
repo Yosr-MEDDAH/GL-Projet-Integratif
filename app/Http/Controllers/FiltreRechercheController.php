@@ -552,10 +552,10 @@ class FiltreRechercheController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'voici vos bons de commandes',
+            'message' => 'les fournisseurs sans compte',
             'data' => [
                 'totalPages' => $fournisseurs->lastPage(),
-                'reclamations' => $fournisseurs->items(),
+                'fournisseurs' => $fournisseurs->items(),
             ]
         ]);
     }
@@ -583,10 +583,10 @@ class FiltreRechercheController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'voici vos bons de commandes',
+            'message' => 'les fournisseurs avec comptes:',
             'data' => [
                 'totalPages' => $fournisseurs->lastPage(),
-                'reclamations' => $fournisseurs->items(),
+                'fournisseurs' => $fournisseurs->items(),
             ]
         ]);
     }
