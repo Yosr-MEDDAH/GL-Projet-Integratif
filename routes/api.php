@@ -125,6 +125,8 @@ Route::controller(FiltreRechercheController::class)->group(function () {
     Route::get('/filtragePoFournisseur', 'filtragePoFournisseur')->middleware('jwt.auth');
     Route::get('/filtragePoFournisseur', 'filtragePoFournisseur')->middleware('jwt.auth');
     Route::get('/filtragePoBof', 'filtragePoBof')->middleware('jwt.auth');
+    Route::get('/rechercheFournisseurSansCompte', 'rechercheFournisseurSansCompte')->middleware('jwt.auth');
+    Route::get('/rechercheFournisseurAvecCompte', 'rechercheFournisseurAvecCompte')->middleware('jwt.auth');
 });
 
 Route::controller(AdministrateurController::class)->group(function () {

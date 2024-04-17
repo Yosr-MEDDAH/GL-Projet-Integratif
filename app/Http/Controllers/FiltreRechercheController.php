@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\BonDeCommande;
 use App\Models\Facture;
+use App\Models\Fournisseur;
+use App\Models\FournisseursSansCompte;
 use App\Models\Reclamation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -515,4 +517,38 @@ class FiltreRechercheController extends Controller
             ]
         ]);
     }
+
+
+
+    function rechercheFournisseurSansCompte(Request $request) // done
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $fournisseurs = FournisseursSansCompte::where('idFiscale', 'LIKE', '%' . $request->input('search') . '%')
+            ->paginate($nb, ['*'], 'page', $page);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'voici vos bons de commandes',
+            'data' => [
+                'totalPages' => $fournisseurs->lastPage(),
+                'reclamations' => $fournisseurs->items(),
+            ]
+        ]);
+    }
+    
 }
