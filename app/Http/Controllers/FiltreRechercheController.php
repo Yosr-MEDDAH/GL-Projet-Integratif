@@ -12,9 +12,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class FiltreRechercheController extends Controller
 {
 
-    //filtrage bon de commande
-    // hasInvoice = 0 ou 1 
-    function filtragePoFournisseur(Request $request)
+    function filtragePoFournisseur(Request $request) //done
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -22,11 +20,11 @@ class FiltreRechercheController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            if ($request->input('FacturePresente', 'tous') === 'possède') {
+            if ($request->input('hasInvoice') === 1) {
                 $purOrders = BonDeCommande::where('hasInvoice', 1)->where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
-            } elseif ($request->input('FacturePresente', 'tous') === 'non-possède') {
+            } elseif ($request->input('hasInvoice') === 0) {
                 $purOrders = BonDeCommande::where('hasInvoice', 0)->where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
-            } elseif ($request->input('FacturePresente', 'tous') === 'tous') {
+            } else {
                 $purOrders = BonDeCommande::where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
             }
             return response()->json([
@@ -45,7 +43,7 @@ class FiltreRechercheController extends Controller
 
 
 
-    function filtragePoBof(Request $request)
+    function filtragePoBof(Request $request) //done
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -63,11 +61,11 @@ class FiltreRechercheController extends Controller
         $nb = $request->query('nb', 10);
 
 
-        if ($request->input('FacturePresente', 'tous') === 'possède') {
+        if ($request->input('hasInvoice') === 1) {
             $purOrders = BonDeCommande::where('hasInvoice', 1)->paginate($nb, ['*'], 'page', $page);
-        } elseif ($request->input('FacturePresente', 'tous') === 'non-possède') {
+        } elseif ($request->input('hasInvoice') === 0) {
             $purOrders = BonDeCommande::where('hasInvoice', 0)->paginate($nb, ['*'], 'page', $page);
-        } elseif ($request->input('FacturePresente', 'tous') === 'tous') {
+        } else {
             $purOrders = BonDeCommande::paginate($nb, ['*'], 'page', $page);
         }
         return response()->json([
@@ -89,7 +87,7 @@ class FiltreRechercheController extends Controller
 
 
 
-    function recherchePoFournisseur(Request $request)
+    function recherchePoFournisseur(Request $request) //done
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -123,7 +121,7 @@ class FiltreRechercheController extends Controller
 
 
 
-    function recherchePoBof(Request $request)
+    function recherchePoBof(Request $request) //done
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -136,18 +134,23 @@ class FiltreRechercheController extends Controller
             ], 403); // 403 accés refusé
         }
 
-
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
-
-        // $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')->orWhere('four_idFiscale', $request->input('search'))->paginate($nb, ['*'], 'page', $page);
-        if ($request->input('FacturePresente', 'tous') === 'possède') {
-            $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')->orWhere('four_idFiscale', $request->input('search'))
-                ->where('hasInvoice', 1)->paginate($nb, ['*'], 'page', $page);
-        } elseif ($request->input('FacturePresente', 'tous') === 'non-possède') {
-            $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')->orWhere('four_idFiscale', $request->input('search'))
-                ->where('hasInvoice', 0)->paginate($nb, ['*'], 'page', $page);
-        } elseif ($request->input('FacturePresente', 'tous')) {
+        if ($request->input('hasInvoice') === 1) {
+            $purOrders = BonDeCommande::where(function ($query) use ($request) {
+                $query->where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
+                    ->orWhere('four_idFiscale', $request->input('search'));
+            })
+                ->where('hasInvoice', 1)
+                ->paginate($nb, ['*'], 'page', $page);
+        } elseif ($request->input('hasInvoice') === 0) {
+            $purOrders = BonDeCommande::where(function ($query) use ($request) {
+                $query->where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
+                    ->orWhere('four_idFiscale', $request->input('search'));
+            })
+                ->where('hasInvoice', 0)
+                ->paginate($nb, ['*'], 'page', $page);
+        } else {
             $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')->orWhere('four_idFiscale', $request->input('search'))
                 ->paginate($nb, ['*'], 'page', $page);
         }
@@ -166,8 +169,6 @@ class FiltreRechercheController extends Controller
 
 
 
-
-    //filtrage facture fournisseur
 
     function filtrageFactureFournisseur(Request $request)
     {
@@ -201,201 +202,6 @@ class FiltreRechercheController extends Controller
         ]);
     }
 
-
-
-
-
-
-
-
-
-
-
-    function rechercheFactureFournisseur(Request $request)
-    {
-        $user = JWTAuth::user();
-        $role = $user->role()->first();
-
-        $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
-        if ($role->id === 3) {
-            $factures = Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
-                ->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
-            if (!$factures) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "cette facture n'existe pas",
-                    'data' => [],
-                ]);
-            }
-            foreach ($factures as $facture) {
-                $facture->etat_name = $facture->etat()->first()->name_etat;
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'voici vos factures',
-                'data' => [
-                    'totalPages' => $factures->lastPage(),
-                    'factures' => $factures->items(),
-                ]
-            ]);
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-    //filtrage reclamation
-
-    function filtrageReclamationFournisseur(Request $request)
-    {
-        $user = JWTAuth::user();
-        $role = $user->role()->first();
-
-        $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
-        if ($role->id === 3) {
-            if ($request->input('etat', 'tous') === 'En Attente') {
-                $reclamations = Reclamation::where('etat', 'En Attente')->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
-            } elseif ($request->input('etat', 'tous') === 'Recu') {
-                $reclamations = Reclamation::where('etat', 'Recu')->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
-            } elseif ($request->input('etat', 'tous') === 'tous') {
-                $reclamations = Reclamation::where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'voici vos bons de commandes',
-                'data' => [
-                    'totalPages' => $reclamations->lastPage(),
-                    'purOrders' => $reclamations->items(),
-                ]
-            ]);
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-    function rechercheReclamationFournisseur(Request $request)
-    {
-        $user = JWTAuth::user();
-        $role = $user->role()->first();
-
-        $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
-        if ($role->id === 3) {
-            $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
-                ->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
-            if (!$reclamations) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "cette réclamtion n'existe pas",
-                    'data' => [],
-                ]);
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'voici vos réclamtions',
-                'data' => [
-                    'totalPages' => $reclamations->lastPage(),
-                    'réclamtions' => $reclamations->items(),
-                ]
-            ]);
-        }
-    }
-
-
-
-
-
-
-
-
-    function filtrageReclamationBof(Request $request)
-    {
-        $user = JWTAuth::user();
-        $role = $user->role()->first();
-
-        $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
-        if ($role->id === 2) {
-            if ($request->input('etat', 'En Attente') === 'En Attente') {
-                $reclamations = Reclamation::where('etat', 'En Attente')->paginate($nb, ['*'], 'page', $page);
-            } elseif ($request->input('etat', 'En Attente') === 'Recu') {
-                $reclamations = Reclamation::where('etat', 'Recu')->paginate($nb, ['*'], 'page', $page);
-            } elseif ($request->input('etat', 'En Attente') === 'tous') {
-                $reclamations = Reclamation::paginate($nb, ['*'], 'page', $page);
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'voici vos bons de commandes',
-                'data' => [
-                    'totalPages' => $reclamations->lastPage(),
-                    'purOrders' => $reclamations->items(),
-                ]
-            ]);
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    function rechercheReclamationBof(Request $request)
-    {
-        $user = JWTAuth::user();
-        $role = $user->role()->first();
-
-        if ($role->id !== 2) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
-                'data' => []
-            ], 403); // 403 accés refusé
-        }
-
-
-        $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
-
-        $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
-            ->orWhere('idFiscale', $request->input('search'))->paginate($nb, ['*'], 'page', $page);
-
-
-        return response()->json([
-            'success' => true,
-            'message' => 'voici vos bons de commandes',
-            'data' => [
-                'totalPages' => $reclamations->lastPage(),
-                'purOrders' => $reclamations->items(),
-            ]
-        ]);
-    }
 
 
 
@@ -453,9 +259,6 @@ class FiltreRechercheController extends Controller
                 ->where('etat_id', $request->input('etat', 1))
                 ->where('agent_bof_id', '!=', null)->paginate($nb, ['*'], 'page', $page);
         }
-
-
-
         return response()->json([
             'success' => false,
             'message' => "les factures",
@@ -467,6 +270,46 @@ class FiltreRechercheController extends Controller
     }
 
 
+
+
+
+
+
+
+
+
+
+
+    function rechercheFactureFournisseur(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $factures = Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+            if (!$factures) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "cette facture n'existe pas",
+                    'data' => [],
+                ]);
+            }
+            foreach ($factures as $facture) {
+                $facture->etat_name = $facture->etat()->first()->name_etat;
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'voici vos factures',
+                'data' => [
+                    'totalPages' => $factures->lastPage(),
+                    'factures' => $factures->items(),
+                ]
+            ]);
+        }
+    }
 
 
 
@@ -533,6 +376,144 @@ class FiltreRechercheController extends Controller
             "data" => [
                 'totalPages' => $factures->lastPage(),
                 'factures' => $factures->items(),
+            ]
+        ]);
+    }
+
+
+
+
+    //filtrage reclamation
+
+    function filtrageReclamationFournisseur(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            if ($request->input('etat', 'tous') === 'En Attente') {
+                $reclamations = Reclamation::where('etat', 'En Attente')->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat', 'tous') === 'Recu') {
+                $reclamations = Reclamation::where('etat', 'Recu')->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat', 'tous') === 'tous') {
+                $reclamations = Reclamation::where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'voici vos bons de commandes',
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'purOrders' => $reclamations->items(),
+                ]
+            ]);
+        }
+    }
+
+
+
+
+    function filtrageReclamationBof(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 2) {
+            if ($request->input('etat', 'En Attente') === 'En Attente') {
+                $reclamations = Reclamation::where('etat', 'En Attente')->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat', 'En Attente') === 'Recu') {
+                $reclamations = Reclamation::where('etat', 'Recu')->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat', 'En Attente') === 'tous') {
+                $reclamations = Reclamation::paginate($nb, ['*'], 'page', $page);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'voici vos bons de commandes',
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'purOrders' => $reclamations->items(),
+                ]
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+    function rechercheReclamationFournisseur(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
+                ->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            if (!$reclamations) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "cette réclamtion n'existe pas",
+                    'data' => [],
+                ]);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'voici vos réclamtions',
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'réclamtions' => $reclamations->items(),
+                ]
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+    function rechercheReclamationBof(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
+            ->orWhere('idFiscale', $request->input('search'))->paginate($nb, ['*'], 'page', $page);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'voici vos bons de commandes',
+            'data' => [
+                'totalPages' => $reclamations->lastPage(),
+                'purOrders' => $reclamations->items(),
             ]
         ]);
     }
