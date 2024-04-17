@@ -98,8 +98,16 @@ class FiltreRechercheController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
-                ->where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            if ($request->input('hasInvoice') === 1) {
+                $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
+                    ->where('four_idFiscale', $user->idFiscale)->where('hasInvoice', 1)->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('hasInvoice') === 0) {
+                $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
+                    ->where('four_idFiscale', $user->idFiscale)->where('hasInvoice', 0)->paginate($nb, ['*'], 'page', $page);
+            } else {
+                $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
+                    ->where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            }
             if (!$purOrders) {
                 return response()->json([
                     'success' => false,
