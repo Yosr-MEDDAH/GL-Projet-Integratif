@@ -91,7 +91,7 @@ class FactureConsultation extends Controller
         if ($role->id === 3) {
             $factures = Facture::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
             foreach ($factures as $facture) {
-                $$etat = $facture->etat()->first();
+                $etat = $facture->etat()->first();
                 if ($etat === null || $etat->name_etat === null) {
                     $facture->etat = null;
                 } else {
