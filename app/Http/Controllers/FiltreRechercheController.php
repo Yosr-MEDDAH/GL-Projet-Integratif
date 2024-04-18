@@ -613,8 +613,16 @@ class FiltreRechercheController extends Controller
         $nb = $request->query('nb', 10);
         if ($request->input('search')) {
             $bordoreaux = Bordereau::whereDate('created_at', 'LIKE', '%' . $request->input('search') . '%')->paginate($nb, ['*'], 'page', $page);
+            foreach ($bordoreaux as $bordoreau) {
+                $factures = Facture::where("borderau_id", $bordoreau->id)->count();
+                $bordoreau->nombreFacture = $factures;
+            }
         } else {
             $bordoreaux = Bordereau::paginate($nb, ['*'], 'page', $page);
+            foreach ($bordoreaux as $bordoreau) {
+                $factures = Facture::where("borderau_id", $bordoreau->id)->count();
+                $bordoreau->nombreFacture = $factures;
+            }
         }
 
         return response()->json([
