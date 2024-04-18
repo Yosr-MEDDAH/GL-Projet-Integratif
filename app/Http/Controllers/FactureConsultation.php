@@ -25,6 +25,14 @@ class FactureConsultation extends Controller
             ]);
         }
 
+        $etat = $facture->etat()->first();
+        if ($etat === null || $etat->name_etat === null) {
+            $facture->etat = null;
+        } else {
+            $facture->etat = $etat->name_etat;
+        }
+
+
         if ($role->id === 3 && ($facture->fournisseur_id !== $user->id)) {
             return response()->json([
                 'success' => false,
@@ -37,21 +45,20 @@ class FactureConsultation extends Controller
             foreach ($piecesJointes as $piecesJointe) {
                 $piece_jointes[] = PieceJointeFacture::find($piecesJointe)->namePJ;
             }
+
             return response()->json([
                 'success' => true,
                 'message' => 'voici les informations de cette facture',
                 'data' => [
                     'facture' => $facture,
                     'etat_facture' => [
-                        'etat_id' => $facture->etat()->first()->id,
-                        'etat_name' => $facture->etat()->first()->name_etat,
+                        'etat_name' => $facture->etat,
                     ],
                     'pieces_jointes' => $piece_jointes,
                     'objet' => $facture->objetFacture->objet_name,
                 ]
             ]);
         }
-
 
         // pour l'agent bof
         return response()->json([
@@ -60,8 +67,7 @@ class FactureConsultation extends Controller
             'data' => [
                 'facture' => $facture,
                 'etat_facture' => [
-                    'etat_id' => $facture->etat()->first()->id,
-                    'etat_name' => $facture->etat()->first()->name_etat,
+                    'etat_name' => $facture->etat,
                 ]
             ]
         ]);
@@ -85,7 +91,12 @@ class FactureConsultation extends Controller
         if ($role->id === 3) {
             $factures = Facture::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
             foreach ($factures as $facture) {
-                $facture->etat_name = $facture->etat()->first()->name_etat;
+                $$etat = $facture->etat()->first();
+                if ($etat === null || $etat->name_etat === null) {
+                    $facture->etat = null;
+                } else {
+                    $facture->etat = $etat->name_etat;
+                }
             }
             return response()->json([
                 'success' => true,
@@ -101,7 +112,12 @@ class FactureConsultation extends Controller
         $totalPages = $factures->lastPage();
         //$factures = Facture::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page); à éliminer
         foreach ($factures as $facture) {
-            $facture->etat_name = $facture->etat()->first()->name_etat;
+            $etat = $facture->etat()->first();
+            if ($etat === null || $etat->name_etat === null) {
+                $facture->etat = null;
+            } else {
+                $facture->etat = $etat->name_etat;
+            }
         }
         return response()->json([
             'success' => true,

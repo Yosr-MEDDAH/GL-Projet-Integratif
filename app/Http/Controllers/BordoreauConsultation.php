@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Bordereau;
 use App\Models\Facture;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -66,15 +67,40 @@ class BordoreauConsultation extends Controller
         }
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
-        $listFacture = Facture::select()->where('borderau_id', $request->input('id'))->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
-
-        return response()->json([
-            'success' => true,
-            'message' => "les factures trouvées dans le bordoreau spécifié",
-            'data' => [
-                'totalPages' => $listFacture->lastPage(),
-                'factures' => $listFacture->items(),
-            ]
-        ]);
+        $listFacture = Facture::select('id', 'number', 'invoice_name', 'type', 'invoice_file_path', 'fournisseur_id', 'agent_bof_id', 'created_by', 'bon_de_commande_id', 'etat_id')
+            ->where('borderau_id', $request->input('id'))
+            ->orderBy('created_at', 'desc')
+            ->paginate($nb, ['*'], 'page', $page);
+        foreach ($listFacture as $facture) {
+            foreach ($listFacture as $facture) {
+                if ($facture->fournisseur_id !== null) {
+                    $user = User::select('name')->where('id', $facture->fournisseur_id)->first();
+                    $facture->nameCreatedBy = $user->name;
+                } else {
+                    $user = User::select('name')->where('id', $facture->agent_bof_id)->first();
+                    $facture->nameCreatedBy = $user->name;
+                }
+                $etat = $facture->etat()->first();
+                if ($etat === null || $etat->name_etat === null) {
+                    $facture->etat = null;
+                } else {
+                    $facture->etat = $etat->name_etat;
+                }
+                $bonDeCommande = $facture->bonDeCommande()->first();
+                if ($bonDeCommande === null || $bonDeCommande->num_commande === null) {
+                    $facture->numBonCommande = null;
+                } else {
+                    $facture->numBonCommande = $bonDeCommande->num_commande;
+                }
+            }
+            return response()->json([
+                'success' => true,
+                'message' => "les factures trouvées dans le bordoreau spécifié",
+                'data' => [
+                    'totalPages' => $listFacture->lastPage(),
+                    'factures' => $listFacture->items(),
+                ]
+            ]);
+        }
     }
 }

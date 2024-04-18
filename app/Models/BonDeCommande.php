@@ -17,4 +17,9 @@ class BonDeCommande extends Model
         'hasInvoice',
         'four_idFiscale',
     ];
+
+    public function facture()
+    {
+        return $this->hasOne(Facture::class);
+    }
 }
