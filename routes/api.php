@@ -105,8 +105,8 @@ Route::controller(FournisseurAccessController::class)->group(function () {
 });
 
 Route::controller(BordoreauConsultation::class)->group(function () {
-    Route::get('Bordoreaux', 'getAllBordoreau')->middleware('jwt.auth');
-    Route::get('Bordoreau/listFacture', 'getBordoreauListFacture')->middleware('jwt.auth');
+    Route::get('Bordereaux', 'getAllBordoreau')->middleware('jwt.auth');
+    Route::get('Bordereau/listFacture', 'getBordoreauListFacture')->middleware('jwt.auth');
 });
 
 Route::controller(FiltreRechercheController::class)->group(function () {
