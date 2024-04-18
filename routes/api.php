@@ -127,8 +127,8 @@ Route::controller(FiltreRechercheController::class)->group(function () {
     Route::get('/filtragePoBof', 'filtragePoBof')->middleware('jwt.auth');
     Route::get('/rechercheFournisseurSansCompte', 'rechercheFournisseurSansCompte')->middleware('jwt.auth');
     Route::get('/rechercheFournisseurAvecCompte', 'rechercheFournisseurAvecCompte')->middleware('jwt.auth');
-    Route::get('/rechercheBordoreau', 'rechercheBordoreau')->middleware('jwt.auth');
-    Route::get('/rechercheBordoreauListFacture', 'rechercheBordoreauListFacture')->middleware('jwt.auth');
+    Route::get('/rechercheBordereau', 'rechercheBordoreau')->middleware('jwt.auth');
+    Route::get('/rechercheBordereauListFacture', 'rechercheBordoreauListFacture')->middleware('jwt.auth');
 });
 
 Route::controller(AdministrateurController::class)->group(function () {
