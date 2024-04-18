@@ -674,7 +674,7 @@ class FiltreRechercheController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'les bordoreaux',
+            'message' => 'les factures',
             'data' => [
                 'totalPages' => $listFacture->lastPage(),
                 'factures' => $listFacture->items(),
