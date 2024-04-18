@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\BonDeCommande;
+use App\Models\Bordereau;
 use App\Models\Facture;
 use App\Models\Fournisseur;
 use App\Models\FournisseursSansCompte;
 use App\Models\Reclamation;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -587,6 +589,95 @@ class FiltreRechercheController extends Controller
             'data' => [
                 'totalPages' => $fournisseurs->lastPage(),
                 'fournisseurs' => $fournisseurs->items(),
+            ]
+        ]);
+    }
+
+
+
+    function rechercheBordoreau(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($request->input('search')) {
+            $bordoreaux = Bordereau::whereDate('created_at', 'LIKE', '%' . $request->input('search') . '%')->paginate($nb, ['*'], 'page', $page);
+        } else {
+            $bordoreaux = Bordereau::paginate($nb, ['*'], 'page', $page);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'les bordoreaux',
+            'data' => [
+                'totalPages' => $bordoreaux->lastPage(),
+                'bordoreaux' => $bordoreaux->items(),
+            ]
+        ]);
+    }
+
+    function rechercheBordoreauListFacture(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        $listFacture = Facture::select('id', 'number', 'invoice_name', 'type', 'invoice_file_path', 'fournisseur_id', 'agent_bof_id', 'created_by', 'bon_de_commande_id', 'etat_id')
+            ->where('number', 'LIKE', '%' . $request->input('search') . '%')
+            ->where('borderau_id', $request->input('id'))
+            ->orderBy('created_at', 'desc')
+            ->paginate($nb, ['*'], 'page', $page);
+        foreach ($listFacture as $facture) {
+            foreach ($listFacture as $facture) {
+                if ($facture->fournisseur_id !== null) {
+                    $user = User::select('name')->where('id', $facture->fournisseur_id)->first();
+                    $facture->nameCreatedBy = $user->name;
+                } else {
+                    $user = User::select('name')->where('id', $facture->agent_bof_id)->first();
+                    $facture->nameCreatedBy = $user->name;
+                }
+                $etat = $facture->etat()->first();
+                if ($etat === null || $etat->name_etat === null) {
+                    $facture->etat = null;
+                } else {
+                    $facture->etat = $etat->name_etat;
+                }
+                /*$bonDeCommande = $facture->bonDeCommande()->first();
+                if ($bonDeCommande === null || $bonDeCommande->num_commande === null) {
+                    $facture->numBonCommande = null;
+                } else {
+                    $facture->numBonCommande = $bonDeCommande->num_commande;
+                }*/
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'les bordoreaux',
+            'data' => [
+                'totalPages' => $listFacture->lastPage(),
+                'factures' => $listFacture->items(),
             ]
         ]);
     }

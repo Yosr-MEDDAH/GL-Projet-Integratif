@@ -34,13 +34,13 @@ class FactureController extends Controller
             }
 
             $pur = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
-            /*if (!$pur) {
+            if (!$pur) {
                 return response()->json([
                     'success' => false,
                     'message' => "vérifier votre numero du bon de commande",
                     'data' => [],
                 ]);
-            }*/ // vérifier si user posséde la possibilité de saisir un bon de commande ? !!!!!!!!!!!!!!!!!!!!!
+            } // vérifier si user posséde la possibilité de saisir un bon de commande ? !!!!!!!!!!!!!!!!!!!!!
             if (Facture::where('number', $request->input('number'))->first() || Facture::where('bon_de_commande_id', $pur->id)->first()) {
                 return response()->json([
                     'success' => false,
