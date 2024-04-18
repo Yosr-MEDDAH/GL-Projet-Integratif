@@ -98,10 +98,10 @@ class FiltreRechercheController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
-            if ($request->input('hasInvoice') === 1) {
+            if ($request->input('hasInvoice') === "1") {
                 $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
                     ->where('four_idFiscale', $user->idFiscale)->where('hasInvoice', 1)->paginate($nb, ['*'], 'page', $page);
-            } elseif ($request->input('hasInvoice') === 0) {
+            } elseif ($request->input('hasInvoice') === "0") {
                 $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
                     ->where('four_idFiscale', $user->idFiscale)->where('hasInvoice', 0)->paginate($nb, ['*'], 'page', $page);
             } else {
@@ -147,14 +147,14 @@ class FiltreRechercheController extends Controller
 
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
-        if ($request->input('hasInvoice') === 1) {
+        if ($request->input('hasInvoice') === "1") {
             $purOrders = BonDeCommande::where(function ($query) use ($request) {
                 $query->where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
                     ->orWhere('four_idFiscale', $request->input('search'));
             })
                 ->where('hasInvoice', 1)
                 ->paginate($nb, ['*'], 'page', $page);
-        } elseif ($request->input('hasInvoice') === 0) {
+        } elseif ($request->input('hasInvoice') === "0") {
             $purOrders = BonDeCommande::where(function ($query) use ($request) {
                 $query->where('num_commande', 'LIKE', '%' . $request->input('search') . '%')
                     ->orWhere('four_idFiscale', $request->input('search'));
