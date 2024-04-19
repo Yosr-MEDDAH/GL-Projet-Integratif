@@ -65,6 +65,15 @@ class ReclamationController extends Controller
             ]);
         }
 
+        $messages = [
+            'title.required' => 'Le titre est requis.',
+            'title.string' => 'Le titre doit être une chaîne de caractères.',
+            'title.max' => 'Le titre ne doit pas dépasser : 255 caractères',
+            'text.required' => 'Le texte est requis.',
+            'text.string' => 'Le texte doit être une chaîne de caractères.',
+            'idFiscale.string' => 'L\'identifiant fiscal doit être une chaîne de caractères.',
+        ];
+
         $validator = Validator($request->all(), [
             'title' => 'required|string|max:255',
             'text' => 'required|string',
