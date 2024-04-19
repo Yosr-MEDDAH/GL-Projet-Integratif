@@ -75,7 +75,7 @@ class BonDeCommandeConsultation extends Controller
         $numbers = [];
 
         if ($role->id === 3) {
-            $purOrdersNumbers = BonDeCommande::select('num_commande')->where('four_idFiscale', $user->idFiscale)->where('hasInvoice', 0)->get();
+            $purOrdersNumbers = BonDeCommande::select('num_commande')->where('four_idFiscale', $user->idFiscale)->get();
             // si tu veux un tableau contient seulement les nombres du bon de  commande
             foreach ($purOrdersNumbers as $purOrderNumber) {
                 $numbers[] = $purOrderNumber->num_commande;
@@ -95,7 +95,7 @@ class BonDeCommandeConsultation extends Controller
 
         // pour agent bof 
         // si tu veux un tableau contient seulement les nombres
-        $purOrdersNumbers = BonDeCommande::select('num_commande')->where('hasInvoice', 0)->get();
+        $purOrdersNumbers = BonDeCommande::select('num_commande')->get();
         foreach ($purOrdersNumbers as $purOrderNumber) {
             $numbers[] = $purOrderNumber->num_commande;
         }
