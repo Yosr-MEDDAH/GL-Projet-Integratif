@@ -20,6 +20,6 @@ class BonDeCommande extends Model
 
     public function facture()
     {
-        return $this->hasOne(Facture::class);
+        return $this->hasMany(Facture::class);
     }
 }

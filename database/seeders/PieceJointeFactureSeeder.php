@@ -21,6 +21,7 @@ class PieceJointeFactureSeeder extends Seeder
             "APPEL À LA FACTURATION",
             "RELEVÉ CONSOMMATION",
             "CIN",
+            "FACTURE",
         ];
 
 
