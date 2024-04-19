@@ -55,7 +55,7 @@ class ReclamationController extends Controller
                 'message' => "vérifier votre numero du bon de commande",
                 'data' => [],
             ]);
-        }
+        }*/
 
         if ($request->input('idFiscale') !== $user->idFiscale) {
             return response()->json([
@@ -63,7 +63,7 @@ class ReclamationController extends Controller
                 'message' => "vérifier votre matricule fiscale",
                 'data' => [],
             ]);
-        }*/
+        }
 
         $validator = Validator($request->all(), [
             'title' => 'required|string|max:255',
