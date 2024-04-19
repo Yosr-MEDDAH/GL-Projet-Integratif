@@ -57,13 +57,13 @@ class ReclamationController extends Controller
             ]);
         }*/
 
-        if ($request->input('idFiscale') !== $user->idFiscale) {
+        /*if ($request->input('idFiscale') !== $user->idFiscale) {
             return response()->json([
                 'success' => false,
                 'message' => "vérifier votre matricule fiscale",
                 'data' => [],
             ]);
-        }
+        }*/
 
         $messages = [
             'title.required' => 'Le titre est requis.',
@@ -81,7 +81,7 @@ class ReclamationController extends Controller
             'numFacture' => 'nullable|string',
             'numCommande' => 'nullable|string',
             'attached_file.*' => 'nullable||file|mimes:pdf|max:102400'
-        ]);
+        ], $messages);
 
         if ($validator->fails()) {
             return response()->json([
@@ -92,6 +92,7 @@ class ReclamationController extends Controller
         }
 
         $count = Reclamation::all()->count();
+        $attachedFile = "";
         if ($request->hasFile('attached_file')) {
             $files = $request->file('attached_file');
             $pdf = PDFMergerFacade::init();

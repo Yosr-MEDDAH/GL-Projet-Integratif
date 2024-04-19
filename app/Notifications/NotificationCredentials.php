@@ -50,7 +50,7 @@ class NotificationCredentials extends Notification
             $greeting = 'Bonsoir';
         }
 
-        $url = "url de login";
+        $url = "http://localhost:5173/login";
 
 
         return (new MailMessage)
