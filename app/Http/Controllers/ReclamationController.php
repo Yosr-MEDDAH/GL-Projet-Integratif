@@ -261,6 +261,14 @@ class ReclamationController extends Controller
         ]);
     }
 
+
+
+
+
+
+
+
+
     function getReclamationSpec(Request $request)
     {
         $user = JWTAuth::user();
@@ -305,6 +313,10 @@ class ReclamationController extends Controller
             ]
         ]);
     }
+
+
+
+
 
 
     function getFileReclamation(Request $request, $userId, $fileName)
