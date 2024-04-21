@@ -360,4 +360,43 @@ class ReclamationController extends Controller
             ]); //disk
         }
     }
+
+
+    function changerEtatReclamation(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+        $reclamation = Reclamation::find($request->input('id'));
+        if (!$reclamation) {
+            return response()->json([
+                'success' => false,
+                'message' => "reclamation n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if ($request->input('etat') === "1") {
+            $etat = 'Recu';
+        } else {
+            $etat = 'En Attente';
+        }
+
+        $reclamation->update([
+            'etat' => $etat,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "etat a été changé avec succes",
+            'data' => [],
+        ]);
+    }
 }

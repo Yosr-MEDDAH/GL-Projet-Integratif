@@ -14,6 +14,7 @@ class Reclamation extends Model
         'text', // Texte de la réclamation
         'path', // Chemin du fichier de la réclamation
         'file',
+        'etat',
         'attached_file', // Nom du fichier joint à la réclamation
         'fournisseur_id',
     ];

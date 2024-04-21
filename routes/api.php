@@ -78,6 +78,7 @@ Route::controller(ReclamationController::class)->group(function () {
     Route::get('/reclamation', 'getReclamation')->middleware('jwt.auth');
     Route::delete('/reclamation/delete', 'deleteReclamation')->middleware('jwt.auth');
     Route::get('/reclamationsSpec', 'getReclamationSpec')->middleware('jwt.auth');
+    Route::put('/changerEtatReclamation', 'changerEtatReclamation')->middleware('jwt.auth');
     Route::get('/users/{userID}/userUploads/reclamation/{fileName}', 'getFileReclamation')->middleware('jwt.auth');
 });
 
