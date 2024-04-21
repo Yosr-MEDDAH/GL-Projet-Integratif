@@ -532,8 +532,30 @@ class FiltreRechercheController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 5);
 
-        $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
-            ->orWhere('idFiscale', $request->input('search'))->paginate($nb, ['*'], 'page', $page);
+        if ($request->input('etat') === "0") {
+            $reclamations = Reclamation::where(function ($query) use ($request) {
+                $query->where('title', 'LIKE', '%' . $request->input('search') . '%')
+                    ->orWhere('idFiscale', $request->input('search'));
+            })
+                ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
+                ->where('etat', 'En Attente')
+                ->paginate($nb, ['*'], 'page', $page);
+        } elseif ($request->input('etat') === "1") {
+            $reclamations = Reclamation::where(function ($query) use ($request) {
+                $query->where('title', 'LIKE', '%' . $request->input('search') . '%')
+                    ->orWhere('idFiscale', $request->input('search'));
+            })
+                ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
+                ->where('etat', 'En Attente')
+                ->paginate($nb, ['*'], 'page', $page);
+        } else {
+            $reclamations = Reclamation::where(function ($query) use ($request) {
+                $query->where('title', 'LIKE', '%' . $request->input('search') . '%')
+                    ->orWhere('idFiscale', $request->input('search'));
+            })
+                ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
+                ->paginate($nb, ['*'], 'page', $page);
+        }
 
 
         return response()->json([
@@ -541,6 +563,7 @@ class FiltreRechercheController extends Controller
             'message' => 'voici vos bons de commandes',
             'data' => [
                 'totalPages' => $reclamations->lastPage(),
+                "nombreReclamation" => $reclamations->count(),
                 'reclamations' => $reclamations->items(),
             ]
         ]);
