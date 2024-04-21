@@ -468,10 +468,26 @@ class FiltreRechercheController extends Controller
         $role = $user->role()->first();
 
         $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
+        $nb = $request->query('nb', 5);
         if ($role->id === 3) {
-            $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
-                ->where('idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
+            if ($request->input('etat') === "0") {
+                $reclamations = Reclamation::where('title', 'LIKE', '%' . $request->input('search') . '%')
+                    ->where('idFiscale', $user->idFiscale)
+                    ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
+                    ->where('etat', 'En Attente')
+                    ->paginate($nb, ['*'], 'page', $page);
+            } elseif ($request->input('etat') === "1") {
+                $reclamations = Reclamation::where('title', 'LIKE', '%' . $request->input('search') . '%')
+                    ->where('idFiscale', $user->idFiscale)
+                    ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
+                    ->where('etat', 'Recu')
+                    ->paginate($nb, ['*'], 'page', $page);
+            } else {
+                $reclamations = Reclamation::where('title', 'LIKE', '%' . $request->input('search') . '%')
+                    ->where('idFiscale', $user->idFiscale)
+                    ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
+                    ->paginate($nb, ['*'], 'page', $page);
+            }
             if (!$reclamations) {
                 return response()->json([
                     'success' => false,
@@ -484,6 +500,7 @@ class FiltreRechercheController extends Controller
                 'message' => 'voici vos réclamtions',
                 'data' => [
                     'totalPages' => $reclamations->lastPage(),
+                    "nombreReclamation" => $reclamations->count(),
                     'reclamations' => $reclamations->items(),
                 ]
             ]);
@@ -513,7 +530,7 @@ class FiltreRechercheController extends Controller
 
 
         $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
+        $nb = $request->query('nb', 5);
 
         $reclamations = Reclamation::where('numFacture', 'LIKE', '%' . $request->input('search') . '%')
             ->orWhere('idFiscale', $request->input('search'))->paginate($nb, ['*'], 'page', $page);

@@ -109,7 +109,7 @@ class ReclamationController extends Controller
         Reclamation::create([
             'title' => $request->input('title'),
             'text' => $request->input('text'),
-            'idFiscale' => $request->input('idFiscale'),
+            'idFiscale' => $user->idFiscale,
             'numFacture' => $request->input('numFacture'),
             'numCommande' => $request->input('numCommande'),
             'attached_file' => $attachedFile,
