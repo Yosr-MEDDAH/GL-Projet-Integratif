@@ -565,6 +565,10 @@ class FiltreRechercheController extends Controller
                 ->paginate($nb, ['*'], 'page', $page);
         }
 
+        foreach ($reclamations as $reclamation) {
+            $nomFournisseur = User::where('idFiscale', $reclamation->idFiscale)->first()->name;
+            $reclamation->nomFournisseur = $nomFournisseur;
+        }
 
         return response()->json([
             'success' => true,
