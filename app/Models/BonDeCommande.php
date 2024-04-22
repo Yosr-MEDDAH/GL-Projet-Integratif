@@ -10,6 +10,7 @@ class BonDeCommande extends Model
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'num_commande', // Numéro de commande
         'created_by', // Créé par
         'idErp', // ID ERP

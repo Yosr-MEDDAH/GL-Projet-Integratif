@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BonDeCommande;
 use App\Models\Facture;
 use App\Models\ObjetFacture;
 use App\Models\PieceJointeFacture;
@@ -169,5 +170,65 @@ class FactureConsultation extends Controller
                 'data' => []
             ]); //disk
         }
+    }
+
+
+
+
+    function getfacturesParBonDeCommande(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $purOrder = BonDeCommande::select('id')->where('num_commande', $request->input('num_commande'))->first()->id;
+        if (!$purOrder) {
+            return response()->json([
+                'success' => false,
+                'message' => "bon de commande n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        /*$nbFactures = Facture::where('bon_de_commande_id', $purOrder)->count();
+        dd($nbFactures);
+        if ($nbFactures === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Aucune facture ne correspond à ce bon de commande.",
+                'data' => [],
+            ]);
+        }*/
+
+        $factures = Facture::where('bon_de_commande_id', $purOrder)->paginate($nb, ['*'], 'page', $page);
+
+        foreach ($factures as $facture) {
+            $etat = $facture->etat()->first();
+            if ($etat === null || $etat->name_etat === null) {
+                $facture->etat = null;
+            } else {
+                $facture->etat = $etat->name_etat;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Voici les factures qui correspondent à ce bon de commande.",
+            'data' => [
+                'totalPages' => $factures->lastPage(),
+                'factures' => $factures->items(),
+            ],
+        ]);
     }
 }

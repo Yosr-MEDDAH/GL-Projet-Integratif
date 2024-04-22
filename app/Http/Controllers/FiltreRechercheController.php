@@ -708,7 +708,6 @@ class FiltreRechercheController extends Controller
             ->where('borderau_id', $request->input('id'))
             ->orderBy('created_at', 'desc')
             ->paginate($nb, ['*'], 'page', $page);
-        foreach ($listFacture as $facture) {
             foreach ($listFacture as $facture) {
                 if ($facture->fournisseur_id !== null) {
                     $user = User::select('name')->where('id', $facture->fournisseur_id)->first();
@@ -730,7 +729,6 @@ class FiltreRechercheController extends Controller
                     $facture->numBonCommande = $bonDeCommande->num_commande;
                 }*/
             }
-        }
 
         return response()->json([
             'success' => true,

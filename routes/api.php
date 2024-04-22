@@ -66,6 +66,7 @@ Route::controller(FactureController::class)->prefix('facture')->group(function (
 Route::controller(FactureConsultation::class)->group(function () {
     Route::get('/facture', 'getInvoice')->middleware('jwt.auth');
     Route::get('/factures', 'getInvoices')->middleware('jwt.auth');
+    Route::get('/facturesParBonDeCommande', 'getfacturesParBonDeCommande')->middleware('jwt.auth');
     Route::get('/storage/userUploads/pdf/invoice/{date}/{fileName}', 'getFileInvoice')->middleware('jwt.auth');
 });
 
