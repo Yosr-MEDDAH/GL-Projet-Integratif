@@ -117,6 +117,10 @@ class FiltreRechercheController extends Controller
                     'data' => [],
                 ]);
             }
+            foreach ($purOrders as $purOrder) {
+                $nbFactures = Facture::where('bon_de_commande_id', $purOrder->id)->count();
+                $purOrder->nbFactures = $nbFactures;
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'voici vos bons de commandes',
@@ -166,6 +170,10 @@ class FiltreRechercheController extends Controller
         } else {
             $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('search') . '%')->orWhere('four_idFiscale', $request->input('search'))
                 ->paginate($nb, ['*'], 'page', $page);
+        }
+        foreach ($purOrders as $purOrder) {
+            $nbFactures = Facture::where('bon_de_commande_id', $purOrder->id)->count();
+            $purOrder->nbFactures = $nbFactures;
         }
         return response()->json([
             'success' => true,
