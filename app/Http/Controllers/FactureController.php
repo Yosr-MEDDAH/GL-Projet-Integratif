@@ -222,7 +222,7 @@ class FactureController extends Controller
 
 
 
-        /*$bord = Bordereau::whereTime('created_at', '=', Carbon::now()->format('H:i:s'))->first();
+    /*$bord = Bordereau::whereTime('created_at', '=', Carbon::now()->format('H:i:s'))->first();
         $file = $request->file('invoice_file_path');
         $fileName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
         if (!$bord) {
@@ -236,7 +236,7 @@ class FactureController extends Controller
         $bord->date_sent = Carbon::now();
         return Carbon::now();*/
 
-        /*$bord = Bordereau::whereTime('created_at', '=', '17:28:24')->first();
+    /*$bord = Bordereau::whereTime('created_at', '=', '17:28:24')->first();
         $file = $request->file('invoice_file_path');
         $fileName = $file->getClientOriginalName() . '.' . $file->getClientOriginalExtension();
         if (!$bord) {
@@ -661,6 +661,7 @@ class FactureController extends Controller
                 'organization' => $request->input('organization'),
                 'billing_date' => $request->input('billing_date'),
                 'amount' => $request->input('amount'),
+                'type_facture_id' => 1,
                 'invoice_file_path' => $filePath,
                 'reception_date' => Carbon::now(),
                 'isArchived' => 0,
@@ -682,6 +683,7 @@ class FactureController extends Controller
                 'organization' => $request->input('organization'),
                 'billing_date' => $request->input('billing_date'),
                 'amount' => $request->input('amount'),
+                'type_facture_id' => 1,
                 'invoice_file_path' => $filePath,
                 'reception_date' => Carbon::now(),
                 'isArchived' => 0,
@@ -703,6 +705,7 @@ class FactureController extends Controller
                 'organization' => $request->input('organization'),
                 'billing_date' => $request->input('billing_date'),
                 'amount' => $request->input('amount'),
+                'type_facture_id' => 1,
                 'invoice_file_path' => $filePath,
                 'reception_date' => Carbon::now(),
                 'isArchived' => false,

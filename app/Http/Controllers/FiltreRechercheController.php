@@ -542,24 +542,24 @@ class FiltreRechercheController extends Controller
 
         if ($request->input('etat') === "0") {
             $reclamations = Reclamation::where(function ($query) use ($request) {
-                $query->where('title', 'LIKE', '%' . $request->input('search') . '%')
-                    ->orWhere('idFiscale', $request->input('search'));
+                $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%')
+                    ->orWhere('title', 'LIKE', '%' . $request->input('search') . '%');
             })
                 ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                 ->where('etat', 'En Attente')
                 ->paginate($nb, ['*'], 'page', $page);
         } elseif ($request->input('etat') === "1") {
             $reclamations = Reclamation::where(function ($query) use ($request) {
-                $query->where('title', 'LIKE', '%' . $request->input('search') . '%')
-                    ->orWhere('idFiscale', $request->input('search'));
+                $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%')
+                    ->orWhere('title', 'LIKE', '%' . $request->input('search') . '%');
             })
                 ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
-                ->where('etat', 'En Attente')
+                ->where('etat', 'Recu')
                 ->paginate($nb, ['*'], 'page', $page);
         } else {
             $reclamations = Reclamation::where(function ($query) use ($request) {
-                $query->where('title', 'LIKE', '%' . $request->input('search') . '%')
-                    ->orWhere('idFiscale', $request->input('search'));
+                $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%')
+                    ->orWhere('title', 'LIKE', '%' . $request->input('search') . '%');
             })
                 ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                 ->paginate($nb, ['*'], 'page', $page);
@@ -708,27 +708,27 @@ class FiltreRechercheController extends Controller
             ->where('borderau_id', $request->input('id'))
             ->orderBy('created_at', 'desc')
             ->paginate($nb, ['*'], 'page', $page);
-            foreach ($listFacture as $facture) {
-                if ($facture->fournisseur_id !== null) {
-                    $user = User::select('name')->where('id', $facture->fournisseur_id)->first();
-                    $facture->nameCreatedBy = $user->name;
-                } else {
-                    $user = User::select('name')->where('id', $facture->agent_bof_id)->first();
-                    $facture->nameCreatedBy = $user->name;
-                }
-                $etat = $facture->etat()->first();
-                if ($etat === null || $etat->name_etat === null) {
-                    $facture->etat = null;
-                } else {
-                    $facture->etat = $etat->name_etat;
-                }
-                /*$bonDeCommande = $facture->bonDeCommande()->first();
+        foreach ($listFacture as $facture) {
+            if ($facture->fournisseur_id !== null) {
+                $user = User::select('name')->where('id', $facture->fournisseur_id)->first();
+                $facture->nameCreatedBy = $user->name;
+            } else {
+                $user = User::select('name')->where('id', $facture->agent_bof_id)->first();
+                $facture->nameCreatedBy = $user->name;
+            }
+            $etat = $facture->etat()->first();
+            if ($etat === null || $etat->name_etat === null) {
+                $facture->etat = null;
+            } else {
+                $facture->etat = $etat->name_etat;
+            }
+            /*$bonDeCommande = $facture->bonDeCommande()->first();
                 if ($bonDeCommande === null || $bonDeCommande->num_commande === null) {
                     $facture->numBonCommande = null;
                 } else {
                     $facture->numBonCommande = $bonDeCommande->num_commande;
                 }*/
-            }
+        }
 
         return response()->json([
             'success' => true,

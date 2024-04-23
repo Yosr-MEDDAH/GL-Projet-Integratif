@@ -21,7 +21,8 @@ return new class extends Migration
             $table->string('consumption_period')->nullable(); // Période de consommation
             $table->string('currency')->nullable()->default('TND'); // Devise
             $table->decimal('amount', 10, 3)->nullable(); // Montant
-            $table->string('type')->default('3WM')->nullable(); // type
+            $table->unsignedBigInteger('type_facture_id')->nullable();
+            $table->foreign('type_facture_id')->references('id')->on('types_factures')->onDelete('set null');
             $table->string('invoice_file_path')->nullable(); // Chemin du fichier de la facture
             $table->timestamp('reception_date')->nullable(); // Date de réception de la facture
             $table->string('payment_period')->nullable()->default('60 jours');

@@ -205,7 +205,7 @@ class DataBaseSeederGeneral extends Seeder
             'created_at' => '2024-03-23 12:00:00',
             'updated_at' => '2024-03-23 12:00:00',
         ]);
-        
+
         DB::table('users')->insert([
             'name' => 'Oliver Smith',
             'email' => 'oliver@example.com',
@@ -227,7 +227,7 @@ class DataBaseSeederGeneral extends Seeder
             'created_at' => '2024-03-24 12:00:00',
             'updated_at' => '2024-03-24 12:00:00',
         ]);
-        
+
         DB::table('users')->insert([
             'name' => 'William Johnson',
             'email' => 'william@example.com',
@@ -249,7 +249,7 @@ class DataBaseSeederGeneral extends Seeder
             'created_at' => '2024-03-25 12:00:00',
             'updated_at' => '2024-03-25 12:00:00',
         ]);
-        
+
 
 
 
@@ -265,6 +265,7 @@ class DataBaseSeederGeneral extends Seeder
             'idFiscale' => $johnDoe->idFiscale,
             'numFacture' => 'FAC123',
             'numCommande' => '123',
+            'etat' => 'Recu',
             'attached_file' => 'chemin/vers/le/fichier_joint.pdf',
             'fournisseur_id' => $johnDoe->id,
         ]);
@@ -350,6 +351,26 @@ class DataBaseSeederGeneral extends Seeder
             $pieceJointe->save();
         }
 
+        $types = [
+            '3WM TND',
+            '3WM LETTRE DE CREDIT',
+            '3WM DEVISE',
+            '3WM CHAGRGES LOCATIVES',
+            '3WM STEG',
+            'FINANCEMENT TND',
+            'FONDS DE ROULEMENT',
+            'OPERATEUR',
+            'VENTILATION DIRECTE',
+            'FISCALITE CHARGES SOCIALES',
+            'FISCALITE PAYMENT IMPOTS ET TAXES',
+        ];
+
+        // Insérer chaque type de facture dans la table
+        foreach ($types as $typeName) {
+            DB::table('types_factures')->insert([
+                'typeName' => $typeName,
+            ]);
+        }
 
 
         Facture::create([
@@ -361,6 +382,7 @@ class DataBaseSeederGeneral extends Seeder
             'consumption_period' => 'Février 2024',
             'currency' => 'TND',
             'amount' => 1500.75,
+            'type_facture_id' => 1,
             'invoice_file_path' => 'path/vers/le/fichier/facture_anton_carey.pdf',
             'reception_date' => now(),
             'payment_period' => '60 jours',
@@ -384,6 +406,7 @@ class DataBaseSeederGeneral extends Seeder
                 'billing_date' => now(),
                 'consumption_period' => 'Février 2024',
                 'currency' => 'TND',
+                'type_facture_id' => 1,
                 'amount' => 1500.75,
                 'invoice_file_path' => 'path/vers/le/fichier/facture_anton_carey.pdf',
                 'reception_date' => now(),
@@ -408,6 +431,7 @@ class DataBaseSeederGeneral extends Seeder
             'consumption_period' => 'Février 2024',
             'currency' => 'TND',
             'amount' => 1500.75,
+            'type_facture_id' => 1,
             'invoice_file_path' => 'path/vers/le/fichier/facture_anton_carey.pdf',
             'reception_date' => now(),
             'payment_period' => '60 jours',
@@ -431,6 +455,7 @@ class DataBaseSeederGeneral extends Seeder
             'consumption_period' => 'Mars 2024',
             'currency' => 'TND',
             'amount' => 2000.80,
+            'type_facture_id' => 1,
             'invoice_file_path' => 'path/vers/le/fichier/facture_benji_thomas.pdf',
             'reception_date' => now(),
             'payment_period' => '60 jours',
@@ -453,6 +478,7 @@ class DataBaseSeederGeneral extends Seeder
             'consumption_period' => 'Mars 2024',
             'currency' => 'TND',
             'amount' => 2000.80,
+            'type_facture_id' => 1,
             'invoice_file_path' => 'path/vers/le/fichier/facture_benji_thomas.pdf',
             'reception_date' => now(),
             'payment_period' => '60 jours',
@@ -476,6 +502,7 @@ class DataBaseSeederGeneral extends Seeder
             'consumption_period' => 'Janvier 2024',
             'currency' => 'TND',
             'amount' => 1000.50,
+            'type_facture_id' => 1,
             'invoice_file_path' => 'path/vers/le/fichier/facture_john_doe.pdf',
             'reception_date' => now(),
             'payment_period' => '60 jours',
@@ -498,6 +525,7 @@ class DataBaseSeederGeneral extends Seeder
             'consumption_period' => 'Janvier 2024',
             'currency' => 'TND',
             'amount' => 1000.50,
+            'type_facture_id' => 1,
             'invoice_file_path' => 'path/vers/le/fichier/facture_john_doe.pdf',
             'reception_date' => now(),
             'payment_period' => '60 jours',
@@ -640,5 +668,26 @@ class DataBaseSeederGeneral extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $types = [
+            '3WM TND',
+            '3WM LETTRE DE CREDIT',
+            '3WM DEVISE',
+            '3WM CHAGRGES LOCATIVES',
+            '3WM STEG',
+            'FINANCEMENT TND',
+            'FONDS DE ROULEMENT',
+            'OPERATEUR',
+            'VENTILATION DIRECTE',
+            'FISCALITE CHARGES SOCIALES',
+            'FISCALITE PAYMENT IMPOTS ET TAXES',
+        ];
+
+        // Insérer chaque type de facture dans la table
+        foreach ($types as $typeName) {
+            DB::table('types_factures')->insert([
+                'typeName' => $typeName,
+            ]);
+        }
     }
 }

@@ -18,6 +18,7 @@ class Facture extends Model
         'consumption_period',
         'currency',
         'amount',
+        'type_facture_id',
         'invoice_file_path',
         'reception_date',
         'payment_period',
@@ -31,6 +32,11 @@ class Facture extends Model
         'pieces_jointes',
         'objet_facture_id',
     ];
+
+    public function typeFacture()
+    {
+        return $this->belongsTo(TypesFactures::class, 'type_facture_id');
+    }
 
     public function fournisseur()
     {
