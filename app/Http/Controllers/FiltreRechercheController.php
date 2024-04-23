@@ -483,17 +483,20 @@ class FiltreRechercheController extends Controller
                     ->where('idFiscale', $user->idFiscale)
                     ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                     ->where('etat', 'En Attente')
+                    ->orderBy('created_at', 'desc')
                     ->paginate($nb, ['*'], 'page', $page);
             } elseif ($request->input('etat') === "1") {
                 $reclamations = Reclamation::where('title', 'LIKE', '%' . $request->input('search') . '%')
                     ->where('idFiscale', $user->idFiscale)
                     ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                     ->where('etat', 'Recu')
+                    ->orderBy('created_at', 'desc')
                     ->paginate($nb, ['*'], 'page', $page);
             } else {
                 $reclamations = Reclamation::where('title', 'LIKE', '%' . $request->input('search') . '%')
                     ->where('idFiscale', $user->idFiscale)
                     ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
+                    ->orderBy('created_at', 'desc')
                     ->paginate($nb, ['*'], 'page', $page);
             }
             if (!$reclamations) {
@@ -523,7 +526,7 @@ class FiltreRechercheController extends Controller
 
 
 
-    function rechercheReclamationBof(Request $request)
+    function rechercheReclamationBof(Request $request) // éliminer text, numcommande et facture
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -538,7 +541,7 @@ class FiltreRechercheController extends Controller
 
 
         $page = $request->query('page', 1);
-        $nb = $request->query('nb', 5);
+        $nb = $request->query('nb', 10);
 
         if ($request->input('etat') === "0") {
             $reclamations = Reclamation::where(function ($query) use ($request) {
@@ -547,6 +550,7 @@ class FiltreRechercheController extends Controller
             })
                 ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                 ->where('etat', 'En Attente')
+                ->orderBy('created_at', 'desc')
                 ->paginate($nb, ['*'], 'page', $page);
         } elseif ($request->input('etat') === "1") {
             $reclamations = Reclamation::where(function ($query) use ($request) {
@@ -555,6 +559,7 @@ class FiltreRechercheController extends Controller
             })
                 ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                 ->where('etat', 'Recu')
+                ->orderBy('created_at', 'desc')
                 ->paginate($nb, ['*'], 'page', $page);
         } else {
             $reclamations = Reclamation::where(function ($query) use ($request) {
@@ -562,6 +567,7 @@ class FiltreRechercheController extends Controller
                     ->orWhere('title', 'LIKE', '%' . $request->input('search') . '%');
             })
                 ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
+                ->orderBy('created_at', 'desc')
                 ->paginate($nb, ['*'], 'page', $page);
         }
 
