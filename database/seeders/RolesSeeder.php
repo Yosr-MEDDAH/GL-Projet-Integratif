@@ -35,7 +35,7 @@ class RolesSeeder extends Seeder
                 'name' => 'Agent Fiscaliste',
             ],
             [
-                'name' => 'Agent Trésorerie ',
+                'name' => 'Agent Trésorerie',
             ],
         ]);
     }
