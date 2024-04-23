@@ -15,6 +15,7 @@ class Reclamation extends Model
         'path', // Chemin du fichier de la réclamation
         'file',
         'etat',
+        'idFiscale',
         'attached_file', // Nom du fichier joint à la réclamation
         'fournisseur_id',
     ];
