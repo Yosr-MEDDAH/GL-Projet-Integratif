@@ -118,6 +118,139 @@ class DataBaseSeederGeneral extends Seeder
             'updated_at' => '2024-03-20 12:00:00',
         ]);
 
+        DB::table('users')->insert([
+            'name' => 'Alice Johnson',
+            'email' => 'alice@example.com',
+            'email_verified_at' => '2024-03-20 12:00:00',
+            'password' => Hash::make('12345678'),
+            'phone' => '1234567890',
+            'image' => 'alice.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456,
+            'code_2fa_created_at' => '2024-03-20 12:00:00',
+            'isTwoFactorEnabled' => false,
+            'role_id' => 4, // ID du rôle Agent Ap
+            'idErp' => 1,
+            'idFiscale' => null,
+            'adress' => '123 Street, City',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+            'remember_token' => 'random_token',
+            'created_at' => '2024-03-20 12:00:00',
+            'updated_at' => '2024-03-20 12:00:00',
+        ]);
+
+        DB::table('users')->insert([
+            'name' => 'Bob Smith',
+            'email' => 'bob@example.com',
+            'email_verified_at' => '2024-03-21 12:00:00',
+            'password' => Hash::make('12345678'),
+            'phone' => '1234567890',
+            'image' => 'bob.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456,
+            'code_2fa_created_at' => '2024-03-21 12:00:00',
+            'isTwoFactorEnabled' => false,
+            'role_id' => 5, // ID du rôle Agent Fiscaliste
+            'idErp' => 1,
+            'idFiscale' => null,
+            'adress' => '456 Avenue, Town',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+            'remember_token' => 'random_token',
+            'created_at' => '2024-03-21 12:00:00',
+            'updated_at' => '2024-03-21 12:00:00',
+        ]);
+
+        DB::table('users')->insert([
+            'name' => 'Charlie Brown',
+            'email' => 'charlie@example.com',
+            'email_verified_at' => '2024-03-22 12:00:00',
+            'password' => Hash::make('12345678'),
+            'phone' => '1234567890',
+            'image' => 'charlie.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456,
+            'code_2fa_created_at' => '2024-03-22 12:00:00',
+            'isTwoFactorEnabled' => false,
+            'role_id' => 6, // ID du rôle Agent Trésorerie
+            'idErp' => 1,
+            'idFiscale' => null,
+            'adress' => '789 Road, Village',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+            'remember_token' => 'random_token',
+            'created_at' => '2024-03-22 12:00:00',
+            'updated_at' => '2024-03-22 12:00:00',
+        ]);
+
+        DB::table('users')->insert([
+            'name' => 'Emma Wilson',
+            'email' => 'emma@example.com',
+            'email_verified_at' => '2024-03-23 12:00:00',
+            'password' => Hash::make('12345678'),
+            'phone' => '1234567890',
+            'image' => 'emma.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456,
+            'code_2fa_created_at' => '2024-03-23 12:00:00',
+            'isTwoFactorEnabled' => false,
+            'role_id' => 4, // ID du rôle Agent Ap
+            'idErp' => 1,
+            'idFiscale' => null,
+            'adress' => '101 Main Street, City',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+            'remember_token' => 'random_token',
+            'created_at' => '2024-03-23 12:00:00',
+            'updated_at' => '2024-03-23 12:00:00',
+        ]);
+        
+        DB::table('users')->insert([
+            'name' => 'Oliver Smith',
+            'email' => 'oliver@example.com',
+            'email_verified_at' => '2024-03-24 12:00:00',
+            'password' => Hash::make('12345678'),
+            'phone' => '1234567890',
+            'image' => 'oliver.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456,
+            'code_2fa_created_at' => '2024-03-24 12:00:00',
+            'isTwoFactorEnabled' => false,
+            'role_id' => 5, // ID du rôle Agent Fiscaliste
+            'idErp' => 1,
+            'idFiscale' => null,
+            'adress' => '202 Elm Street, Town',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+            'remember_token' => 'random_token',
+            'created_at' => '2024-03-24 12:00:00',
+            'updated_at' => '2024-03-24 12:00:00',
+        ]);
+        
+        DB::table('users')->insert([
+            'name' => 'William Johnson',
+            'email' => 'william@example.com',
+            'email_verified_at' => '2024-03-25 12:00:00',
+            'password' => Hash::make('12345678'),
+            'phone' => '1234567890',
+            'image' => 'william.jpg',
+            'isActive' => true,
+            'code_2FA' => 123456,
+            'code_2fa_created_at' => '2024-03-25 12:00:00',
+            'isTwoFactorEnabled' => false,
+            'role_id' => 6, // ID du rôle Agent Trésorerie
+            'idErp' => 1,
+            'idFiscale' => null,
+            'adress' => '303 Oak Street, Village',
+            'nationnalites' => 'Nationality',
+            'direction' => 'Direction',
+            'remember_token' => 'random_token',
+            'created_at' => '2024-03-25 12:00:00',
+            'updated_at' => '2024-03-25 12:00:00',
+        ]);
+        
+
 
 
 

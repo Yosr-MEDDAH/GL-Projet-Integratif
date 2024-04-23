@@ -29,9 +29,14 @@ class RolesSeeder extends Seeder
                 'name' => 'Fournisseur',
             ],
             [
-                'name' => 'Comptable',
+                'name' => 'Agent Ap',
             ],
-
+            [
+                'name' => 'Agent Fiscaliste',
+            ],
+            [
+                'name' => 'Agent Trésorerie ',
+            ],
         ]);
     }
 }
