@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BonDeCommande;
 use App\Models\Facture;
 use App\Models\Reclamation;
+use App\Models\User;
 use Carbon\Carbon;
 use Dotenv\Validator;
 use Illuminate\Http\Request;
@@ -180,6 +181,7 @@ class ReclamationController extends Controller
         }
 
         $reclamation = Reclamation::where('id', $request->input('id'))->first();
+        $reclamation->nomFournisseur = User::where('idFiscale', $reclamation->idFiscale)->first()->name;
 
         if (!$reclamation) {
             return response()->json([
