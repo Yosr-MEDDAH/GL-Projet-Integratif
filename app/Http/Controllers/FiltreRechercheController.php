@@ -709,7 +709,7 @@ class FiltreRechercheController extends Controller
 
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
-        $listFacture = Facture::select('id', 'number', 'invoice_name', 'type', 'invoice_file_path', 'fournisseur_id', 'agent_bof_id', 'created_by', 'bon_de_commande_id', 'etat_id')
+        $listFacture = Facture::select('id', 'number', 'invoice_name', 'type_facture_id', 'invoice_file_path', 'fournisseur_id', 'agent_bof_id', 'created_by', 'bon_de_commande_id', 'etat_id')
             ->where('number', 'LIKE', '%' . $request->input('search') . '%')
             ->where('borderau_id', $request->input('id'))
             ->orderBy('created_at', 'desc')
