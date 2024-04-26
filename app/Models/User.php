@@ -37,7 +37,8 @@ class User extends Authenticatable implements JWTSubject
         'isTwoFactorEnabled',
         'role_id',
         'refresh_token',
-        'refreshToken_created_at'
+        'refreshToken_created_at',
+        'type_facture_ids'
     ];
 
 
@@ -53,6 +54,7 @@ class User extends Authenticatable implements JWTSubject
         "code_2fa_created_at",
     ];
 
+
     /**
      * The attributes that should be cast.
      *
@@ -60,6 +62,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'type_facture_ids' => 'array',
     ];
 
 
@@ -67,7 +70,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsTo(Role::class);
     }
-
 
     public function getJWTIdentifier()
     {

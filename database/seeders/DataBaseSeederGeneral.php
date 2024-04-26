@@ -116,6 +116,7 @@ class DataBaseSeederGeneral extends Seeder
             'remember_token' => 'random_token',
             'created_at' => '2024-03-20 12:00:00',
             'updated_at' => '2024-03-20 12:00:00',
+            'type_facture_ids' => json_encode([1, 2]),
         ]);
 
         DB::table('users')->insert([
@@ -138,6 +139,7 @@ class DataBaseSeederGeneral extends Seeder
             'remember_token' => 'random_token',
             'created_at' => '2024-03-20 12:00:00',
             'updated_at' => '2024-03-20 12:00:00',
+            'type_facture_ids' => json_encode([1, 2, 3]),
         ]);
 
         DB::table('users')->insert([
@@ -160,6 +162,7 @@ class DataBaseSeederGeneral extends Seeder
             'remember_token' => 'random_token',
             'created_at' => '2024-03-21 12:00:00',
             'updated_at' => '2024-03-21 12:00:00',
+            'type_facture_ids' => json_encode([1]),
         ]);
 
         DB::table('users')->insert([
@@ -182,6 +185,7 @@ class DataBaseSeederGeneral extends Seeder
             'remember_token' => 'random_token',
             'created_at' => '2024-03-22 12:00:00',
             'updated_at' => '2024-03-22 12:00:00',
+            'type_facture_ids' => json_encode([1, 2, 3, 7]),
         ]);
 
         DB::table('users')->insert([
@@ -204,6 +208,7 @@ class DataBaseSeederGeneral extends Seeder
             'remember_token' => 'random_token',
             'created_at' => '2024-03-23 12:00:00',
             'updated_at' => '2024-03-23 12:00:00',
+            'type_facture_ids' => json_encode([1, 2, 10]),
         ]);
 
         DB::table('users')->insert([
@@ -226,6 +231,7 @@ class DataBaseSeederGeneral extends Seeder
             'remember_token' => 'random_token',
             'created_at' => '2024-03-24 12:00:00',
             'updated_at' => '2024-03-24 12:00:00',
+            'type_facture_ids' => json_encode([4, 5]),
         ]);
 
         DB::table('users')->insert([
@@ -248,6 +254,7 @@ class DataBaseSeederGeneral extends Seeder
             'remember_token' => 'random_token',
             'created_at' => '2024-03-25 12:00:00',
             'updated_at' => '2024-03-25 12:00:00',
+            'type_facture_ids' => json_encode([3, 4]),
         ]);
 
 
