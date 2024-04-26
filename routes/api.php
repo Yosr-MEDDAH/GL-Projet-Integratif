@@ -143,4 +143,6 @@ Route::controller(AdministrateurController::class)->group(function () {
 Route::controller(ValidationFactureController::class)->group(function () {
     Route::get('/invoicesToValidate', 'invoicesToValidate')->middleware('jwt.auth');
     Route::get('/invoiceToValidate', 'invoiceToValidate')->middleware('jwt.auth');
+    Route::put('/valideInvoice', 'valideInvoice')->middleware('jwt.auth');
+    Route::get('/invoiceTypeToValidate', 'invoiceTypeToValidate')->middleware('jwt.auth');
 });

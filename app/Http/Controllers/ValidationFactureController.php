@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Etapes;
 use App\Models\Facture;
 use App\Models\PieceJointeFacture;
+use App\Models\Role;
 use App\Models\TypesFactures;
 use App\Models\User;
 use Carbon\Carbon;
@@ -439,6 +440,136 @@ class ValidationFactureController extends Controller
                 "facture" => $facture,
                 "fournisseur" => $fournisseur,
                 "timeline" => $steps,
+            ]
+        ]);
+    }
+
+
+
+    function valideInvoice(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $facture = Facture::find($request->input('id'));
+
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => "la facture n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if ($role->id === 2 && $request->input('etat_id') === "1") {
+            if ($facture->validePar === $role->name) {
+                $facture->validePar = null;
+                $facture->etat_id = 1;
+                $facture->save();
+                return  response()->json([
+                    'success' => true,
+                    'message' => "l'état de la facture est En Attente",
+                    'data' => [],
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => "vous n'avez pas la possibilité de changer l'état de la facture" . $facture->id . "vers en Attente car elle est déja en cours de traitemebt par un autre agent",
+                    'data' => [],
+                ]);
+            }
+        }
+
+        if ($facture->validePar === $role->name) {
+            return  response()->json([
+                'success' => false,
+                'message' => "la facture est déja en cours de traitemebt par un autre agent",
+                'data' => [],
+            ]);
+        }
+
+        if ($request->input('etat_id') === "2") {
+            $facture->validePar = $role->name;
+            $facture->etat_id = 2;
+            $facture->save();
+            Etapes::create([
+                'facture_id' => $facture->id,
+                'etat_id' => 2,
+                'traitParRoleNom' => $role->name,
+                'traitParId' => $user->id,
+                'traitParNom' => $user->name,
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => "la facture est validé par :" . $user->name,
+                'data' => []
+            ]);
+        }
+
+        if ($request->input('etat_id') === "3") {
+            if ($request->input('motif_rejet') === [] || !$request->input('motif_rejet')) {
+                return  response()->json([
+                    'success' => false,
+                    'message' => "Le motif de rejet doit être ajouté",
+                    'data' => [],
+                ]);
+            }
+            $facture->validePar = $role->name;
+            $facture->etat_id = 3;
+            $facture->motif_rejet = $request->input('motif_rejet');
+            $facture->save();
+            Etapes::create([
+                'facture_id' => $facture->id,
+                'etat_id' => 3,
+                'traitParRoleNom' => $role->name,
+                'traitParId' => $user->id,
+                'traitParNom' => $user->name,
+            ]);
+            return response()->json([
+                'success' => true,
+                'message' => "la facture est refusé par :" . $user->name,
+                'data' => []
+            ]);
+        }
+    }
+
+
+
+
+    function invoiceTypeToValidate(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
+        }
+
+        $typesFacturesids = collect($user->type_facture_ids)->values()->all();
+        foreach ($typesFacturesids as $typesFactureid) {
+            $typesFactures[] = TypesFactures::find($typesFactureid);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'les types factures',
+            'data' => [
+                'TypesFactures' => $typesFactures,
             ]
         ]);
     }
