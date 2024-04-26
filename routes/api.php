@@ -17,6 +17,7 @@ use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\SelectionFactureController;
 use App\Http\Controllers\TwoFactorAuthController;
+use App\Http\Controllers\ValidationFactureController;
 use App\Models\Facture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -136,4 +137,9 @@ Route::controller(FiltreRechercheController::class)->group(function () {
 
 Route::controller(AdministrateurController::class)->group(function () {
     Route::post('update/default/picture_profile', 'storeDefaultProfilePicture')->middleware('jwt.auth');
+});
+
+
+Route::controller(ValidationFactureController::class)->group(function () {
+    Route::get('/invoicesToValidate', 'invoicesToValidate')->middleware('jwt.auth');
 });

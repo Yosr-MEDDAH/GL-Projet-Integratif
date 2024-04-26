@@ -55,7 +55,7 @@ class DataBaseSeederGeneral extends Seeder
             'isTwoFactorEnabled' => false,
             'role_id' => 2,
             'idErp' => 1,
-            'idFiscale' => 'smjdhf500',
+            'idFiscale' => 'null',
             'adress' => '123 Street, City',
             'nationnalites' => 'Nationality',
             'direction' => 'Direction',
@@ -209,7 +209,7 @@ class DataBaseSeederGeneral extends Seeder
             'remember_token' => 'random_token',
             'created_at' => '2024-03-23 12:00:00',
             'updated_at' => '2024-03-23 12:00:00',
-            'type_facture_ids' => json_encode([1, 2, 10]),
+            'type_facture_ids' => json_encode([1, 10]),
         ]);
 
         DB::table('users')->insert([
@@ -262,21 +262,10 @@ class DataBaseSeederGeneral extends Seeder
 
 
 
-        $johnDoe = User::where('idFiscale', 'smjdhf500')->first();
         $antonCarey = User::where('idFiscale', 'jsdfsmlkdfdgddf12311')->first();
         $benjiThomas = User::where('idFiscale', '2sdqfklghf455')->first();
 
 
-        Reclamation::create([
-            'title' => 'Réclamation fournisseur John Doe',
-            'text' => 'Description de la réclamation pour John Doe',
-            'idFiscale' => $johnDoe->idFiscale,
-            'numFacture' => 'FAC123',
-            'numCommande' => '123',
-            'etat' => 'Recu',
-            'attached_file' => 'chemin/vers/le/fichier_joint.pdf',
-            'fournisseur_id' => $johnDoe->id,
-        ]);
 
         Reclamation::create([
             'title' => 'Réclamation fournisseur Anton Carey',
@@ -397,12 +386,14 @@ class DataBaseSeederGeneral extends Seeder
             'isArchived' => false,
             'objet_facture_id' => 1,
             'pieces_jointes' => [1, 2, 3],
-            'etat_id' => 1,
+            'etat_id' => 2,
             'borderau_id' => 1,
             'bon_de_commande_id' => null,
             'created_by' => 'Fournisseur',
             'fournisseur_id' => 3, // Remplacez par l'ID du fournisseur Anton Carey
             'agent_bof_id' => null,
+            'created_at' => '2024-03-28 10:44:58',
+            'validePar' => "Agent Bof"
         ]);
 
         for ($i = 0; $i <= 10; $i++) {
@@ -439,18 +430,20 @@ class DataBaseSeederGeneral extends Seeder
             'consumption_period' => 'Février 2024',
             'currency' => 'TND',
             'amount' => 1500.75,
-            'type_facture_id' => 1,
+            'type_facture_id' => 2,
             'invoice_file_path' => 'path/vers/le/fichier/facture_anton_carey.pdf',
             'reception_date' => now(),
             'payment_period' => '60 jours',
             'isArchived' => false,
             'objet_facture_id' => 1,
-            'etat_id' => 1,
+            'etat_id' => 2,
             'borderau_id' => 1,
             'bon_de_commande_id' => null,
             'created_by' => 'Fournisseur',
             'fournisseur_id' => 3, // Remplacez par l'ID du fournisseur Anton Carey
             'agent_bof_id' => null,
+            'created_at' => "2024-03-27 10:44:58",
+            'validePar' => "Agent Bof"
         ]);
 
         // Facture pour le fournisseur Benji Thomas
@@ -469,12 +462,13 @@ class DataBaseSeederGeneral extends Seeder
             'payment_period' => '60 jours',
             'isArchived' => false,
             'objet_facture_id' => 1,
-            'etat_id' => 1,
+            'etat_id' => 2,
             'borderau_id' => 1,
             'bon_de_commande_id' => null,
             'created_by' => 'Fournisseur',
             'fournisseur_id' => 4, // Remplacez par l'ID du fournisseur Benji Thomas
             'agent_bof_id' => null,
+            'validePar' => 'Agent Ap',
         ]);
 
         Facture::create([
@@ -492,12 +486,13 @@ class DataBaseSeederGeneral extends Seeder
             'payment_period' => '60 jours',
             'isArchived' => false,
             'objet_facture_id' => 1,
-            'etat_id' => 1,
+            'etat_id' => 2,
             'borderau_id' => 1,
             'bon_de_commande_id' => null,
             'created_by' => 'Fournisseur',
             'fournisseur_id' => 4, // Remplacez par l'ID du fournisseur Benji Thomas
             'agent_bof_id' => null,
+            'validePar' => "Agent Fiscaliste"
         ]);
 
         // Facture pour le fournisseur John Doe
@@ -516,12 +511,13 @@ class DataBaseSeederGeneral extends Seeder
             'payment_period' => '60 jours',
             'isArchived' => false,
             'objet_facture_id' => 1,
-            'etat_id' => 1,
+            'etat_id' => 2,
             'borderau_id' => 1,
             'bon_de_commande_id' => null,
             'created_by' => 'Fournisseur',
             'fournisseur_id' => 2, // Remplacez par l'ID du fournisseur John Doe
             'agent_bof_id' => null,
+            'validePar' => "Agent Trésorerie"
         ]);
 
         Facture::create([
@@ -539,12 +535,13 @@ class DataBaseSeederGeneral extends Seeder
             'payment_period' => '60 jours',
             'isArchived' => false,
             'objet_facture_id' => 1,
-            'etat_id' => 1,
+            'etat_id' => 2,
             'borderau_id' => 1,
             'bon_de_commande_id' => null,
             'created_by' => 'Fournisseur',
             'fournisseur_id' => 2, // Remplacez par l'ID du fournisseur John Doe
             'agent_bof_id' => null,
+            'validePar' => "Agent Bof"
         ]);
 
 
@@ -557,7 +554,7 @@ class DataBaseSeederGeneral extends Seeder
             'idErp' => 1,
             'delai_paiement' => '30 jours',
             'hasInvoice' => 1,
-            'four_idFiscale' => 'smjdhf500',
+            'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
         ]);
 
         BonDeCommande::create([
@@ -566,7 +563,7 @@ class DataBaseSeederGeneral extends Seeder
             'idErp' => 1,
             'delai_paiement' => '30 jours',
             'hasInvoice' => 1,
-            'four_idFiscale' => 'smjdhf500',
+            'four_idFiscale' => 'jsdfsmlkdfdgddf12311',
         ]);
 
         // Créer un bon de commande pour le fournisseur Anton Carey
