@@ -301,6 +301,7 @@ class DataBaseSeederGeneral extends Seeder
         Etat::create(['name_etat' => 'Attente']);
         Etat::create(['name_etat' => 'Accepté']);
         Etat::create(['name_etat' => 'Refusé']);
+        
 
 
 
