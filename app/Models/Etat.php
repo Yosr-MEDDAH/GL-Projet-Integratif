@@ -15,4 +15,9 @@ class Etat extends Model
     {
         return $this->hasMany(Facture::class);
     }
+
+    public function etapes()
+    {
+        return $this->hasMany(Etapes::class);
+    }
 }

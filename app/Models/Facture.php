@@ -58,6 +58,11 @@ class Facture extends Model
         return $this->belongsTo(BonDeCommande::class);
     }
 
+    public function etapes()
+    {
+        return $this->hasMany(Etapes::class);
+    }
+
     public function objetFacture()
     {
         return $this->belongsTo(ObjetFacture::class, 'objet_facture_id');

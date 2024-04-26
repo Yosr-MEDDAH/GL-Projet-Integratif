@@ -65,6 +65,10 @@ class User extends Authenticatable implements JWTSubject
         'type_facture_ids' => 'array',
     ];
 
+    public function etapes()
+    {
+        return $this->hasMany(Etapes::class);
+    }
 
     public function role()
     {
