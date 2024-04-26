@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Etapes;
 use App\Models\Facture;
+use App\Models\PieceJointeFacture;
 use App\Models\TypesFactures;
 use App\Models\User;
 use Carbon\Carbon;
@@ -342,5 +344,102 @@ class ValidationFactureController extends Controller
                 ],
             ]);
         }
+    }
+
+
+
+
+
+
+
+
+    function invoiceToValidate(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        $facture = Facture::find($request->input('id'));
+
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => "la facture n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        $typeFacture = $facture->typeFacture()->first();
+        if ($typeFacture === null || $typeFacture->typeName === null) {
+            $facture->typeFacture = null;
+        } else {
+            $facture->typeFacture = $typeFacture;
+        }
+
+        $etat = $facture->etat()->first();
+
+        if ($etat === null || $etat->name_etat === null) {
+            $facture->etat = null;
+        } else {
+            $facture->etat = $etat;
+        }
+
+        if ($facture->fournisseur_id !== null) {
+            $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
+            $facture->createdBy = $user;
+        } else {
+            $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->agent_bof_id)->first();
+            $facture->createdBy = $user;
+        }
+
+        $periodePaiement = intval(preg_replace('/[^0-9]/', '', $facture->payment_period));
+
+        if ($periodePaiement === 0) {
+            $periodePaiement = 60;
+        }
+        $dateCreation = Carbon::parse($facture->created_at);
+        $dateLimitePaiement = $dateCreation->addDays($periodePaiement);
+        $joursRestants = $dateLimitePaiement->diffInDays(Carbon::now());
+        $joursÉcoulés = Carbon::now()->diffInDays($dateCreation);
+        $pourcentageJoursRestants = round(($joursÉcoulés / $periodePaiement) * 100, 2);
+        $pourcentageJoursPassés = round(100 - $pourcentageJoursRestants, 2);
+        $facture->progress = [
+            'joursRestantsPourPaiement' => $joursRestants,
+            'pourcentageJoursPassés' => $pourcentageJoursPassés,
+            'pourcentageJoursRestants' => $pourcentageJoursRestants
+        ];
+
+        $piecesJointes = collect($facture->pieces_jointes)->values()->all();
+        $piece_jointes_name = [];
+        foreach ($piecesJointes as $piecesJointe) {
+            $piece_jointes_name[] = PieceJointeFacture::find($piecesJointe)->namePJ;
+        }
+
+        $facture->pieceJointeNom = $piece_jointes_name;
+        if ($facture->fournisseur_id !== null) {
+            $fournisseur = User::find($facture->fournisseur_id);
+        } else {
+            $fournisseur = null;
+        }
+        $steps = Etapes::find($facture->fournisseur_id);
+        return response()->json([
+            'success' => true,
+            'message' => "voila la facture",
+            "data" => [
+                "facture" => $facture,
+                "fournisseur" => $fournisseur,
+                "timeline" => $steps,
+            ]
+        ]);
     }
 }
