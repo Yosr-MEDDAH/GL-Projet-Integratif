@@ -33,6 +33,7 @@ return new class extends Migration
             $table->unsignedBigInteger('etat_id')->nullable(); // Clé étrangère pour l'état de la facture
             $table->foreign('etat_id')->references('id')->on('etats')->onDelete('set null'); // Référence à la table des états
             $table->string('validePar')->nullable();
+            $table->json('motif_rejet')->nullable();
             $table->unsignedBigInteger('borderau_id')->nullable(); // Clé étrangère pour le bordereau
             $table->foreign('borderau_id')->references('id')->on('bordereaux')->onDelete('set null');
             $table->unsignedBigInteger('bon_de_commande_id')->nullable();

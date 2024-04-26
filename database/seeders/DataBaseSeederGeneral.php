@@ -6,6 +6,7 @@ use App\Models\BonDeCommande;
 use App\Models\Bordereau;
 use App\Models\Etat;
 use App\Models\Facture;
+use App\Models\MotifDeRejet;
 use App\Models\ObjetFacture;
 use App\Models\PieceJointeFacture;
 use App\Models\Reclamation;
@@ -301,7 +302,7 @@ class DataBaseSeederGeneral extends Seeder
         Etat::create(['name_etat' => 'Attente']);
         Etat::create(['name_etat' => 'Accepté']);
         Etat::create(['name_etat' => 'Refusé']);
-        
+
 
 
 
@@ -695,6 +696,25 @@ class DataBaseSeederGeneral extends Seeder
             DB::table('types_factures')->insert([
                 'typeName' => $typeName,
             ]);
+        }
+
+
+        $motifs = [
+            'Manque PV',
+            'Manque BL',
+            'Manque fiche de présences',
+            'Manque copie du PO',
+            'Vice de forme de la facture : Sans cachet',
+            'Vice de forme de la facture : Raison sociale',
+            'Vice de forme de la facture : sans numéro facture',
+            'Nom du FR erroné',
+            'PO erroné',
+            'Facture sans TVA',
+            'Montant facture non conforme au PO'
+        ];
+
+        foreach ($motifs as $motif) {
+            MotifDeRejet::create(['nomMotif' => $motif]);
         }
     }
 }
