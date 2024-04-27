@@ -35,7 +35,7 @@ class ValidationFactureController extends Controller
 
         //agent bof
         if ($role->id === 2) {
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'created_by', 'validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
                 ->where('etat_id', 1);
             if ($request->input('numero') || $request->input('idFiscale') || $request->input('type') || $request->input('jours')) {
                 $factures->where('number', 'LIKE', '%' . $request->input('numero') . '%');
@@ -73,6 +73,7 @@ class ValidationFactureController extends Controller
 
                 if ($facture->fournisseur_id !== null) {
                     $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
+                    $user->role_name = $facture->created_by;
                     $facture->createdBy = $user;
                 } else {
                     $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->agent_bof_id)->first();
@@ -112,7 +113,7 @@ class ValidationFactureController extends Controller
 
         //agent Ap
         if ($role->id === 4) {
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'created_by', 'validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
                 ->where('etat_id', 2)
                 ->where('validePar', 'Agent Bof')
                 ->whereIn('type_facture_id', $user->type_facture_ids);
@@ -154,6 +155,7 @@ class ValidationFactureController extends Controller
 
                 if ($facture->fournisseur_id !== null) {
                     $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
+                    $user->role_name = $facture->created_by;
                     $facture->createdBy = $user;
                 } else {
                     $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->agent_bof_id)->first();
@@ -191,7 +193,7 @@ class ValidationFactureController extends Controller
 
         // Agent Fiscaliste 
         if ($role->id === 5) {
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'created_by', 'validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
                 ->where('etat_id', 2)
                 ->where('validePar', 'Agent Ap')
                 ->whereIn('type_facture_id', $user->type_facture_ids);
@@ -233,6 +235,7 @@ class ValidationFactureController extends Controller
 
                 if ($facture->fournisseur_id !== null) {
                     $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
+                    $user->role_name = $facture->created_by;
                     $facture->createdBy = $user;
                 } else {
                     $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->agent_bof_id)->first();
@@ -271,7 +274,7 @@ class ValidationFactureController extends Controller
 
         //agent trésorerie
         if ($role->id === 6) {
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'created_by', 'validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
                 ->where('etat_id', 2)
                 ->where('validePar', 'Agent Fiscaliste')
                 ->whereIn('type_facture_id', $user->type_facture_ids);
@@ -297,7 +300,7 @@ class ValidationFactureController extends Controller
             $factures = $factures->paginate($nb, ['*'], 'page', $page);
 
             /*
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'created_by', 'validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
                 ->where('etat_id', 2)
                 ->where('validePar', 'Agent Fiscaliste')
                 ->whereIn('type_facture_id', $user->type_facture_ids);
@@ -345,6 +348,7 @@ $factures = $factures->paginate($nb, ['*'], 'page', $page);
 
                 if ($facture->fournisseur_id !== null) {
                     $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
+                    $user->role_name = $facture->created_by;
                     $facture->createdBy = $user;
                 } else {
                     $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->agent_bof_id)->first();
@@ -430,6 +434,7 @@ $factures = $factures->paginate($nb, ['*'], 'page', $page);
 
         if ($facture->fournisseur_id !== null) {
             $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
+            $user->role_name = $facture->created_by;
             $facture->createdBy = $user;
         } else {
             $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->agent_bof_id)->first();
@@ -496,7 +501,7 @@ $factures = $factures->paginate($nb, ['*'], 'page', $page);
         $nb = $request->query('nb', 10);
 
         $facture = Facture::find($request->input('id'));
-
+        //dd($request->input('id'));
         if (!$facture) {
             return response()->json([
                 'success' => false,
@@ -545,7 +550,7 @@ $factures = $factures->paginate($nb, ['*'], 'page', $page);
             ]);
             return response()->json([
                 'success' => true,
-                'message' => "la facture est validé par :" . $user->name,
+                'message' => "la facture est validé par : " . $user->name,
                 'data' => []
             ]);
         }
@@ -571,7 +576,7 @@ $factures = $factures->paginate($nb, ['*'], 'page', $page);
             ]);
             return response()->json([
                 'success' => true,
-                'message' => "la facture est refusé par :" . $user->name,
+                'message' => "la facture est refusé par : " . $user->name,
                 'data' => []
             ]);
         }
