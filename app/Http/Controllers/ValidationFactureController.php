@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BonDeCommande;
 use App\Models\Etapes;
 use App\Models\Facture;
 use App\Models\MotifDeRejet;
+use App\Models\ObjetFacture;
 use App\Models\PieceJointeFacture;
 use App\Models\Role;
 use App\Models\TypesFactures;
@@ -35,7 +37,7 @@ class ValidationFactureController extends Controller
 
         //agent bof
         if ($role->id === 2) {
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by', 'validePar', 'payment_period')
                 ->where('etat_id', 1);
             if ($request->input('numero') || $request->input('idFiscale') || $request->input('type') || $request->input('jours')) {
                 $factures->where('number', 'LIKE', '%' . $request->input('numero') . '%');
@@ -113,7 +115,7 @@ class ValidationFactureController extends Controller
 
         //agent Ap
         if ($role->id === 4) {
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by', 'validePar', 'payment_period')
                 ->where('etat_id', 2)
                 ->where('validePar', 'Agent Bof')
                 ->whereIn('type_facture_id', $user->type_facture_ids);
@@ -193,7 +195,7 @@ class ValidationFactureController extends Controller
 
         // Agent Fiscaliste 
         if ($role->id === 5) {
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by', 'validePar', 'payment_period')
                 ->where('etat_id', 2)
                 ->where('validePar', 'Agent Ap')
                 ->whereIn('type_facture_id', $user->type_facture_ids);
@@ -274,7 +276,7 @@ class ValidationFactureController extends Controller
 
         //agent trésorerie
         if ($role->id === 6) {
-            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by','validePar', 'payment_period')
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by', 'validePar', 'payment_period')
                 ->where('etat_id', 2)
                 ->where('validePar', 'Agent Fiscaliste')
                 ->whereIn('type_facture_id', $user->type_facture_ids);
@@ -465,19 +467,54 @@ $factures = $factures->paginate($nb, ['*'], 'page', $page);
         }
 
         $facture->pieceJointeNom = $piece_jointes_name;
+        $objet = ObjetFacture::select('id', 'objet_name')->find($facture->objet_facture_id);
+        if (!$objet || $objet->objet_name === null) {
+            $facture->nomObjetFacture = null;
+        } else {
+            $facture->nomObjetFacture = $objet->objet_name;
+        }
+        $bc =  BonDeCommande::find($facture->bon_de_commande_id);
+        if (!$bc || $bc->num_commande === null) {
+            $facture->numBonDeCommande = null;
+        } else {
+            $facture->numBonDeCommande = $bc->num_commande;
+        }
         if ($facture->fournisseur_id !== null) {
             $fournisseur = User::find($facture->fournisseur_id);
+            $fournisseur->makeHidden(['refresh_token', 'refreshToken_created_at']);
+            $agentBof = null;
         } else {
             $fournisseur = null;
+            $agentBof = User::find($facture->agent_bof_id);
+            $agentBof->makeHidden(['refresh_token', 'refreshToken_created_at']);
         }
-        $steps = Etapes::find($facture->fournisseur_id);
+        $facture->makeHidden(['objet_facture_id', 'bon_de_commande_id', 'etat_id']);
+        $steps = Etapes::where('facture_id', $facture->id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+        $stepsInvoice = $steps->mapWithKeys(function ($step, $index) {
+            $etat = optional($step->etat)->name_etat;
+            return [
+                $index + 1 => [
+                    'etat' => $etat,
+                    'ProcessedBy' => [
+                        'roleName' => $step->traitParRoleNom,
+                        'agentName' => $step->traitParNom
+                    ],
+                    'created_at' => $step->created_at
+                ]
+            ];
+        })->all();
+
+
         return response()->json([
             'success' => true,
             'message' => "voila la facture",
             "data" => [
                 "facture" => $facture,
                 "fournisseur" => $fournisseur,
-                "timeline" => $steps,
+                "agentBof" => $agentBof,
+                "timeline" => $stepsInvoice,
             ]
         ]);
     }
