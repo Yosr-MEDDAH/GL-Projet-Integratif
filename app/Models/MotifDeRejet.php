@@ -9,5 +9,7 @@ class MotifDeRejet extends Model
 {
     use HasFactory;
 
+    protected $table = "motif_de_rejets";
+
     protected $fillable = ['nomMotif'];
 }

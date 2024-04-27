@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Etapes;
 use App\Models\Facture;
+use App\Models\MotifDeRejet;
 use App\Models\PieceJointeFacture;
 use App\Models\Role;
 use App\Models\TypesFactures;
@@ -294,6 +295,38 @@ class ValidationFactureController extends Controller
                 }
             }
             $factures = $factures->paginate($nb, ['*'], 'page', $page);
+
+            /*
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'created_by', 'validePar', 'payment_period')
+                ->where('etat_id', 2)
+                ->where('validePar', 'Agent Fiscaliste')
+                ->whereIn('type_facture_id', $user->type_facture_ids);
+
+if ($request->input('numero') || $request->input('idFiscale') || $request->input('type') || $request->input('jours')) {
+    $factures->where(function ($query) use ($request) {
+        if ($request->input('numero')) {
+            $query->where('number', 'LIKE', '%' . $request->input('numero') . '%');
+        }
+
+        if ($request->input('type')) {
+            $query->where('type_facture_id', $request->input('type'));
+        }
+
+        if ($request->input('idFiscale')) {
+            $query->whereHas('fournisseur', function ($query) use ($request) {
+                $query->where('idFiscale', 'LIKE', '%' . $request->input('idFiscale') . '%');
+            });
+        }
+
+        if ($request->input('jours')) {
+            $query->whereRaw('payment_period - DATEDIFF(NOW(), created_at)-1 <= ?', [$request->input('jours')]);
+        }
+    });
+}
+
+$factures = $factures->paginate($nb, ['*'], 'page', $page);
+
+            */
             foreach ($factures as $facture) {
                 $typeFacture = $facture->typeFacture()->first();
                 if ($typeFacture === null || $typeFacture->typeName === null) {
@@ -573,4 +606,8 @@ class ValidationFactureController extends Controller
             ]
         ]);
     }
+
+
+
+    
 }

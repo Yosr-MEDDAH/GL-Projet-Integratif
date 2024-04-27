@@ -356,7 +356,7 @@ class FiltreRechercheController extends Controller
         $nb = $request->query('nb', 10);
 
 
-        if ($request->input('cree_par', "tous") === "tous") {
+        /*if ($request->input('cree_par', "tous") === "tous") {
             $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
                 ->orWhereHas('fournisseur', function ($query) use ($request) {
                     $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
@@ -381,13 +381,115 @@ class FiltreRechercheController extends Controller
                 ->where('type', $request->input('type', '3WM'))
                 ->where('etat_id', $request->input('etat', 1))
                 ->where('agent_bof_id', '!=', null)->paginate($nb, ['*'], 'page', $page);
-        }
+        }*/
 
         /*$factures = Facture::where('number', 'LIKE', '%' . "FAC3" . '%')
             ->orWhereHas('fournisseur', function ($query) use ($request) {
                 $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
             })
             ->paginate($nb, ['*'], 'page', $page);*/
+
+
+        /* if ($request->input('cree_par') === "1") {
+            $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->orWhereHas('fournisseur', function ($query) use ($request) {
+                    $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
+                })
+                ->where('type_facture_id', $request->input('type'))
+                ->where('etat_id', $request->input('etat'))
+                ->where('fournisseur_id', '!=', null)->paginate($nb, ['*'], 'page', $page);
+        } elseif ($request->input('cree_par') === "2") {
+            $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->where('type_facture_id', $request->input('type'))
+                ->where('etat_id', $request->input('etat'))
+                ->where('agent_bof_id', '!=', null)->paginate($nb, ['*'], 'page', $page);
+        } elseif ($request->input('cree_par') === "3") {
+            $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->where('type_facture_id', $request->input('type'))
+                ->where('etat_id', $request->input('etat'))
+                ->where('agent_bof_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+        } else {
+            $factures =  Facture::where('number', 'LIKE', '%' . $request->input('search') . '%')
+                ->orWhereHas('fournisseur', function ($query) use ($request) {
+                    $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
+                })
+                ->where('type_facture_id', $request->input('type'))
+                ->where('etat_id', $request->input('etat'))->paginate($nb, ['*'], 'page', $page);
+        }*/
+
+
+        $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'created_by', 'validePar', 'payment_period');
+        
+        $factures->where(function ($query) use ($request, $user) {
+            if ($request->input('cree_par') === "1") {
+                $query->where('fournisseur_id', '!=', null);
+            } elseif ($request->input('cree_par') === "2") {
+                $query->where('agent_bof_id', '!=', null);
+            } elseif ($request->input('cree_par') === "3") {
+                $query->where('agent_bof_id', $user->id);
+            }
+
+            if ($request->input('search')) {
+                $query->where(function ($query) use ($request) {
+                    $query->where('number', 'LIKE', '%' . $request->input('search') . '%')
+                        ->orWhereHas('fournisseur', function ($query) use ($request) {
+                            $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%');
+                        });
+                });
+            }
+
+            if ($request->input('type_facture')) {
+                $query->where('type_facture_id', $request->input('type_facture'));
+            }
+
+            if ($request->input('etat')) {
+                $query->where('etat_id', $request->input('etat'));
+            }
+        });
+
+        $factures = $factures->paginate($nb, ['*'], 'page', $page);
+
+        foreach ($factures as $facture) {
+            $typeFacture = $facture->typeFacture()->first();
+            if ($typeFacture === null || $typeFacture->typeName === null) {
+                $facture->typeFacture = null;
+            } else {
+                $facture->typeFacture = $typeFacture;
+            }
+
+            $etat = $facture->etat()->first();
+
+            if ($etat === null || $etat->name_etat === null) {
+                $facture->etat = null;
+            } else {
+                $facture->etat = $etat;
+            }
+
+            if ($facture->fournisseur_id !== null) {
+                $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
+                $facture->createdBy = $user;
+            } else {
+                $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->agent_bof_id)->first();
+                $facture->createdBy = $user;
+            }
+
+            $periodePaiement = intval(preg_replace('/[^0-9]/', '', $facture->payment_period));
+
+            if ($periodePaiement === 0) {
+                $periodePaiement = 60;
+            }
+            $dateCreation = Carbon::parse($facture->created_at);
+            $dateLimitePaiement = $dateCreation->addDays($periodePaiement);
+            $joursRestants = $dateLimitePaiement->diffInDays(Carbon::now());
+            $joursÉcoulés = Carbon::now()->diffInDays($dateCreation);
+            $pourcentageJoursRestants = round(($joursÉcoulés / $periodePaiement) * 100, 2);
+            $pourcentageJoursPassés = round(100 - $pourcentageJoursRestants, 2);
+            $facture->progress = [
+                'joursRestantsPourPaiement' => $joursRestants,
+                'pourcentageJoursPassés' => $pourcentageJoursPassés,
+                'pourcentageJoursRestants' => $pourcentageJoursRestants
+            ];
+        }
 
         return response()->json([
             'success' => true,
