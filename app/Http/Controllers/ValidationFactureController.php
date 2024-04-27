@@ -609,5 +609,32 @@ $factures = $factures->paginate($nb, ['*'], 'page', $page);
 
 
 
-    
+    function motifsDeRejet(Request $request)
+    {
+
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
+        }
+
+        $motifsDeRejetsNom = MotifDeRejet::all('nomMotif');
+        $motifsDeRejetsIds = MotifDeRejet::all('id');
+        $motifsDeRejets = MotifDeRejet::all('id', 'nomMotif');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'les motifs de rejets',
+            'data' => [
+                'nomsMotifsDeRejets' => $motifsDeRejetsNom,
+                'idsMotifsDeRejets' => $motifsDeRejetsIds,
+                'motifsDeRejets' => $motifsDeRejets,
+            ],
+        ]);
+    }
 }
