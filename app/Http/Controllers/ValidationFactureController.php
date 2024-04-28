@@ -450,16 +450,24 @@ class ValidationFactureController extends Controller
             ]);
         }
 
-        $typesFacturesids = collect($user->type_facture_ids)->values()->all();
-        foreach ($typesFacturesids as $typesFactureid) {
-            $typesFactures[] = TypesFactures::find($typesFactureid);
+        $allTypes = TypesFactures::all('id', 'typeName');
+        if ($role->id === 2) {
+            $userTypes = TypesFactures::all('id', 'typeName');
+        } else {
+            $typesFacturesids = collect($user->type_facture_ids)->values()->toArray();
+            $userTypes = [];
+            foreach ($typesFacturesids as $typesFactureid) {
+                $userTypes[] = TypesFactures::select('id', 'typeName')->where('id', $typesFactureid)->get();
+            }
+            $userTypes = array_map('json_decode', $userTypes);
+            $userTypes = array_merge(...$userTypes);
         }
-
         return response()->json([
             'success' => true,
             'message' => 'les types factures',
             'data' => [
-                'TypesFactures' => $typesFactures,
+                'allTypes' => $allTypes,
+                'userTypes' => $userTypes,
             ]
         ]);
     }

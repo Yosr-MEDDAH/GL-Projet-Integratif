@@ -8,21 +8,21 @@ return [
 
         'image' => [
             'driver' => 'local',
-            'root' => "C:\Users\yefer\Desktop\storage",
-            //'root' => storage_path("app/storage"),
+            //'root' => "C:\Users\yefer\Desktop\storage",
+            'root' => storage_path("app/storage"),
             'throw' => false,
         ],
 
         'facture' => [
             'driver' => 'local',
-            'root' => "C:\Users\yefer\Desktop\mes_bordreaux",
-            //'root' => storage_path("app/mes_bordreaux"),
+            //'root' => "C:\Users\yefer\Desktop\mes_bordreaux",
+            'root' => storage_path("app/mes_bordreaux"),
         ],
 
         'reclamation' => [
             'driver' => 'local',
-            'root' => "C:\Users\yefer\Desktop\storage",
-            //'root' => storage_path("app/storage"),
+            //'root' => "C:\Users\yefer\Desktop\storage",
+            'root' => storage_path("app/storage"),
         ],
 
         'public' => [
