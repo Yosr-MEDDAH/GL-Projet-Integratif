@@ -143,12 +143,20 @@ class FiltreRechercheController extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id !== 2) {
+        /*if ($role->id !== 2) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
             ], 403); // 403 accés refusé
+        }*/
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
         }
 
         $page = $request->query('page', 1);
@@ -343,12 +351,20 @@ class FiltreRechercheController extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id !== 2) {
+        /*if ($role->id !== 2) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
             ], 403); // 403 accés refusé
+        }*/
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
         }
 
 
@@ -419,7 +435,7 @@ class FiltreRechercheController extends Controller
 
 
         $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'created_by', 'validePar', 'payment_period');
-        
+
         $factures->where(function ($query) use ($request, $user) {
             if ($request->input('cree_par') === "1") {
                 $query->where('fournisseur_id', '!=', null);
@@ -760,14 +776,21 @@ class FiltreRechercheController extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id !== 2) {
+        /*if ($role->id !== 2) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
             ], 403); // 403 accés refusé
-        }
+        }*/
 
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
+        }
 
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
@@ -800,12 +823,20 @@ class FiltreRechercheController extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id !== 2) {
+        /*if ($role->id !== 2) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
             ], 403); // 403 accés refusé
+        }*/
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
         }
 
 
