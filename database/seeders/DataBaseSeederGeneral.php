@@ -713,5 +713,363 @@ class DataBaseSeederGeneral extends Seeder
         foreach ($motifs as $motif) {
             MotifDeRejet::create(['nomMotif' => $motif]);
         }
+
+
+        $data = [
+            [
+                'nomDirectionsRegionales' => 'DIRECTEUR DE ZONE GRAND TUNIS',
+                'Responsable' => 'ABDESSATTAR SALHI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE TUNIS',
+                'Responsable' => 'ABDELAMJID HELALI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE ARIANA',
+                'Responsable' => 'ABDENACEUR JEDIDI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE BEN AROUS',
+                'Responsable' => 'HAYKAL SAOUDI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE MANOUBA',
+                'Responsable' => 'HABIB SMIDA',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTEUR DE ZONE NORD',
+                'Responsable' => 'NAFAA KHEMAKHEM',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE ZAGHOUAN',
+                'Responsable' => 'FADHEL BENHADJSLAMA',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE NABEUL',
+                'Responsable' => 'LAMINE DRIDI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE BIZERTE',
+                'Responsable' => 'FAOUZI SALEM',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE KEF',
+                'Responsable' => 'FOURATI WISSEM',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE JENDOUBA',
+                'Responsable' => 'SALIM NEBILI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE BEJA',
+                'Responsable' => 'ADEL BEN HAJ AMOR',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE SILIANA',
+                'Responsable' => 'KAMEL MEDINI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTEUR DE ZONE CENTRE',
+                'Responsable' => 'HAMADI AGUIR',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE SOUSSE',
+                'Responsable' => 'MOHAMED KASSIS',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE MONASTIR',
+                'Responsable' => 'MOHAMED AYADI SBOUI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE MAHDIA',
+                'Responsable' => 'ADEL YACOUB',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE KASSERINE',
+                'Responsable' => 'ABDELKARIM CHAÂBANI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE KAIROUAN',
+                'Responsable' => 'TAREK BEN KHOUD',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE SIDI BOUZID',
+                'Responsable' => 'HEDI OUDAA',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTEUR DE ZONE SUD',
+                'Responsable' => 'NOUREDDINE SLITI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE SFAX',
+                'Responsable' => 'HEDI MAATAR',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE TATAOUINE',
+                'Responsable' => 'TAOUFIK EL MEDDEB',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE MEDENINE',
+                'Responsable' => 'ADEL MIHOUB',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE KEBILI',
+                'Responsable' => 'FERID TRABELSI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE GABES',
+                'Responsable' => 'ABDELBAKI SAADENE',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE TOZEUR',
+                'Responsable' => 'MOHAMED KAMEL FELHI',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsRegionales' => 'DIRECTION RÉGIONALE DE GAFSA',
+                'Responsable' => 'ERRIGHI IMED',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        DB::table('directions_regionales')->insert($data);
+
+
+
+        $data = [
+            [
+                'nomDirectionsCentrales' => 'DIRECTEUR GENERAL ADJOINT (DGA)',
+                'directeur' => 'NORBERT PRIHODA',
+                'profil' => 'DIRECTEUR GENERAL ADJOINT (DGA)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE DES FINANCES (DCF)',
+                'directeur' => 'OKBA MOUSSA',
+                'profil' => 'DIRECTEUR CENTRAL DES FINANCES (DCF)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'CONSEILLER JURIDIQUE GENERAL (CJG)',
+                'directeur' => 'MAJED SFAR',
+                'profil' => 'CONSEILLER JURIDIQUE GENERAL (CJG)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE COMMERCIAL ET MARKETING (DCCM)',
+                'directeur' => 'NORBERT PRIHODA',
+                'profil' => 'DIRECTEUR CENTRAL COMMERCIAL ET MARKETING (DCCM)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE DU SYSTEME D\'INFORMATION (DCSI)',
+                'directeur' => 'MOHAMED WASSEL BELHAJ',
+                'profil' => 'DIRECTEUR CENTRAL DU SYSTEME D’INFORMATION (DCSI)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE WHOLESALES & INTERNATIONAL (DCWI)',
+                'directeur' => 'HABIB BENLALLAHOM',
+                'profil' => 'DIRECTEUR CENTRAL WHOLESALES & INTERNATIONAL (DCWI)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE TECHNIQUE (DCT)',
+                'directeur' => 'LASSAAD BEN DHIAB',
+                'profil' => 'DIRECTEUR CENTRAL TECHNIQUE (DCT)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE STRATEGIE & INNOVATION (DCS&I)',
+                'directeur' => 'RIM BELHASSINE CHERIF',
+                'profil' => 'DIRECTEUR CENTRAL STRATEGIE & INNOVATION (DCS&I)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE DES ACHATS (DCA)',
+                'directeur' => 'ABDELAZIZ TORKHANI',
+                'profil' => 'DIRECTEUR CENTRAL DES ACHATS (DCA)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE DE L\'INSPECTION (DCI)',
+                'directeur' => 'MOUNIR AZIZI',
+                'profil' => 'DIRECTEUR CENTRAL DE L’INSPECTION (DCI)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE DE L\'AUDIT INTERNE (DCAI)',
+                'directeur' => 'FAKER HNID',
+                'profil' => 'DIRECTEUR CENTRAL DE L’AUDIT INTERNE (DCAI)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE DES RESSOURCES HUMAINES (DCRH)',
+                'directeur' => 'DORSAF BEJAOUI',
+                'profil' => 'DIRECTEUR CENTRAL DES RESSOURCES HUMAINES (DCRH)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION CENTRALE DES MOYENS GENERAUX (DCMG)',
+                'directeur' => 'TAREK LAMLOUM',
+                'profil' => 'DIRECTEUR CENTRAL DES MOYENS GENERAUX (DCMG)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION EXECUTIVE DE LA COMMUNICATION CORPORATE (DECC)',
+                'directeur' => 'NAJLA CHAAR',
+                'profil' => 'DIRECTION EXECUTIVE DE LA COMMUNICATION CORPORATE (DECC)',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nomDirectionsCentrales' => 'DIRECTION DU CABINET DU PDG',
+                'directeur' => 'RIADH OUNEISSA',
+                'profil' => 'DIRECTION DU CABINET DU PDG',
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        DB::table('directions_centrales')->insert($data);
+
+
+
+
+        $bailleurs = [
+            ['nomBanque' => 'THE WORLD BANK'],
+            ['nomBanque' => 'NIB'],
+            ['nomBanque' => 'THE EXPORT –IMPORT BANK OF CHINA'],
+            ['nomBanque' => 'CREDIT SUISSE'],
+            ['nomBanque' => 'EUROPEAN INVESTMENT BANK'],
+            ['nomBanque' => 'BNP PARIBAS'],
+            ['nomBanque' => 'UIB'],
+            ['nomBanque' => 'UBCI'],
+            ['nomBanque' => 'ATTIJARI BANK'],
+            ['nomBanque' => 'BANQUE DE TUNISIE'],
+            ['nomBanque' => 'BIAT'],
+            ['nomBanque' => 'AMEN BANK'],
+            ['nomBanque' => 'ATB'],
+            ['nomBanque' => 'TRESORERIE GENERALE DE TUNISIE']
+        ];
+
+        foreach ($bailleurs as $bailleur) {
+            DB::table('bailleurs')->insert([
+                'nomBanque' => $bailleur['nomBanque'],
+                'created_by' => 'Admin',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 }
