@@ -163,7 +163,7 @@ class ValidationFactureController extends Controller
             ];*/
 
             //pour calculer juste la date 
-            /*$dateCreation = Carbon::parse($facture->created_at)->startOfDay();
+            $dateCreation = Carbon::parse($facture->created_at)->startOfDay();
             $dateLimitePaiement = $dateCreation->copy()->addDays($periodePaiement); // Utilisation de copy() pour éviter la modification de la date de création
             $joursRestants = $dateLimitePaiement->diffInDays(Carbon::now());
             $joursÉcoulés = Carbon::now()->diffInDays($dateCreation);
@@ -173,7 +173,7 @@ class ValidationFactureController extends Controller
                 'joursRestantsPourPaiement' => $joursRestants,
                 'pourcentageJoursPassés' => $pourcentageJoursPassés,
                 'pourcentageJoursRestants' => $pourcentageJoursRestants
-            ];*/
+            ];
         }
 
         return response()->json([
