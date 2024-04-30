@@ -16,10 +16,10 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->default("12345678");
             $table->string('phone');
             $table->string('image')->nullable();
-            $table->boolean('isActive');
+            $table->boolean('isActive')->default(1);
             $table->unsignedBigInteger('code_2FA')->nullable();
             $table->timestamp('code_2fa_created_at')->nullable();
             $table->string('refresh_token')->nullable();

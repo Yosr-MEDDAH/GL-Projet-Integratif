@@ -137,6 +137,7 @@ Route::controller(FiltreRechercheController::class)->group(function () {
 
 Route::controller(AdministrateurController::class)->group(function () {
     Route::post('update/default/picture_profile', 'storeDefaultProfilePicture')->middleware('jwt.auth');
+    Route::post('createAgent', 'createAgent')->middleware('jwt.auth');
 });
 
 

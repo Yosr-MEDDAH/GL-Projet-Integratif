@@ -314,7 +314,8 @@ class ValidationFactureController extends Controller
                     'etat' => $etat,
                     'ProcessedBy' => [
                         'roleName' => $step->traitParRoleNom,
-                        'agentName' => $step->traitParNom
+                        'agentName' => $step->traitParNom,
+                        'agentEmail' => User::select('email')->where('id', $step->traitParId)->first()->email,
                     ],
                     'created_at' => $step->created_at
                 ]
@@ -384,7 +385,19 @@ class ValidationFactureController extends Controller
         if ($facture->validePar === $role->name) {
             return  response()->json([
                 'success' => false,
-                'message' => "la facture est déja en cours de traitemebt par un autre agent",
+                'message' => "la facture est déja en cours de traitement par un autre agent",
+                'data' => [],
+            ]);
+        }
+
+        $etape = Etapes::where('facture_id', $request->input('id'))
+            ->where('traitParRoleNom', $role->name)
+            ->first();
+
+        if ($etape) {
+            return  response()->json([
+                'success' => false,
+                'message' => "la facture est déja en cours de traitement par un autre agent",
                 'data' => [],
             ]);
         }
