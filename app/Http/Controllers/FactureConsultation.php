@@ -49,7 +49,10 @@ class FactureConsultation extends Controller
 
         if ($etat === null || $etat->name_etat === null) {
             $facture->etat = null;
-        } else {
+        } /*elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+            $facture->etat->id = 4;
+            $facture->etat->name_etat = "En Cours";
+        } */ else {
             $facture->etat = $etat;
         }
 
