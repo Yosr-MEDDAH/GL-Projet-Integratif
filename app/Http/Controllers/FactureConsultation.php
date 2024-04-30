@@ -49,10 +49,10 @@ class FactureConsultation extends Controller
 
         if ($etat === null || $etat->name_etat === null) {
             $facture->etat = null;
-        } /*elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+        } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
             $facture->etat->id = 4;
             $facture->etat->name_etat = "En Cours";
-        } */ else {
+        } else {
             $facture->etat = $etat;
         }
 
@@ -125,7 +125,7 @@ class FactureConsultation extends Controller
             $agentBof = User::find($facture->agent_bof_id);
             $agentBof->makeHidden(['refresh_token', 'refreshToken_created_at']);
         }
-        $facture->makeHidden(['objet_facture_id', 'bon_de_commande_id', 'etat_id']);
+        $facture->makeHidden(['objet_facture_id', 'bon_de_commande_id']);
         $steps = Etapes::where('facture_id', $facture->id)
             ->orderBy('created_at', 'asc')
             ->get();
@@ -176,10 +176,14 @@ class FactureConsultation extends Controller
             $factures = Facture::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
             foreach ($factures as $facture) {
                 $etat = $facture->etat()->first();
+
                 if ($etat === null || $etat->name_etat === null) {
                     $facture->etat = null;
-                } else {
-                    $facture->etat = $etat->name_etat;
+                } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+                    $facture->etat->id = 4;
+                    $facture->etat->name_etat = "En Cours";
+                }  else {
+                    $facture->etat = $etat;
                 }
             }
             return response()->json([
@@ -197,10 +201,14 @@ class FactureConsultation extends Controller
         //$factures = Facture::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page); à éliminer
         foreach ($factures as $facture) {
             $etat = $facture->etat()->first();
+
             if ($etat === null || $etat->name_etat === null) {
                 $facture->etat = null;
+            } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+                $facture->etat->id = 4;
+                $facture->etat->name_etat = "En Cours";
             } else {
-                $facture->etat = $etat->name_etat;
+                $facture->etat = $etat;
             }
         }
         return response()->json([

@@ -326,10 +326,10 @@ class FiltreRechercheController extends Controller
                     'data' => [],
                 ]);
             }
-            
+
             foreach ($factures as $facture) {
                 $facture->etat_name = $facture->etat()->first()->name_etat;
-                /*$etat = $facture->etat()->first();
+                $etat = $facture->etat()->first();
                 if ($etat === null || $etat->name_etat === null) {
                     $facture->etat = null;
                 } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
@@ -337,7 +337,7 @@ class FiltreRechercheController extends Controller
                     $facture->etat->name_etat = "En Cours";
                 } else {
                     $facture->etat = $etat;
-                }*/
+                }
             }
             return response()->json([
                 'success' => true,
@@ -485,14 +485,14 @@ class FiltreRechercheController extends Controller
 
             $etat = $facture->etat()->first();
 
-            /*  if ($etat === null || $etat->name_etat === null) {
-                    $facture->etat = null;
-                } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
-                    $facture->etat->id = 4;
-                    $facture->etat->name_etat = "En Cours";
-                } else {
-                    $facture->etat = $etat;
-                }*/
+            if ($etat === null || $etat->name_etat === null) {
+                $facture->etat = null;
+            } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+                $facture->etat->id = 4;
+                $facture->etat->name_etat = "En Cours";
+            } else {
+                $facture->etat = $etat;
+            }
 
             if ($facture->fournisseur_id !== null) {
                 $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
