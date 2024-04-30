@@ -402,7 +402,7 @@ class ValidationFactureController extends Controller
             ]);
         }
 
-        if ($request->input('etat_id') === "2") {
+        if ($request->input('etat_id') === "2") {//
             $facture->validePar = $role->name;
             $facture->etat_id = 2;
             $facture->save();
