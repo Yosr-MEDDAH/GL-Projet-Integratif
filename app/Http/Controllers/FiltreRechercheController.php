@@ -637,6 +637,9 @@ class FiltreRechercheController extends Controller
                     'data' => [],
                 ]);
             }
+            foreach ($reclamations as $reclamation) {
+                $reclamation->etat = "Reçue";
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'voici vos réclamtions',
