@@ -283,7 +283,7 @@ class FactureConsultation extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
         if ($role->id === 2) {
-            $purOrder = BonDeCommande::select('id')->where('num_commande', $request->input('num_commande'))->first()->id;
+            $purOrder = BonDeCommande::select('id')->where('num_commande', $request->input('num_commande'))->first();
         } elseif ($role->id === 3) {
             $purOrder = BonDeCommande::select('id')->where('num_commande', $request->input('num_commande'))->where('four_idFiscale', $user->idFiscale)->first();
         }
