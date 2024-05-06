@@ -182,7 +182,7 @@ class FactureConsultation extends Controller
                 } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
                     $facture->etat->id = 4;
                     $facture->etat->name_etat = "En Cours";
-                }  else {
+                } else {
                     $facture->etat = $etat;
                 }
             }
@@ -271,19 +271,22 @@ class FactureConsultation extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id !== 2) {
+        /*if ($role->id !== 2) {
             return response()->json([
                 'success' => false,
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
             ], 403); // 403 accés refusé
-        }
+        }*/
 
 
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
-
-        $purOrder = BonDeCommande::select('id')->where('num_commande', $request->input('num_commande'))->first()->id;
+        if ($role->id === 2) {
+            $purOrder = BonDeCommande::select('id')->where('num_commande', $request->input('num_commande'))->first()->id;
+        } elseif ($role->id === 3) {
+            $purOrder = BonDeCommande::select('id')->where('num_commande', $request->input('num_commande'))->where('four_idFiscale', $user->idFiscale)->first();
+        }
         if (!$purOrder) {
             return response()->json([
                 'success' => false,
@@ -302,15 +305,51 @@ class FactureConsultation extends Controller
             ]);
         }*/
 
-        $factures = Facture::where('bon_de_commande_id', $purOrder)->paginate($nb, ['*'], 'page', $page);
+        $factures = Facture::where('bon_de_commande_id', $purOrder->id)->paginate($nb, ['*'], 'page', $page);
 
         foreach ($factures as $facture) {
+            $typeFacture = $facture->typeFacture()->first();
+            if ($typeFacture === null || $typeFacture->typeName === null) {
+                $facture->typeFacture = null;
+            } else {
+                $facture->typeFacture = $typeFacture;
+            }
+
             $etat = $facture->etat()->first();
+
             if ($etat === null || $etat->name_etat === null) {
                 $facture->etat = null;
+            } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+                $facture->etat->id = 4;
+                $facture->etat->name_etat = "En Cours";
             } else {
-                $facture->etat = $etat->name_etat;
+                $facture->etat = $etat;
             }
+
+            if ($facture->fournisseur_id !== null) {
+                $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
+                $facture->createdBy = $user;
+            } else {
+                $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->agent_bof_id)->first();
+                $facture->createdBy = $user;
+            }
+
+            $periodePaiement = intval(preg_replace('/[^0-9]/', '', $facture->payment_period));
+
+            if ($periodePaiement === 0) {
+                $periodePaiement = 60;
+            }
+            $dateCreation = Carbon::parse($facture->created_at);
+            $dateLimitePaiement = $dateCreation->addDays($periodePaiement);
+            $joursRestants = $dateLimitePaiement->diffInDays(Carbon::now());
+            $joursÉcoulés = Carbon::now()->diffInDays($dateCreation);
+            $pourcentageJoursRestants = round(($joursÉcoulés / $periodePaiement) * 100, 2);
+            $pourcentageJoursPassés = round(100 - $pourcentageJoursRestants, 2);
+            $facture->progress = [
+                'joursRestantsPourPaiement' => $joursRestants,
+                'pourcentageJoursPassés' => $pourcentageJoursPassés,
+                'pourcentageJoursRestants' => $pourcentageJoursRestants
+            ];
         }
 
         return response()->json([
