@@ -629,6 +629,11 @@ class FiltreRechercheController extends Controller
                     ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                     ->orderBy('created_at', 'desc')
                     ->paginate($nb, ['*'], 'page', $page);
+                    foreach ($reclamations as $reclamation) {
+                        if($reclamation->etat === "Recu"){
+                            $reclamation->etat = "Reçue";
+                        }
+                    }
             }
             if (!$reclamations) {
                 return response()->json([
@@ -636,9 +641,6 @@ class FiltreRechercheController extends Controller
                     'message' => "cette réclamtion n'existe pas",
                     'data' => [],
                 ]);
-            }
-            foreach ($reclamations as $reclamation) {
-                $reclamation->etat = "Reçue";
             }
             return response()->json([
                 'success' => true,
@@ -695,6 +697,9 @@ class FiltreRechercheController extends Controller
                 ->where('etat', 'Recu')
                 ->orderBy('created_at', 'desc')
                 ->paginate($nb, ['*'], 'page', $page);
+            foreach ($reclamations as $reclamation) {
+                $reclamation->etat = "Reçue";
+            }
         } else {
             $reclamations = Reclamation::where(function ($query) use ($request) {
                 $query->where('idFiscale', 'LIKE', '%' . $request->input('search') . '%')
@@ -712,7 +717,7 @@ class FiltreRechercheController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'voici vos bons de commandes',
+            'message' => 'voici vos réclamations',
             'data' => [
                 'totalPages' => $reclamations->lastPage(),
                 "nombreReclamation" => $reclamations->count(),
