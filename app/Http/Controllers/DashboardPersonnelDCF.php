@@ -34,9 +34,20 @@ class DashboardPersonnelDCF extends Controller
         $anneesReclamation = Reclamation::pluck('created_at')->map(function ($date) {
             return Carbon::parse($date)->year;
         })->unique();
+
+        // DashbordData ***
+
+        //nombreTotaleFac
+        if ($request->input('anneeFacture')) {
+            $nombreTotaleFac = Facture::whereYear('created_at', $request->input('anneeFacture'))->count();
+        } else {
+            $nombreTotaleFac = Facture::count();
+        }
         return response()->json([
-            "anneesReclamation" => $anneesReclamation,
-            "anneesFacture" => $anneesFacture
+            "anneeFacture" => $request->input('anneeFacture'),
+            "nombreTotaleFac" => $nombreTotaleFac,
         ]);
+
+        
     }
 }
