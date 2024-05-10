@@ -43,11 +43,25 @@ class DashboardPersonnelDCF extends Controller
         } else {
             $nombreTotaleFac = Facture::count();
         }
-        return response()->json([
-            "anneeFacture" => $request->input('anneeFacture'),
-            "nombreTotaleFac" => $nombreTotaleFac,
-        ]);
 
-        
+        //totalFacMontantPayes
+        $montantTotale = 0;
+        if ($request->input('dateMontant')) {
+            $factures = Facture::whereDate('updated_at', $request->input('dateMontant'))
+                ->where('validePar', 'Agent Trésorerie')
+                ->where('etat_id', 2)
+                ->get();
+            $facturesNb = $factures->count();
+            foreach ($factures as $facture) {
+                $montantTotale += $facture->amount;
+            }
+        } else {
+            $factures = Facture::where('validePar', 'Agent Trésorerie')
+                ->where('etat_id', 2)
+                ->get();
+            foreach ($factures as $facture) {
+                $montantTotale += $facture->amount;
+            }
+        }
     }
 }
