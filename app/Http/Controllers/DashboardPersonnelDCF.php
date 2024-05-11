@@ -159,6 +159,14 @@ class DashboardPersonnelDCF extends Controller
             $agent->nbFacTraitees = $facTraitees;
             $agents[] = $agent;
         }
+        $otherAgents = User::select('name', 'email', 'role_id')->where('role_id', $role->id)
+            ->whereNotIn('id', $ids)
+            ->get();
+        foreach ($otherAgents as $agent) {
+            $agent->nbFacTraitees = 0;
+            $agents[] = $agent;
+            $agent->makeHidden(['role_id']);
+        }
         $agents = collect($agents)->sortByDesc('nbFacTraitees')->values()->all();
 
 
