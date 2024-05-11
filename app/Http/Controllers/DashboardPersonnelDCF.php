@@ -168,7 +168,15 @@ class DashboardPersonnelDCF extends Controller
             $recentRecalamation = Reclamation::select('title', 'etat', 'idFiscale')->orderBy('updated_at', 'desc')
                 ->take(4)
                 ->get();
-
+            foreach ($recentRecalamation as $reclamation) {
+                if ($reclamation->etat === "Recu") {
+                    $reclamation->etat = "Reçue";
+                }
+            }
+            // ReclamationsData 
+            $totaleReclamation = Reclamation::count();
+            $recalamtionRecue = Reclamation::where('etat',  'Recu')->count();
+            $recalamtionEnAttente = Reclamation::where('etat',  'En Attente')->count();
             //fournisseurs totale
             $nbFourTotaleAvecCompte = User::where('role_id', 3)->count();
             $nbFourTotaleSansCompte = FournisseursSansCompte::count();
@@ -196,6 +204,11 @@ class DashboardPersonnelDCF extends Controller
                         "fournisseur" => [
                             "nbFournisseurSansCompte" => $nbFourTotaleSansCompte,
                             "nbFournisseurAvecCompte" => $nbFourTotaleAvecCompte,
+                        ],
+                        "reclamationsData" => [
+                            'totaleReclamation' => $totaleReclamation,
+                            'recalamtionEnAttente' => $recalamtionEnAttente,
+                            'recalamtionRecue' => $recalamtionRecue,
                         ]
                     ]
                 ]
@@ -236,7 +249,7 @@ class DashboardPersonnelDCF extends Controller
                     "fournisseur" => [
                         "nbFournisseurSansCompte" => null,
                         "nbFournisseurAvecCompte" => null,
-                    ]
+                    ],
                 ]
             ]
         ]);
