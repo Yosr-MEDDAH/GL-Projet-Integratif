@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BonDeCommandeConsultation;
 use App\Http\Controllers\BordoreauConsultation;
 use App\Http\Controllers\ConfigurationController;
+use App\Http\Controllers\DashboardFournisseur;
 use App\Http\Controllers\DashboardPersonnelDCF;
 use App\Http\Controllers\FactureConsultation;
 use App\Http\Controllers\FactureController;
@@ -153,3 +154,12 @@ Route::controller(ValidationFactureController::class)->group(function () {
 Route::controller(DashboardPersonnelDCF::class)->group((function () {
     Route::get("/DashboardPersonnelDCF", "DashboardPersonnelDCF")->middleware('jwt.auth');
 }));
+
+Route::controller(DashboardPersonnelDCF::class)->group((function () {
+    Route::get("/DashboardPersonnelDCF", "DashboardPersonnelDCF")->middleware('jwt.auth');
+}));
+
+Route::controller(DashboardFournisseur::class)->group((function () {
+    Route::get("/DashboardFournisseur", "DashboardFournisseur")->middleware('jwt.auth');
+}));
+
