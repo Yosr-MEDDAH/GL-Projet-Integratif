@@ -33,11 +33,16 @@ class DashboardPersonnelDCF extends Controller
 
 
         // Config 
-        $anneesFacture = [];
-        $anneesFacture = Facture::pluck('created_at')->map(function ($date) {
-            return Carbon::parse($date)->year;
-        })->unique();
+        $anneesFacture = Facture::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
+            // $anneesFacture contiendra maintenant les années uniques présentes dans la colonne 'created_at' des factures, triées par ordre décroissant.
+
+        // $anneesFacture contiendra maintenant uniquement les années uniques présentes dans la colonne 'created_at' des factures.
+
+        // dd($anneesFacture);
         $anneesReclamation = [];
         $anneesReclamation = Reclamation::pluck('created_at')->map(function ($date) {
             return Carbon::parse($date)->year;
