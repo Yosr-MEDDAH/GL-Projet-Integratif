@@ -52,7 +52,6 @@ class DashboardFournisseur extends Controller
                 ->where('etat_id', 2)
                 ->where('fournisseur_id', $user->id)
                 ->get();
-            $facturesNb = $factures->count();
             foreach ($factures as $facture) {
                 $montantTotale += $facture->amount;
             }
@@ -171,5 +170,43 @@ class DashboardFournisseur extends Controller
                 $reclamation->etat = "Reçue";
             }
         }
+
+
+
+
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Dashboard Fournisseur',
+            'data' => [
+                'config' => [
+                    'anneesFacture' => $anneesFacture,
+                ],
+                'dashboardData' => [
+                    'nombreTotaleFac' => $nombreTotaleFac,
+                    'payments' => [
+                        'montantTotale' => $montantTotale,
+                        'montantTotaleEnAttente' => $montantTotaleEnAttente,
+                    ],
+                    'invoiceDonutData' => [
+                        'labels' => $labels,
+                        'values' => $values,
+                    ],
+                    'recentInvoices' => $recentFactures,
+                    'recentPO' => [
+                        'labelsPo' => $labelsPo,
+                        'valuesPo' => $valuesPo,
+                    ],
+                    'reclamationsData' => [
+                        'nbreclamationTotale' => $totaleReclamation,
+                        'nbrecalamtionRecue' =>  $recalamtionRecue,
+                        'nbrecalamtionEnAttente' => $recalamtionEnAttente,
+                    ],
+                    'recentReclamations' => $recentRecalamation,
+                ]
+            ]
+        ]);
     }
 }

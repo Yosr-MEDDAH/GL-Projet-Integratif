@@ -159,7 +159,7 @@ class DashboardPersonnelDCF extends Controller
             $agent->nbFacTraitees = $facTraitees;
             $agents[] = $agent;
         }
-
+        $agents = collect($agents)->sortByDesc('nbFacTraitees')->values()->all();
 
 
         // Agent Bof et RecentReclamations  

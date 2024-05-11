@@ -130,11 +130,11 @@ class AdministrateurController extends Controller
 
         if (($request->has('password'))) {
             $userData['password'] = Hash::make($request->input('password'));
-        } else {
+        } /*else {
             $password = User::generateRandomPassword();
             $userData['password'] = Hash::make($password);
             User::sendCredentialsNotification($userData['email'], $password);
-        }
+        }*/
 
         $user = User::create($userData);
 
