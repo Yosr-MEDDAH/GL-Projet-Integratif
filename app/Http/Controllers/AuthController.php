@@ -65,7 +65,8 @@ class AuthController extends Controller
         $user->refreshToken_created_at = Carbon::now();
         $user->save();
         $role = $user->role()->first();
-        $token = JWTAuth::claims(['role' => $role])->fromUser($user);
+        $role->makeHidden(['created_at', 'updated_at']);
+        $token = JWTAuth::claims(['role' => $role, 'email' => $user->email])->fromUser($user);
         return response()->json([
             'success' => true,
             'message' => 'Welcome User',

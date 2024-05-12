@@ -9,6 +9,7 @@ use App\Models\Facture;
 use App\Models\ObjetFacture;
 use App\Models\User;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -721,6 +722,15 @@ class FactureController extends Controller
             $purOrder->hasInvoice = 1;
             $purOrder->save();
         }
+
+        $emails = User::where('role_id', 2)->pluck('email')->toArray();
+        $client = new Client();
+        $response = $client->post('http://localhost:3001/notifybyMail', [
+            'json' => [
+                'emails' => $emails,
+                'message' => 'Une nouvelle facture a été ajoutée par un fournisseur'
+            ]
+        ]);
 
         return response()->json([
             'success' => true,

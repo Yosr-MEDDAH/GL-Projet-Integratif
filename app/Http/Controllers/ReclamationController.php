@@ -8,6 +8,7 @@ use App\Models\Reclamation;
 use App\Models\User;
 use Carbon\Carbon;
 use Dotenv\Validator;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -116,6 +117,15 @@ class ReclamationController extends Controller
             'attached_file' => $attachedFile,
             'etat' => 'En Attente',
             'fournisseur_id' => $user->id,
+        ]);
+
+        $emails = User::where('role_id', 2)->pluck('email')->toArray();
+        $client = new Client();
+        $response = $client->post('http://localhost:3001/notifybyMail', [
+            'json' => [
+                'emails' => $emails,
+                'message' => 'Une nouvelle réclamation a été ajoutée par un fournisseur'
+            ]
         ]);
 
         return response()->json([
@@ -394,6 +404,19 @@ class ReclamationController extends Controller
         $reclamation->update([
             'etat' => $etat,
         ]);
+
+        $reclamation = Reclamation::find($request->input('id'));
+        $emailFour = User::where('idFiscale', $reclamation->idFiscale);
+        if ($$request->input('etat') === "1") {
+            $message = "Votre réclamation intitulée " . $reclamation->title . " a été consultée par un agent BOF.";
+            $client = new Client();
+            $response = $client->post('http://localhost:3001/notifybyMail', [
+                'json' => [
+                    'emails' => $emailFour,
+                    'message' => $message
+                ]
+            ]);
+        }
 
         return response()->json([
             'success' => true,
