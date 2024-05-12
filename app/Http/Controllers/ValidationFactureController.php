@@ -439,7 +439,6 @@ class ValidationFactureController extends Controller
                     ->whereJsonContains('type_facture_ids', $typeFactureId)
                     ->pluck('email')
                     ->toArray();
-                dd($emails);
                 $client = new Client();
                 $response = $client->post('http://localhost:3001/notifybyMail', [
                     'json' => [

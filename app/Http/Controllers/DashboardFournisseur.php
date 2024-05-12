@@ -124,7 +124,7 @@ class DashboardFournisseur extends Controller
 
         //RecentInvoices
 
-        $recentFactures = Facture::select('number', 'etat_id', 'amount', 'updated_at')->where('fournisseur_id', $user->id)->orderBy('updated_at', 'desc')
+        $recentFactures = Facture::select('number', 'etat_id', 'amount', 'updated_at', 'validePar')->where('fournisseur_id', $user->id)->orderBy('updated_at', 'desc')
             ->take(4)
             ->get();
         foreach ($recentFactures as $facture) {
@@ -132,6 +132,7 @@ class DashboardFournisseur extends Controller
                 $facture->etat_id = 4;
             }
         }
+        $recentFactures->makeHidden('validePar');
 
         // Recent po
 
