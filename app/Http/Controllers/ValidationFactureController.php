@@ -414,6 +414,74 @@ class ValidationFactureController extends Controller
                 'traitParId' => $user->id,
                 'traitParNom' => $user->name,
             ]);
+            $facture = Facture::find($request->input('id'));
+            $typeFactureId = $facture->type_facture_id;
+            if ($role->id === 2 && $request->input('etat_id') === "2") {
+                $facture = Facture::find($request->input('id'));
+                $typeFactureId = $facture->type_facture_id;
+                $emails = User::where('role_id', 4)
+                    ->whereJsonContains('type_facture_ids', $typeFactureId)
+                    ->pluck('email')
+                    ->toArray();
+                $client = new Client();
+                $response = $client->post('http://localhost:3001/notifybyMail', [
+                    'json' => [
+                        'emails' => $emails,
+                        'message' => 'Vous avez une nouvelle facture à valider.'
+                    ]
+                ]);
+            }
+
+            if ($role->id === 4 && $request->input('etat_id') === "2") {
+                $facture = Facture::find($request->input('id'));
+                $typeFactureId = $facture->type_facture_id;
+                $emails = User::where('role_id', 5)
+                    ->whereJsonContains('type_facture_ids', $typeFactureId)
+                    ->pluck('email')
+                    ->toArray();
+                dd($emails);
+                $client = new Client();
+                $response = $client->post('http://localhost:3001/notifybyMail', [
+                    'json' => [
+                        'emails' => $emails,
+                        'message' => 'Vous avez une nouvelle facture à valider.'
+                    ]
+                ]);
+            }
+
+
+            if ($role->id === 5 && $request->input('etat_id') === "2") {
+                $facture = Facture::find($request->input('id'));
+                $typeFactureId = $facture->type_facture_id;
+                $emails = User::where('role_id', 6)
+                    ->whereJsonContains('type_facture_ids', $typeFactureId)
+                    ->pluck('email')
+                    ->toArray();
+                $client = new Client();
+                $response = $client->post('http://localhost:3001/notifybyMail', [
+                    'json' => [
+                        'emails' => $emails,
+                        'message' => 'Vous avez une nouvelle facture à valider.'
+                    ]
+                ]);
+            }
+
+            if ($role->id === 6 && $request->input('etat_id') === "2") {
+                $facture = Facture::find($request->input('id'));
+                if ($facture->fournisseur_id) {
+                    $fourId = $facture->fournisseur_id;
+                    $emails = User::where('id', $fourId)
+                        ->pluck('email')
+                        ->toArray();
+                    $client = new Client();
+                    $response = $client->post('http://localhost:3001/notifybyMail', [
+                        'json' => [
+                            'emails' => $emails,
+                            'message' => 'Votre facture numéro ' . $facture->number . ' a été validée et est prête à être payée.'
+                        ]
+                    ]);
+                }
+            }
             return response()->json([
                 'success' => true,
                 'message' => "la facture est validé par : " . $user->name,
@@ -421,78 +489,10 @@ class ValidationFactureController extends Controller
             ]);
         }
 
-        if ($role->id === 2 && $request->input('etat_id') === "2") {
-            $facture = Facture::find($request->input('id'));
-            $typeFactureId = $facture->type_facture_id;
-            $emails = User::where('role_id', 4)
-                ->whereHas('typeFactures', function ($query) use ($typeFactureId) {
-                    $query->where('id', $typeFactureId);
-                })
-                ->pluck('email')
-                ->toArray();
-            $client = new Client();
-            $response = $client->post('http://localhost:3001/notifybyMail', [
-                'json' => [
-                    'emails' => $emails,
-                    'message' => 'Vous avez une nouvelle facture à valider.'
-                ]
-            ]);
-        }
 
 
-        if ($role->id === 4 && $request->input('etat_id') === "2") {
-            $facture = Facture::find($request->input('id'));
-            $typeFactureId = $facture->type_facture_id;
-            $emails = User::where('role_id', 5)
-                ->whereHas('typeFactures', function ($query) use ($typeFactureId) {
-                    $query->where('id', $typeFactureId);
-                })
-                ->pluck('email')
-                ->toArray();
-            $client = new Client();
-            $response = $client->post('http://localhost:3001/notifybyMail', [
-                'json' => [
-                    'emails' => $emails,
-                    'message' => 'Vous avez une nouvelle facture à valider.'
-                ]
-            ]);
-        }
 
 
-        if ($role->id === 5 && $request->input('etat_id') === "2") {
-            $facture = Facture::find($request->input('id'));
-            $typeFactureId = $facture->type_facture_id;
-            $emails = User::where('role_id', 6)
-                ->whereHas('typeFactures', function ($query) use ($typeFactureId) {
-                    $query->where('id', $typeFactureId);
-                })
-                ->pluck('email')
-                ->toArray();
-            $client = new Client();
-            $response = $client->post('http://localhost:3001/notifybyMail', [
-                'json' => [
-                    'emails' => $emails,
-                    'message' => 'Vous avez une nouvelle facture à valider.'
-                ]
-            ]);
-        }
-
-        if ($role->id === 6 && $request->input('etat_id') === "2") {
-            $facture = Facture::find($request->input('id'));
-            if ($facture->fournisseur_id) {
-                $fourId = $facture->fournisseur_id;
-                $emails = User::where('id', $fourId)
-                    ->pluck('email')
-                    ->toArray();
-                $client = new Client();
-                $response = $client->post('http://localhost:3001/notifybyMail', [
-                    'json' => [
-                        'emails' => $emails,
-                        'message' => 'Votre facture numéro ' . $facture->numero . ' a été validée et est prête à être payée.'
-                    ]
-                ]);
-            }
-        }
 
         if ($request->input('etat_id') === "3") {
             if ($request->input('motif_rejet') === [] || !$request->input('motif_rejet')) {
@@ -523,7 +523,7 @@ class ValidationFactureController extends Controller
                 $response = $client->post('http://localhost:3001/notifybyMail', [
                     'json' => [
                         'emails' => $emails,
-                        'message' => 'Votre facture numéro ' . $facture->numero . ' a été refusée.'
+                        'message' => 'Votre facture numéro ' . $facture->number . ' a été refusée.'
                     ]
                 ]);
             }

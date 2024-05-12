@@ -406,9 +406,9 @@ class ReclamationController extends Controller
         ]);
 
         $reclamation = Reclamation::find($request->input('id'));
-        $emailFour = User::where('idFiscale', $reclamation->idFiscale);
-        if ($$request->input('etat') === "1") {
-            $message = "Votre réclamation intitulée " . $reclamation->title . " a été consultée par un agent BOF.";
+        $emailFour = User::where('idFiscale', $reclamation->idFiscale)->pluck('email')->toArray();
+        if ($request->input('etat') === "1") {
+            $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
             $client = new Client();
             $response = $client->post('http://localhost:3001/notifybyMail', [
                 'json' => [
