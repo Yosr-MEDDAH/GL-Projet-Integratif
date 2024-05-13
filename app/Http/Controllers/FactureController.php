@@ -655,9 +655,9 @@ class FactureController extends Controller
             $filePath = Carbon::now()->toDateString() . '/' .  $fileName;
             $bord->date_sent = Carbon::now();
         }
-
+        $fac = new Facture();
         if ($role_id === 3) {
-            Facture::create([
+            $fac = Facture::create([
                 'number' => $request->input('number'),
                 'invoice_name' => $request->input('invoice_name'),
                 'organization' => $request->input('organization'),
@@ -701,7 +701,7 @@ class FactureController extends Controller
             $purOrder->hasInvoice = 1;
             $purOrder->save();
         } else {
-            $fac = Facture::create([
+            Facture::create([
                 'number' => $request->input('number'),
                 'invoice_name' => $request->input('invoice_name'),
                 'organization' => $request->input('organization'),
@@ -723,40 +723,50 @@ class FactureController extends Controller
             $purOrder->hasInvoice = 1;
             $purOrder->save();
         }
-        $emails = User::where('role_id', 2)->pluck('email')->toArray();
-        $users = User::whereIn('email', $emails)->get();
-        foreach ($users as $userAg) {
-            if ($userAg->notification_toggle) {
-                $client = new Client();
-                $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
-                    'json' => [
-                        'emails' => [$userAg->email],
-                        'message' => 'Une nouvelle facture a été ajoutée par un fournisseur'
-                    ]
-                ]);
-                Notification::create([
-                    'user_id' => $userAg->id,
-                    'type' => 'FactureEnvoyee',
-                    'titre' => 'Une nouvelle facture a été envoyée',
-                    'num_facture' => $request->input('number'),
-                    'id_facture' => $fac->id,
-                    'id_reclamation' => null,
-                    'titre_reclamation' => null,
-                    'nom_creator' => $user->name,
-                ]);
-            }
-        }
-        $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
-            ->where('lu', true)
-            ->get();
-        foreach ($notificationsObsoletes as $notification) {
-            $notification->delete();
-        }
+        try {
+            $emails = User::where('role_id', 2)->pluck('email')->toArray();
+            $users = User::whereIn('email', $emails)->get();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'La facture a été ajouté avec succés',
-            'data' => [],
-        ]);
+            $client = new Client();
+            foreach ($users as $userAg) {
+                if ($userAg->notification_toggle) {
+                    $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                        'json' => [
+                            'emails' => [$userAg->email],
+                            'message' => 'Une nouvelle facture a été ajoutée par un fournisseur'
+                        ]
+                    ]);
+                    if ($response->getStatusCode() === 200) {
+                        Notification::create([
+                            'user_id' => $userAg->id,
+                            'type' => 'FactureEnvoyee',
+                            'titre' => 'Une nouvelle facture a été envoyée',
+                            'num_facture' => $request->input('number'),
+                            'id_facture' => $fac->id,
+                            'id_reclamation' => null,
+                            'titre_reclamation' => null,
+                            'nom_creator' => $user->name,
+                        ]);
+                    }
+                }
+            }
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'La facture a été ajoutée avec succès',
+                'data' => [],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => true,
+                'message' => 'La facture a été ajoutée avec succès',
+                'data' => [],
+            ]);
+        }
     }
 }

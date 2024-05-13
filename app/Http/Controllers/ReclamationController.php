@@ -108,7 +108,7 @@ class ReclamationController extends Controller
             $attachedFile = "users/" . $user->id . "/userUploads/reclamation/" .  $fileName;
         }
 
-
+        $rec = new Reclamation();
         $rec = Reclamation::create([
             'title' => $request->input('title'),
             'text' => $request->input('text'),
