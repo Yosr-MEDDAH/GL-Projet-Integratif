@@ -255,4 +255,18 @@ class InfosController extends Controller
             ]); //disk
         }
     }
+
+
+
+
+    function toggleNotification(Request $request)
+    {
+        $bool = $request->input('toggleNotif');
+        $user = JWTAuth::user();
+        $user->toggleNotif($bool);
+        return response()->json([
+            'success' => true,
+            'message' => $bool ? 'Notification activée' : 'Notification désactivée'
+        ]);
+    }
 }

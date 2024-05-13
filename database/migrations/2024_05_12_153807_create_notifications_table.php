@@ -15,7 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('content');
+            $table->string('type');
+            $table->string('titre');
+            $table->string('num_facture')->nullable();
+            $table->unsignedBigInteger('id_facture')->nullable();
+            $table->unsignedBigInteger('id_reclamation')->nullable();
+            $table->string('titre_reclamation')->nullable();
+            $table->string('nom_creator')->nullable();
             $table->boolean('lu')->default(false);
             $table->timestamps();
         });

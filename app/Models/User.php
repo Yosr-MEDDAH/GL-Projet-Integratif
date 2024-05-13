@@ -38,7 +38,8 @@ class User extends Authenticatable implements JWTSubject
         'role_id',
         'refresh_token',
         'refreshToken_created_at',
-        'type_facture_ids'
+        'type_facture_ids',
+        'notification_toggle'
     ];
 
 
@@ -70,7 +71,7 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Notification::class);
     }
-    
+
     public function etapes()
     {
         return $this->hasMany(Etapes::class);
@@ -158,6 +159,13 @@ class User extends Authenticatable implements JWTSubject
         $this->save();
     }
 
+    public function toggleNotif($bool)
+    {
+        $this->notification_toggle = $bool;
+        $this->save();
+    }
+
+
     public function getFillable()
     {
         return [
@@ -171,7 +179,7 @@ class User extends Authenticatable implements JWTSubject
             'isTwoFactorEnabled',
             'role_id',
             'refresh_token',
-            'refreshToken_created_at'
+            'refreshToken_created_at',
         ];
     }
 }

@@ -38,15 +38,16 @@ class DashboardPersonnelDCF extends Controller
             ->orderBy('year', 'desc')
             ->pluck('year');
 
-            // $anneesFacture contiendra maintenant les années uniques présentes dans la colonne 'created_at' des factures, triées par ordre décroissant.
+        // $anneesFacture contiendra maintenant les années uniques présentes dans la colonne 'created_at' des factures, triées par ordre décroissant.
 
         // $anneesFacture contiendra maintenant uniquement les années uniques présentes dans la colonne 'created_at' des factures.
 
         // dd($anneesFacture);
         $anneesReclamation = [];
-        $anneesReclamation = Reclamation::pluck('created_at')->map(function ($date) {
-            return Carbon::parse($date)->year;
-        })->unique();
+        $anneesReclamation = Reclamation::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
 
 
@@ -128,7 +129,7 @@ class DashboardPersonnelDCF extends Controller
 
 
         //RecentInvoices 
-        $recentFactures = Facture::select('number', 'etat_id')->orderBy('updated_at', 'desc')
+        $recentFactures = Facture::select('number', 'etat_id', 'validePar')->orderBy('updated_at', 'desc')
             ->take(4)
             ->get();
         foreach ($recentFactures as $facture) {
@@ -136,6 +137,7 @@ class DashboardPersonnelDCF extends Controller
                 $facture->etat_id = 4;
             }
         }
+        $recentFactures->makeHidden('validePar');
 
 
 

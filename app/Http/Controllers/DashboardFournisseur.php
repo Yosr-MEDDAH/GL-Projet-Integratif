@@ -26,10 +26,10 @@ class DashboardFournisseur extends Controller
         }
 
         // config 
-        $anneesFacture = [];
-        $anneesFacture = Facture::where('fournisseur_id', $user->id)->pluck('created_at')->map(function ($date) {
-            return Carbon::parse($date)->year;
-        })->unique();
+        $anneesFacture = Facture::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year');
 
 
 

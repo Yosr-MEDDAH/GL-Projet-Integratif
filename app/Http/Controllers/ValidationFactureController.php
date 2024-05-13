@@ -6,6 +6,7 @@ use App\Models\BonDeCommande;
 use App\Models\Etapes;
 use App\Models\Facture;
 use App\Models\MotifDeRejet;
+use App\Models\Notification;
 use App\Models\ObjetFacture;
 use App\Models\PieceJointeFacture;
 use App\Models\Role;
@@ -423,13 +424,28 @@ class ValidationFactureController extends Controller
                     ->whereJsonContains('type_facture_ids', $typeFactureId)
                     ->pluck('email')
                     ->toArray();
-                $client = new Client();
-                $response = $client->post('http://localhost:3001/notifybyMail', [
-                    'json' => [
-                        'emails' => $emails,
-                        'message' => 'Vous avez une nouvelle facture à valider.'
-                    ]
-                ]);
+                $users = User::whereIn('email', $emails)->get();
+                foreach ($users as $userAg) {
+                    if ($userAg->notification_toggle) {
+                        $client = new Client();
+                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                            'json' => [
+                                'emails' => [$userAg->email],
+                                'message' => 'Une nouvelle facture à valider.'
+                            ]
+                        ]);
+                    }
+                    Notification::create([
+                        'user_id' => $userAg->id,
+                        'type' => 'FactureAvalider',
+                        'titre' => 'Une nouvelle facture a été envoyée',
+                        'num_facture' => $facture->number,
+                        'id_facture' => $facture->id,
+                        'id_reclamation' => null,
+                        'titre_reclamation' => null,
+                        'nom_creator' => $user->name,
+                    ]);
+                }
             }
 
             if ($role->id === 4 && $request->input('etat_id') === "2") {
@@ -439,13 +455,28 @@ class ValidationFactureController extends Controller
                     ->whereJsonContains('type_facture_ids', $typeFactureId)
                     ->pluck('email')
                     ->toArray();
-                $client = new Client();
-                $response = $client->post('http://localhost:3001/notifybyMail', [
-                    'json' => [
-                        'emails' => $emails,
-                        'message' => 'Vous avez une nouvelle facture à valider.'
-                    ]
-                ]);
+                $users = User::whereIn('email', $emails)->get();
+                foreach ($users as $userAg) {
+                    if ($userAg->notification_toggle) {
+                        $client = new Client();
+                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                            'json' => [
+                                'emails' => [$userAg->email],
+                                'message' => 'Une nouvelle facture à valider.'
+                            ]
+                        ]);
+                    }
+                    Notification::create([
+                        'user_id' => $userAg->id,
+                        'type' => 'FactureAvalider',
+                        'titre' => 'Une nouvelle facture a été envoyée',
+                        'num_facture' => $facture->number,
+                        'id_facture' => $facture->id,
+                        'id_reclamation' => null,
+                        'titre_reclamation' => null,
+                        'nom_creator' => $user->name,
+                    ]);
+                }
             }
 
 
@@ -456,13 +487,28 @@ class ValidationFactureController extends Controller
                     ->whereJsonContains('type_facture_ids', $typeFactureId)
                     ->pluck('email')
                     ->toArray();
-                $client = new Client();
-                $response = $client->post('http://localhost:3001/notifybyMail', [
-                    'json' => [
-                        'emails' => $emails,
-                        'message' => 'Vous avez une nouvelle facture à valider.'
-                    ]
-                ]);
+                $users = User::whereIn('email', $emails)->get();
+                foreach ($users as $userAg) {
+                    if ($userAg->notification_toggle) {
+                        $client = new Client();
+                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                            'json' => [
+                                'emails' => [$userAg->email],
+                                'message' => 'Une nouvelle facture à valider.'
+                            ]
+                        ]);
+                    }
+                    Notification::create([
+                        'user_id' => $userAg->id,
+                        'type' => 'FactureAvalider',
+                        'titre' => 'Une nouvelle facture a été envoyée',
+                        'num_facture' => $facture->number,
+                        'id_facture' => $facture->id,
+                        'id_reclamation' => null,
+                        'titre_reclamation' => null,
+                        'nom_creator' => $user->name,
+                    ]);
+                }
             }
 
             if ($role->id === 6 && $request->input('etat_id') === "2") {
@@ -472,14 +518,35 @@ class ValidationFactureController extends Controller
                     $emails = User::where('id', $fourId)
                         ->pluck('email')
                         ->toArray();
-                    $client = new Client();
-                    $response = $client->post('http://localhost:3001/notifybyMail', [
-                        'json' => [
-                            'emails' => $emails,
-                            'message' => 'Votre facture numéro ' . $facture->number . ' a été validée et est prête à être payée.'
-                        ]
-                    ]);
+                    $users = User::whereIn('email', $emails)->get();
+                    foreach ($users as $userAg) {
+                        if ($userAg->notification_toggle) {
+                            $client = new Client();
+                            $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                                'json' => [
+                                    'emails' => [$userAg->email],
+                                    'message' => 'Votre facture numéro ' . $facture->number . ' a été validée et est prête à être payée.'
+                                ]
+                            ]);
+                        }
+                        Notification::create([
+                            'user_id' => $userAg->id,
+                            'type' => 'FactureValidee',
+                            'titre' => 'Une nouvelle facture a été validée',
+                            'num_facture' => $facture->number,
+                            'id_facture' => $facture->id,
+                            'id_reclamation' => null,
+                            'titre_reclamation' => null,
+                            'nom_creator' => $user->name,
+                        ]);
+                    }
                 }
+            }
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
             }
             return response()->json([
                 'success' => true,
@@ -487,6 +554,7 @@ class ValidationFactureController extends Controller
                 'data' => []
             ]);
         }
+
 
 
 
@@ -518,13 +586,34 @@ class ValidationFactureController extends Controller
                 $emails = User::where('id', $fourId)
                     ->pluck('email')
                     ->toArray();
-                $client = new Client();
-                $response = $client->post('http://localhost:3001/notifybyMail', [
-                    'json' => [
-                        'emails' => $emails,
-                        'message' => 'Votre facture numéro ' . $facture->number . ' a été refusée.'
-                    ]
-                ]);
+                $users = User::whereIn('email', $emails)->get();
+                foreach ($users as $userAg) {
+                    if ($userAg->notification_toggle) {
+                        $client = new Client();
+                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                            'json' => [
+                                'emails' => [$userAg->email],
+                                'message' => 'Votre facture numéro ' . $facture->number . ' a été validée et est prête à être payée.'
+                            ]
+                        ]);
+                    }
+                    Notification::create([
+                        'user_id' => $userAg->id,
+                        'type' => 'FactureRefusee',
+                        'titre' => 'Une nouvelle facture a été refusée',
+                        'num_facture' => $facture->number,
+                        'id_facture' => $facture->id,
+                        'id_reclamation' => null,
+                        'titre_reclamation' => null,
+                        'nom_creator' => $user->name,
+                    ]);
+                }
+            }
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
             }
             return response()->json([
                 'success' => true,

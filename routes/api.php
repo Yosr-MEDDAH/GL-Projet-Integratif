@@ -15,6 +15,7 @@ use App\Http\Controllers\FilterRechercheController;
 use App\Http\Controllers\FiltreRechercheController;
 use App\Http\Controllers\FournisseurAccessController;
 use App\Http\Controllers\InfosController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReclamationController;
 use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\SelectionFactureController;
@@ -49,6 +50,7 @@ Route::controller(TwoFactorAuthController::class)->prefix('2fa')->group(function
 Route::controller(InfosController::class)->group((function () {
     Route::get('user/', 'getUser')->middleware('jwt.auth');
     Route::put('user/update', 'updateGeneralInfo')->middleware('jwt.auth');
+    Route::put('user/toggleNotification', 'toggleNotification')->middleware('jwt.auth');
     Route::post('user/image', 'updateImage')->middleware('jwt.auth');
     Route::put('user/password', 'updatePassword')->middleware('jwt.auth');
     Route::get('users/{userID}/userUploads/img/{imageName}', 'getImage')->middleware('jwt.auth');
@@ -163,3 +165,9 @@ Route::controller(DashboardFournisseur::class)->group((function () {
     Route::get("/DashboardFournisseur", "DashboardFournisseur")->middleware('jwt.auth');
 }));
 
+
+Route::controller(NotificationController::class)->group((function () {
+    Route::get("/nouvellesNotifs", "notificationNonLu")->middleware('jwt.auth');
+    Route::get("/anciennesNotifs", "notificationLu")->middleware('jwt.auth');
+    Route::put("/toutLire", "tousLu")->middleware('jwt.auth');
+}));

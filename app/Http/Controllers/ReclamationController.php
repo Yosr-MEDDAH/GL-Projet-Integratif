@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BonDeCommande;
 use App\Models\Facture;
+use App\Models\Notification;
 use App\Models\Reclamation;
 use App\Models\User;
 use Carbon\Carbon;
@@ -108,7 +109,7 @@ class ReclamationController extends Controller
         }
 
 
-        Reclamation::create([
+        $rec = Reclamation::create([
             'title' => $request->input('title'),
             'text' => $request->input('text'),
             'idFiscale' => $user->idFiscale,
@@ -120,13 +121,34 @@ class ReclamationController extends Controller
         ]);
 
         $emails = User::where('role_id', 2)->pluck('email')->toArray();
-        $client = new Client();
-        $response = $client->post('http://localhost:3001/notifybyMail', [
-            'json' => [
-                'emails' => $emails,
-                'message' => 'Une nouvelle réclamation a été ajoutée par un fournisseur'
-            ]
-        ]);
+        $users = User::whereIn('email', $emails)->get();
+        foreach ($users as $userAg) {
+            if ($userAg->notification_toggle) {
+                $client = new Client();
+                $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                    'json' => [
+                        'emails' => [$userAg->email],
+                        'message' => 'Une nouvelle réclamation a été ajoutée par un fournisseur'
+                    ]
+                ]);
+            }
+            Notification::create([
+                'user_id' => $userAg->id,
+                'type' => 'ReclamationEnvoyee',
+                'titre' => 'Une nouvelle réclamation a été envoyée',
+                'num_facture' => null,
+                'id_facture' => null,
+                'id_reclamation' => $rec->id,
+                'titre_reclamation' => $request->input('title'),
+                'nom_creator' => $user->name,
+            ]);
+        }
+        $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+            ->where('lu', true)
+            ->get();
+        foreach ($notificationsObsoletes as $notification) {
+            $notification->delete();
+        }
 
         return response()->json([
             'success' => true,
@@ -409,19 +431,40 @@ class ReclamationController extends Controller
         $emailFour = User::where('idFiscale', $reclamation->idFiscale)->pluck('email')->toArray();
         if ($request->input('etat') === "1") {
             $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
-            $client = new Client();
-            $response = $client->post('http://localhost:3001/notifybyMail', [
-                'json' => [
-                    'emails' => $emailFour,
-                    'message' => $message
-                ]
+            $users = User::whereIn('email', $emailFour)->get();
+            foreach ($users as $userAg) {
+                if ($userAg->notification_toggle) {
+                    $client = new Client();
+                    $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                        'json' => [
+                            'emails' => [$userAg->email],
+                            'message' => $message
+                        ]
+                    ]);
+                }
+                Notification::create([
+                    'user_id' => $userAg->id,
+                    'type' => 'ReclamationRecue',
+                    'titre' => 'Une réclamation a été reçue',
+                    'num_facture' => null,
+                    'id_facture' => null,
+                    'id_reclamation' => $reclamation->id,
+                    'titre_reclamation' => $reclamation->title,
+                    'nom_creator' => $user->name,
+                ]);
+            }
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "etat a été changé avec succes",
+                'data' => [],
             ]);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => "etat a été changé avec succes",
-            'data' => [],
-        ]);
     }
 }
