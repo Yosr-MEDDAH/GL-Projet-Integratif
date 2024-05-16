@@ -150,4 +150,18 @@ class AdministrateurController extends Controller
             ]
         ]);
     }
+
+
+
+
+
+    function ajoutFournisseurs(Request $request)
+    {
+
+
+        $validator = Validator::make($request->all(), [
+            'name' => '',
+            'email' => '',
+        ]);
+    }
 }

@@ -120,10 +120,23 @@ class FournisseurAccessController extends Controller
             ]);
         }
 
+        $messages = [
+            'email.email' => 'L\'adresse email doit être une adresse email valide.',
+            'email.unique' => 'Cette adresse email est déjà utilisée par un autre utilisateur.',
+            'email.regex' => 'L\'adresse email doit être une adresse email valide.',
+        ];
+
         $validator = Validator::make($request->all(), [
-            'email' => 'email|string|max:255',
-            'idFiscale' => 'required|string',
-        ]);
+            'email' => [
+                'required',
+                'email',
+                'string',
+                'max:255',
+                'unique:users,email,' . $user->id,
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            ],
+            'id' => 'required|string',
+        ], $messages);
 
         if ($validator->fails()) {
             return response()->json([
