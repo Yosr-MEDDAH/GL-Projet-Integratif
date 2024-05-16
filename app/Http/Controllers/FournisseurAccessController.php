@@ -144,7 +144,7 @@ class FournisseurAccessController extends Controller
             ]);
         }
 
-        $four1 = FournisseursSansCompte::where('idFiscale', $request->input('idFiscale'))->first();
+        $four1 = FournisseursSansCompte::where('id', $request->input('id'))->first();
 
         $four1->update([
             'email' => $request->email,
