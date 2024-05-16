@@ -762,6 +762,22 @@ class FactureController extends Controller
                 'data' => [],
             ]);
         } catch (\Exception $e) {
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'FactureEnvoyee',
+                'titre' => 'Une nouvelle facture a été envoyée',
+                'num_facture' => $request->input('number'),
+                'id_facture' => $fac->id,
+                'id_reclamation' => null,
+                'titre_reclamation' => null,
+                'nom_creator' => $user->name,
+            ]);
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'La facture a été ajoutée avec succès',

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BonDeCommande;
+use App\Models\FournisseursSansCompte;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -101,13 +103,8 @@ class AdministrateurController extends Controller
                 'string',
                 'max:30',
             ],
-            'phone' => [
-                'numeric',
-                'digits_between:8,15',
-            ],
             'role_id' => 'required|in:2,4,5,6',
-            'password' => 'sometimes|min:8', // s'affiche seulement si l'admin choisi de donner lui meme le password d'agent
-            'type_facture_ids' => 'sometimes', //  s'affiche seulement si l'admin choisi de créer un agent hors bof
+            'type_facture_ids' => 'nullable', //  s'affiche seulement si l'admin choisi de créer un agent hors bof
         ], $messages);
 
         if ($validator->fails()) {
@@ -117,11 +114,10 @@ class AdministrateurController extends Controller
                 'data' => [],
             ]);
         }
-
+        // ajouter envoi d'email
         $userData = [
             'email' => $request->input('email'),
             'name' => $request->input('name'),
-            'phone' => $request->input('phone'),
             'role_id' => $request->input('role_id'),
             'image' => 'test.jpg',
             'isActive' => 1,
@@ -130,15 +126,11 @@ class AdministrateurController extends Controller
 
         if (($request->has('password'))) {
             $userData['password'] = Hash::make($request->input('password'));
-        } /*else {
-            $password = User::generateRandomPassword();
-            $userData['password'] = Hash::make($password);
-            User::sendCredentialsNotification($userData['email'], $password);
-        }*/
+        }
 
         $user = User::create($userData);
 
-        if ($request->has('type_facture_ids')) {
+        if ($request->has('type_facture_ids') && ($request->input('type_facture_ids') !== null)) {
             $user->type_facture_ids = $request->input('type_facture_ids');
             $user->save();
         }
@@ -158,10 +150,91 @@ class AdministrateurController extends Controller
     function ajoutFournisseurs(Request $request)
     {
 
+        $fournisseurs_sans_compte = $request->input('fournisseurs');
 
-        $validator = Validator::make($request->all(), [
-            'name' => '',
-            'email' => '',
+
+        $rules = [
+            '*.name' => 'required|string|max:255',
+            '*.email' => [
+                'nullable',
+                'email',
+                'string',
+                'max:255',
+                'unique:fournisseurs_sans_comptes,email',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            ],
+            '*.phone' => 'required|string|max:20',
+            '*.idErp' => 'nullable|integer',
+            '*.idFiscale' => 'nullable|string|max:50',
+            '*.adress' => 'nullable|string|max:255',
+            '*.nationnalites' => 'nullable|string|max:255',
+        ];
+
+        $validator = Validator::make($fournisseurs_sans_compte, $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation des fournisseurs.',
+                'errors' => $validator->errors(),
+            ]);
+        }
+
+        foreach ($fournisseurs_sans_compte as $fournisseurData) {
+            FournisseursSansCompte::create([
+                'name' => $fournisseurData['name'],
+                'email' => $fournisseurData['email'],
+                'phone' => $fournisseurData['phone'],
+                'idErp' => $fournisseurData['idErp'],
+                'idFiscale' => $fournisseurData['idFiscale'],
+                'adress' => $fournisseurData['adress'],
+                'nationnalites' => $fournisseurData['nationnalites'],
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Fournisseurs importés avec succès depuis le système global.'
+        ]);
+    }
+
+
+    public function ajoutBonDeCommande(Request $request)
+    {
+        $bons_de_commande = $request->input('bons_de_commande');
+
+        $rules = [
+            '*.num_commande' => 'required|integer',
+            '*.created_by' => 'nullable|string|max:255',
+            '*.idErp' => 'nullable|integer',
+            '*.delai_paiement' => 'nullable|string|max:255',
+            '*.four_idFiscale' => 'nullable|string|max:50',
+        ];
+
+        $validator = Validator::make($bons_de_commande, $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de validation des bons de commande.',
+                'errors' => $validator->errors(),
+            ]);
+        }
+
+        foreach ($bons_de_commande as $bonDeCommandeData) {
+            BonDeCommande::create([
+                'num_commande' => $bonDeCommandeData['num_commande'],
+                'created_by' => $bonDeCommandeData['created_by'],
+                'idErp' => $bonDeCommandeData['idErp'],
+                'delai_paiement' => $bonDeCommandeData['delai_paiement'],
+                'hasInvoice' => false,
+                'four_idFiscale' => $bonDeCommandeData['four_idFiscale'],
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bons de commande importés avec succès.'
         ]);
     }
 }

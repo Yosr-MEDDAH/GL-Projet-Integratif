@@ -119,21 +119,45 @@ class ReclamationController extends Controller
             'etat' => 'En Attente',
             'fournisseur_id' => $user->id,
         ]);
-
-        $emails = User::where('role_id', 2)->pluck('email')->toArray();
-        $users = User::whereIn('email', $emails)->get();
-        foreach ($users as $userAg) {
-            if ($userAg->notification_toggle) {
-                $client = new Client();
-                $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
-                    'json' => [
-                        'emails' => [$userAg->email],
-                        'message' => 'Une nouvelle réclamation a été ajoutée par un fournisseur'
-                    ]
+        try {
+            $emails = User::where('role_id', 2)->pluck('email')->toArray();
+            $users = User::whereIn('email', $emails)->get();
+            foreach ($users as $userAg) {
+                if ($userAg->notification_toggle) {
+                    $client = new Client();
+                    $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                        'json' => [
+                            'emails' => [$userAg->email],
+                            'message' => 'Une nouvelle réclamation a été ajoutée par un fournisseur'
+                        ]
+                    ]);
+                }
+                Notification::create([
+                    'user_id' => $userAg->id,
+                    'type' => 'ReclamationEnvoyee',
+                    'titre' => 'Une nouvelle réclamation a été envoyée',
+                    'num_facture' => null,
+                    'id_facture' => null,
+                    'id_reclamation' => $rec->id,
+                    'titre_reclamation' => $request->input('title'),
+                    'nom_creator' => $user->name,
                 ]);
             }
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'La réclamation a été ajouté avec succés',
+                'data' => [],
+            ]);
+        } catch (\Exception $e) {
             Notification::create([
-                'user_id' => $userAg->id,
+                'user_id' => $user->id,
                 'type' => 'ReclamationEnvoyee',
                 'titre' => 'Une nouvelle réclamation a été envoyée',
                 'num_facture' => null,
@@ -142,20 +166,22 @@ class ReclamationController extends Controller
                 'titre_reclamation' => $request->input('title'),
                 'nom_creator' => $user->name,
             ]);
-        }
-        $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
-            ->where('lu', true)
-            ->get();
-        foreach ($notificationsObsoletes as $notification) {
-            $notification->delete();
-        }
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'La réclamation a été ajouté avec succés',
-            'data' => [],
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'La réclamation a été ajouté avec succés',
+                'data' => [],
+            ]);
+        }
     }
+
+
 
 
     function getAllReclamation(Request $request)
@@ -428,31 +454,56 @@ class ReclamationController extends Controller
         ]);
 
         $reclamation = Reclamation::find($request->input('id'));
-        $emailFour = User::where('idFiscale', $reclamation->idFiscale)->pluck('email')->toArray();
-        if ($request->input('etat') === "1") {
-            $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
-            $users = User::whereIn('email', $emailFour)->get();
-            foreach ($users as $userAg) {
-                if ($userAg->notification_toggle) {
-                    $client = new Client();
-                    $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
-                        'json' => [
-                            'emails' => [$userAg->email],
-                            'message' => $message
-                        ]
+        try {
+            $emailFour = User::where('idFiscale', $reclamation->idFiscale)->pluck('email')->toArray();
+            if ($request->input('etat') === "1") {
+                $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
+                $users = User::whereIn('email', $emailFour)->get();
+                foreach ($users as $userAg) {
+                    if ($userAg->notification_toggle) {
+                        $client = new Client();
+                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                            'json' => [
+                                'emails' => [$userAg->email],
+                                'message' => $message
+                            ]
+                        ]);
+                    }
+                    Notification::create([
+                        'user_id' => $userAg->id,
+                        'type' => 'ReclamationRecue',
+                        'titre' => 'Une réclamation a été reçue',
+                        'num_facture' => null,
+                        'id_facture' => null,
+                        'id_reclamation' => $reclamation->id,
+                        'titre_reclamation' => $reclamation->title,
+                        'nom_creator' => $user->name,
                     ]);
                 }
-                Notification::create([
-                    'user_id' => $userAg->id,
-                    'type' => 'ReclamationRecue',
-                    'titre' => 'Une réclamation a été reçue',
-                    'num_facture' => null,
-                    'id_facture' => null,
-                    'id_reclamation' => $reclamation->id,
-                    'titre_reclamation' => $reclamation->title,
-                    'nom_creator' => $user->name,
+                $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                    ->where('lu', true)
+                    ->get();
+                foreach ($notificationsObsoletes as $notification) {
+                    $notification->delete();
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "etat a été changé avec succes",
+                    'data' => [],
                 ]);
             }
+        } catch (\Exception $e) {
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'ReclamationRecue',
+                'titre' => 'Une réclamation a été reçue',
+                'num_facture' => null,
+                'id_facture' => null,
+                'id_reclamation' => $reclamation->id,
+                'titre_reclamation' => $reclamation->title,
+                'nom_creator' => $user->name,
+            ]);
             $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
                 ->where('lu', true)
                 ->get();
