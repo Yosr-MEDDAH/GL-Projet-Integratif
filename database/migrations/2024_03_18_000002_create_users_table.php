@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->default("12345678");
-            $table->string('phone');
+            $table->string('phone')->nullable();
             $table->string('image')->nullable();
             $table->boolean('notification_toggle')->default(1);
             $table->boolean('isActive')->default(1);

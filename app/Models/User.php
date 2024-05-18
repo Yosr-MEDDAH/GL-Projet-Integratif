@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Notifications\NotificationCredentials;
 use App\Notifications\ResetPasswordNotification;
 use App\Notifications\TwoFactorAuthNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -163,6 +164,11 @@ class User extends Authenticatable implements JWTSubject
     {
         $this->notification_toggle = $bool;
         $this->save();
+    }
+
+    public function NotificationCredentialsAgent($email, $password)
+    {
+        return $this->notify(new NotificationCredentials($email, $password));
     }
 
 

@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\BonDeCommande;
 use App\Models\FournisseursSansCompte;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Str;
+use PhpParser\Node\NullableType;
 
 class AdministrateurController extends Controller
 {
@@ -59,9 +62,8 @@ class AdministrateurController extends Controller
 
 
 
-    function createAgent(Request $request)
+    public function createAgent(Request $request)
     {
-
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
@@ -70,7 +72,7 @@ class AdministrateurController extends Controller
                 'success' => false,
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
-            ], 403); // 403 accés refusé
+            ], 403);
         }
 
         $messages = [
@@ -82,12 +84,11 @@ class AdministrateurController extends Controller
             'email.regex' => 'Le format de l\'adresse email est invalide.',
             'name.string' => 'Le nom doit être une chaîne de caractères.',
             'name.max' => 'Le nom ne peut pas dépasser 30 caractères.',
-            'phone.numeric' => 'Le numéro de téléphone doit être un nombre.',
-            'phone.digits_between' => 'Le numéro de téléphone doit avoir entre 8 et 15 chiffres.',
             'role_id.required' => 'Le champ rôle est requis.',
             'password.required' => 'Le champ mot de passe est requis.',
-            'password.min' => 'Le mot de passe doit avoir au moins :8 caractères.',
+            'password.min' => 'Le mot de passe doit avoir au moins 8 caractères.',
             'role_id.in' => 'Le champ rôle doit être un Agent',
+            'phone.required' => 'Le champ téléphone est requis.',
         ];
 
         $validator = Validator::make($request->all(), [
@@ -96,15 +97,16 @@ class AdministrateurController extends Controller
                 'email',
                 'string',
                 'max:255',
-                'unique:users,email,' . $user->id,
+                'unique:users,email',
                 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
             ],
             'name' => [
                 'string',
                 'max:30',
             ],
+            'phone' => 'required',
             'role_id' => 'required|in:2,4,5,6',
-            'type_facture_ids' => 'nullable', //  s'affiche seulement si l'admin choisi de créer un agent hors bof
+            'type_facture_ids' => 'nullable',
         ], $messages);
 
         if ($validator->fails()) {
@@ -114,34 +116,43 @@ class AdministrateurController extends Controller
                 'data' => [],
             ]);
         }
-        // ajouter envoi d'email
+
+
+        $password = Str::random(9);
+        $hashedPassword = Hash::make($password);
+
+
         $userData = [
             'email' => $request->input('email'),
             'name' => $request->input('name'),
             'role_id' => $request->input('role_id'),
             'image' => 'test.jpg',
             'isActive' => 1,
-            'isTwoFactorEnabled' => '0',
+            'phone' => $request->input('phone'),
+            'isTwoFactorEnabled' => 0,
+            'password' => $hashedPassword,
         ];
 
-        if (($request->has('password'))) {
-            $userData['password'] = Hash::make($request->input('password'));
-        }
-
         $user = User::create($userData);
-
         if ($request->has('type_facture_ids') && ($request->input('type_facture_ids') !== null)) {
             $user->type_facture_ids = $request->input('type_facture_ids');
             $user->save();
         }
+        $user->NotificationCredentialsAgent($request->input('email'), $password);
+
         return response()->json([
             'success' => true,
             'message' => "L'agent a été créé avec succès",
             'data' => [
-                'userCredentials' => ['email' => $user->email, 'password' => $request->input('password', $password ?? null)]
+                'userCredentials' => ['email' => $user->email, 'password' => $password]
             ]
         ]);
     }
+
+
+
+
+
 
 
 
@@ -235,6 +246,162 @@ class AdministrateurController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Bons de commande importés avec succès.'
+        ]);
+    }
+
+
+    function rolesUser(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403);
+        }
+
+        $role = Role::all('id', 'name');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'les roles du systéme',
+            'data' => [
+                'role' => $role,
+            ]
+        ]);
+    }
+
+
+
+
+    function afficheUsers(Request $request)
+    {
+
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403);
+        }
+
+        $users = User::when($request->input('role_id'), function ($query, $roleId) {
+            return $query->where('role_id', $roleId);
+        })
+            ->when($request->input('email'), function ($query, $email) {
+                return $query->where('email', 'like', "%{$email}%");
+            })
+            ->get();
+        foreach ($users as $user) {
+            $user->makeHidden([
+                'password',
+                'phone',
+                'image',
+                'notification_toggle',
+                'code_2FA',
+                'code_2fa_created_at',
+                'refresh_token',
+                'refreshToken_created_at',
+                'isTwoFactorEnabled',
+                'idErp',
+                'idFiscale',
+                'adress',
+                'nationnalites',
+                'direction',
+                'type_facture_ids',
+                'remember_token',
+                'created_at',
+                'updated_at'
+            ]);
+            $user->role = [$user->role()->first()];
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'les utilisateurs',
+            'data' => [$users],
+        ]);
+    }
+
+
+    public function editUser(Request $request)
+    {
+        $user = User::find($request->input('agentId'));
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur non trouvé',
+                'data' => [],
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'email' => [
+                'email',
+                'string',
+                'max:255',
+                'unique:users,email,' . $user->id,
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            ],
+            'type_facture_ids' => 'nullable',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => [],
+            ]);
+        }
+        if ($request->has('email')) {
+            $user->email = $request->input('email');
+        }
+
+
+        if ($request->has('type_facture_ids')) {
+            $user->type_facture_ids = $request->input('type_facture_ids');
+        }
+
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Utilisateur mis à jour avec succès',
+            'data' => [],
+        ]);
+    }
+
+
+    public function toggleUserStatus(Request $request)
+    {
+        $userId = $request->input('userId');
+        $isActive = $request->input('isActive', 0); 
+
+        $user = User::find($userId);
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur non trouvé',
+                'data' => [],
+            ], 404);
+        }
+        $user->isActive = $isActive;
+        $user->save();
+
+        $statusMessage = $isActive ? 'Compte activé avec succès' : 'Compte désactivé avec succès';
+
+        return response()->json([
+            'success' => true,
+            'message' => $statusMessage,
+            'data' => [],
         ]);
     }
 }

@@ -47,6 +47,13 @@ class AuthController extends Controller
         }
 
         $user = User::where('email', $request->input('email'))->first();
+        if ($user->isActive === 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Votre Compte est désactivé, veuillez contacter l\'administrateur.',
+                'data' => []
+            ]);
+        }
         if ($user->isTwoFactorEnabled) {
             $code = $user->generateRandomCode();
             $user->code_2FA = $code;

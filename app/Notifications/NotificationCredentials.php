@@ -57,7 +57,7 @@ class NotificationCredentials extends Notification
             ->mailer('smtp')
             ->subject("Détails d'accès à notre application")
             ->greeting($greeting . ',')
-            ->line('Cher fournisseur,')
+            ->line('Cher Utilisateur,')
             ->line('Nous vous informons que votre accès à notre application a été créé avec succès.')
             ->line('Voici vos identifiants de connexion :')
             ->line('Adresse e-mail : ' . $this->email)

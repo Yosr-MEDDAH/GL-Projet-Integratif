@@ -21,23 +21,14 @@ class FournisseursSansCompte extends Model
         'adress',
         'nationnalites',
     ];
-    
+
 
 
 
     public function generateRandomPassword()
     {
         $password = null;
-        $unique = false;
-
-        while (!$unique) {
-            $password =  Str::random(9);
-            $user = User::where('refresh_token', $password)->first();
-
-            if (!$user) {
-                $unique = true;
-            }
-        }
+        $password =  Str::random(9);
         return $password;
     }
 
