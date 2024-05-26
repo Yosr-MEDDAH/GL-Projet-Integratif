@@ -291,13 +291,17 @@ class AdministrateurController extends Controller
             ], 403);
         }
 
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
         $users = User::when($request->input('role_id'), function ($query, $roleId) {
             return $query->where('role_id', $roleId);
         })
             ->when($request->input('email'), function ($query, $email) {
                 return $query->where('email', 'like', "%{$email}%");
             })
-            ->get();
+            ->paginate($nb, ['*'], 'page', $page);;
         foreach ($users as $user) {
             $user->makeHidden([
                 'password',
@@ -325,7 +329,10 @@ class AdministrateurController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'les utilisateurs',
-            'data' => [$users],
+            'data' => [
+                'totalPages' => $users->lastPage(),
+                'users' => $users->items(),
+            ],
         ]);
     }
 
@@ -382,7 +389,7 @@ class AdministrateurController extends Controller
     public function toggleUserStatus(Request $request)
     {
         $userId = $request->input('userId');
-        $isActive = $request->input('isActive', 0); 
+        $isActive = $request->input('isActive', 0);
 
         $user = User::find($userId);
 
