@@ -411,4 +411,44 @@ class AdministrateurController extends Controller
             'data' => [],
         ]);
     }
+
+
+
+    public function numberOfUsers(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403);
+        }
+
+        $total = User::count();
+        $admins = User::where('role_id', 1)->count();
+        $bofAgents = User::where('role_id', 2)->count();
+        $apAgents = User::where('role_id', 4)->count();
+        $fiscliteAgents = User::where('role_id', 5)->count();
+        $tresoererieAgents = User::where('role_id', 6)->count();
+        $fournisseurs = User::where('role_id', 3)->count();
+
+        return response()->json([
+            "success" => true,
+            'message' => "voici le nombre de chaque type utilisateur",
+            'data' => [
+                "users" => [
+                    "total" => $total,
+                    "admins" => $admins,
+                    "bofAgents" => $bofAgents,
+                    "apAgents" => $apAgents,
+                    "fiscliteAgents" => $fiscliteAgents,
+                    "tresoererieAgents" => $tresoererieAgents,
+                    "fournisseurs" => $fournisseurs,
+                ]
+            ],
+        ]);
+    }
 }
