@@ -149,7 +149,7 @@ Route::controller(AdministrateurController::class)->group(function () {
     Route::get('afficheUsers', 'afficheUsers')->middleware('jwt.auth');
     Route::get('editAgent', 'editUser')->middleware('jwt.auth');
     Route::get('toggleUserStatus', 'toggleUserStatus')->middleware('jwt.auth');
-    Route::get('numberOfUsers', 'numberOfUsers')->middleware('jwt.auth');
+    Route::get('dashboardAdmin', 'dashboardAdmin')->middleware('jwt.auth');
 });
 
 

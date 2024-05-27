@@ -457,7 +457,7 @@ class AdministrateurController extends Controller
         ]);
     }*/
 
-    public function numberOfUsers(Request $request)
+    public function dashboardAdmin(Request $request)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -484,7 +484,7 @@ class AdministrateurController extends Controller
 
         return response()->json([
             "success" => true,
-            'message' => "Voici le nombre de chaque type d'utilisateur et les informations système",
+            'message' => "voici dashboard Admin",
             'data' => [
                 "users" => [
                     "total" => $total,
