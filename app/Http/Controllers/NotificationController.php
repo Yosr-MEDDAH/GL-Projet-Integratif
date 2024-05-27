@@ -13,7 +13,10 @@ class NotificationController extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        $notifications = Notification::where('user_id', $user->id)->where('lu', 0)->get();
+        $notifications = Notification::where('user_id', $user->id)
+            ->where('lu', 0)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json([
             'success' => true,
@@ -31,7 +34,10 @@ class NotificationController extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        $notifications = Notification::where('user_id', $user->id)->where('lu', 1)->get();
+        $notifications = Notification::where('user_id', $user->id)
+            ->where('lu', 1)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json([
             'success' => true,

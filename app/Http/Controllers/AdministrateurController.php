@@ -6,6 +6,8 @@ use App\Models\BonDeCommande;
 use App\Models\FournisseursSansCompte;
 use App\Models\Role;
 use App\Models\User;
+use GuzzleHttp\Psr7\Response;
+use Illuminate\Http\Client\Response as ClientResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -414,7 +416,7 @@ class AdministrateurController extends Controller
 
 
 
-    public function numberOfUsers(Request $request)
+    /*public function numberOfUsers(Request $request)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -426,6 +428,8 @@ class AdministrateurController extends Controller
                 'data' => []
             ], 403);
         }
+
+        
 
         $total = User::count();
         $admins = User::where('role_id', 1)->count();
@@ -449,6 +453,106 @@ class AdministrateurController extends Controller
                     "fournisseurs" => $fournisseurs,
                 ]
             ],
+            'system' => []
         ]);
+    }*/
+
+    public function numberOfUsers(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403);
+        }
+
+        // Retrieve disk space information
+        $diskSpaceInfo = $this->getDiskSpaceInfo();
+
+        // Retrieve user counts
+        $total = User::count();
+        $admins = User::where('role_id', 1)->count();
+        $bofAgents = User::where('role_id', 2)->count();
+        $apAgents = User::where('role_id', 4)->count();
+        $fiscliteAgents = User::where('role_id', 5)->count();
+        $tresoererieAgents = User::where('role_id', 6)->count();
+        $fournisseurs = User::where('role_id', 3)->count();
+
+        return response()->json([
+            "success" => true,
+            'message' => "Voici le nombre de chaque type d'utilisateur et les informations système",
+            'data' => [
+                "users" => [
+                    "total" => $total,
+                    "admins" => $admins,
+                    "bofAgents" => $bofAgents,
+                    "apAgents" => $apAgents,
+                    "fiscliteAgents" => $fiscliteAgents,
+                    "tresoererieAgents" => $tresoererieAgents,
+                    "fournisseurs" => $fournisseurs,
+                ],
+                "system" => $diskSpaceInfo
+            ]
+        ]);
+    }
+
+    private function getDiskSpaceInfo()
+    {
+        // Get total space, free space, and used space
+        $totalSpace = disk_total_space('/');
+        $freeSpace = disk_free_space('/');
+        $usedSpace = $totalSpace - $freeSpace;
+
+        // Calculate the percentage of used and free space
+        $usedPercentage = ($usedSpace / $totalSpace) * 100;
+        $freePercentage = ($freeSpace / $totalSpace) * 100;
+
+        // Optional: Check specific directories (example with storage directory)
+        $storagePath = storage_path();
+        $storageDirectorySize = $this->getDirectorySize($storagePath);
+
+        // Threshold warning
+        $threshold = 10; // 10% free space threshold
+        $status = $freePercentage < $threshold ? 'Warning: Low Disk Space' : 'Disk Space Sufficient';
+
+        return [
+            'total_space' => $this->formatBytes($totalSpace),
+            'used_space' => $this->formatBytes($usedSpace),
+            'free_space' => $this->formatBytes($freeSpace),
+            'used_percentage' => round($usedPercentage, 2) . '%',
+            'free_percentage' => round($freePercentage, 2) . '%',
+            'status' => $status,
+            'directories' => [
+                'storage_directory' => $this->formatBytes($storageDirectorySize)
+            ]
+        ];
+    }
+
+    private function formatBytes($bytes, $precision = 2)
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+
+        $bytes = max($bytes, 0);
+        $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+        $pow = min($pow, count($units) - 1);
+
+        $bytes /= (1 << (10 * $pow));
+
+        return round($bytes, $precision) . ' ' . $units[$pow];
+    }
+
+    private function getDirectorySize($directory)
+    {
+        $size = 0;
+
+        foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($directory, \FilesystemIterator::SKIP_DOTS)) as $file) {
+            $size += $file->getSize();
+        }
+
+        return $size;
     }
 }

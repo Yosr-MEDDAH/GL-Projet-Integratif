@@ -601,10 +601,12 @@ class FactureController extends Controller
             'billing_date.date_format' => 'La date de facturation doit être au format : Y-m-d.',
             'payment_period.required' => 'La période de paiement est obligatoire.',
             'objet_facture_id.integer' => 'L\'ID de l\'objet de facture doit être un entier.',
+            'invoice_file_path.required' => 'Le fichier joint est obligatoire.',
+            'invoice_file_path.array' => 'Le champ du fichier joint doit être un tableau.',
             'invoice_file_path.*.required' => 'Le fichier joint est obligatoire.',
-            'invoice_file_path.*.file' => 'Le fichier joint doit être un fichier pdf.',
-            'invoice_file_path.*.mimes' => 'Les fichier joints doiventt être de type : pdf',
-            'invoice_file_path.*.max' => 'Le fichier joint ne doit pas dépasser : 100 MO',
+            'invoice_file_path.*.file' => 'Le fichier joint doit être un fichier.',
+            'invoice_file_path.*.mimes' => 'Les fichiers joints doivent être de type : pdf.',
+            'invoice_file_path.*.max' => 'Le fichier joint ne doit pas dépasser : 100 MO.',
         ];
 
         $validator = Validator::make($request->all(), [
@@ -617,7 +619,9 @@ class FactureController extends Controller
             'payment_period' => 'required|max:255', //
             'objet_facture_id' => 'integer', //
             'pieces_jointes' => 'json', //changer//
+            'invoice_file_path' => 'required|array',
             'invoice_file_path.*' => 'required|file|mimes:pdf|max:102400', //changer
+            //'id_fiscale' => 'required|string|max:255',
         ], $messages);
 
         if ($validator->fails()) {
@@ -784,5 +788,136 @@ class FactureController extends Controller
                 'data' => [],
             ]);
         }
+    }
+
+
+
+
+
+    function createInvoiceLC(Request $request) //(création facture pour fournisseur ou agent bof "facture de type 3WM")
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+        $role_id = $role->id;
+        if ($role_id !== 3 && $role_id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+
+
+        $messages = [
+            'organization.string' => 'L\'organisation doit être une chaîne de caractères.',
+            'organization.max' => 'L\'organisation ne doit pas dépasser :255 caractères.',
+            'number.required' => 'Le numéro de facture est obligatoire.',
+            'number.numeric' => 'Le numéro de facture doit être un nombre.',
+            'invoice_name.string' => 'Le nom de la facture doit être une chaîne de caractères.',
+            'invoice_name.max' => 'Le nom de la facture ne doit pas dépasser :255 caractères.',
+            'currency.required' => 'La devise est obligatoire.',
+            'currency.string' => 'La devise doit être une chaîne de caractères.',
+            'currency.max' => 'La devise ne doit pas dépasser :3 caractères.',
+            'billing_date.required' => 'La date de facturation est obligatoire.',
+            'billing_date.date_format' => 'La date de facturation doit être au format : Y-m-d.',
+            'amount.required' => 'Le montant est obligatoire.',
+            'amount.numeric' => 'Le montant doit être un nombre.',
+            'payment_period.required' => 'La période de paiement est obligatoire.',
+            'payment_period.max' => 'La période de paiement ne doit pas dépasser :255 caractères.',
+            'objet_facture_id.integer' => 'L\'ID de l\'objet de facture doit être un entier.',
+            'pieces_jointes.json' => 'Les pièces jointes doivent être au format JSON.',
+            'invoice_file_path.required' => 'Le fichier joint est obligatoire.',
+            'invoice_file_path.array' => 'Le champ du fichier joint doit être un tableau.',
+            'invoice_file_path.*.required' => 'Le fichier joint est obligatoire.',
+            'invoice_file_path.*.file' => 'Le fichier joint doit être un fichier.',
+            'invoice_file_path.*.mimes' => 'Les fichiers joints doivent être de type : pdf.',
+            'invoice_file_path.*.max' => 'Le fichier joint ne doit pas dépasser : 100 MO.',
+            'numOp.required' => 'L\'ordre de paiement est obligatoire.',
+            'numOp.string' => 'L\'ordre de paiement doit être une chaîne de caractères.',
+            'idFiscale.required' => 'L\'ID fiscale est obligatoire.',
+            'idFiscale.string' => 'L\'ID fiscale doit être une chaîne de caractères.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'organization' => 'string|max:255',
+            'number' => 'required|numeric',
+            'invoice_name' => 'string|max:255',
+            'currency' => 'required|string|max:3',
+            'billing_date' => 'required|date_format:Y-m-d',
+            'amount' => 'required|numeric',
+            'payment_period' => 'required|max:255',
+            'objet_facture_id' => 'integer',
+            'pieces_jointes' => 'json',
+            'invoice_file_path' => 'required|array',
+            'invoice_file_path.*' => 'file|mimes:pdf|max:102400',
+            'numOp' => 'required|string|max:255', // Validation pour numPo
+            'idFiscale' => 'required|string|max:255', // Validation pour idFiscale
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => [],
+            ]);
+        }
+
+        //$fourName = User::where('idFiscale', $request->input('idFiscale'))->first()->name;
+
+        $bord = Bordereau::whereDate('created_at', Carbon::today()->toDateString())->first();
+        $count = ($bord ? Facture::where('borderau_id', $bord->id)->count() : 0);
+
+        $files = $request->file('invoice_file_path');
+        $pdf = PDFMergerFacade::init();
+        foreach ($files as $file) {
+            $pdf->addPDF($file->getPathName(), 'all');
+        }
+        $fileName = 'facture_' . $request->input('number') . " " . $count = $count + 1 . ".pdf"; //. '.' . $file->getClientOriginalExtension();
+        $pdf->merge();
+
+        if (!$bord) {
+            Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $fileName, $pdf->output());
+            $filePath = Carbon::now()->toDateString() . '/' .  $fileName;
+            $bord = new Bordereau();
+            $bord->date_sent = Carbon::now();;
+            $bord->folder = Carbon::now()->toDateString();
+            $bord->status = 'En cours';
+            $bord->reference = Str::random(8) . '/' . Carbon::now()->toDateString();
+            $bord->save();
+        } else {
+            Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $fileName, $pdf->output());
+            $filePath = Carbon::now()->toDateString() . '/' .  $fileName;
+            $bord->date_sent = Carbon::now();
+        }
+
+        Facture::create([
+            'number' => $request->input('number'),
+            'invoice_name' => $request->input('invoice_name'),
+            'organization' => $request->input('organization'),
+            'billing_date' => $request->input('billing_date'),
+            'amount' => $request->input('amount'),
+            'type_facture_id' => 2,
+            'invoice_file_path' => $filePath,
+            'reception_date' => Carbon::now(),
+            'isArchived' => false,
+            'etat_id' => 1,
+            'objet_facture_id' => $request->input('objet_facture_id'),
+            'pieces_jointes' =>  json_decode($request->input('pieces_jointes'), true), //explode(',', $request->input('pieces_jointes')),
+            'borderau_id' => $bord->id,
+            'created_by' => $role->name,
+            'fournisseur_id' => null,
+            'agent_bof_id' => $user->id,
+            'numOp' => $request->input('numOp'),
+            'idFiscale' => $request->input('idFiscale'),
+            'currency' => $request->input('currency'),
+        ]);
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'La facture a été ajoutée avec succès',
+            'data' => [],
+        ]);
     }
 }

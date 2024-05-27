@@ -66,6 +66,7 @@ Route::controller(FactureController::class)->prefix('facture')->group(function (
     //Route::post('/create', 'createInvoicetest')->middleware('jwt.auth');
     Route::delete('/delete', 'deleteInvoice')->middleware('jwt.auth');
     Route::put('/update', 'updateInvoice')->middleware('jwt.auth');
+    Route::post('/createInvoiceLC', 'createInvoiceLC')->middleware('jwt.auth');
 });
 
 Route::controller(FactureConsultation::class)->group(function () {

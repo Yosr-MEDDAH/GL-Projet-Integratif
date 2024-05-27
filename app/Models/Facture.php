@@ -31,6 +31,8 @@ class Facture extends Model
         'agent_bof_id',
         'pieces_jointes',
         'objet_facture_id',
+        'numOp',
+        'idFiscale'
     ];
 
     public function typeFacture()

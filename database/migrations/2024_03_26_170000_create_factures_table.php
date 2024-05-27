@@ -27,6 +27,8 @@ return new class extends Migration
             $table->timestamp('reception_date')->nullable(); // Date de réception de la facture
             $table->string('payment_period')->nullable()->default('60 jours');
             $table->boolean('isArchived')->nullable();
+            $table->string('numOp')->nullable();
+            $table->string('idFiscale')->nullable();
             $table->json('pieces_jointes')->nullable();
             $table->unsignedBigInteger('objet_facture_id')->nullable();
             $table->foreign('objet_facture_id')->references('id')->on('objet_factures');
