@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\BonDeCommande;
+use App\Models\Facture;
+use App\Models\Fournisseur;
 use App\Models\FournisseursSansCompte;
 use App\Models\Role;
 use App\Models\User;
@@ -482,6 +484,13 @@ class AdministrateurController extends Controller
         $tresoererieAgents = User::where('role_id', 6)->count();
         $fournisseurs = User::where('role_id', 3)->count();
 
+        $enAttente = Facture::where('etat_id', 1)->count();
+        $enCours = Facture::where('etat_id', 2)->where('validePar', '!=', 'Agent Trésorerie')->count();
+        $validee = Facture::where('etat_id', 2)->where('validePar', 'Agent Trésorerie')->count();
+        $refusee = Facture::where('etat_id', 3)->count();
+
+        $nbFourTotaleSansCompte = FournisseursSansCompte::count();
+
         return response()->json([
             "success" => true,
             'message' => "voici dashboard Admin",
@@ -495,8 +504,15 @@ class AdministrateurController extends Controller
                     "tresoererieAgents" => $tresoererieAgents,
                     "fournisseurs" => $fournisseurs,
                 ],
-                "system" => $diskSpaceInfo
-            ]
+                "system" => $diskSpaceInfo,
+                "facture" => [
+                    "enAttente" => $enAttente,
+                    'enCours' => $enCours,
+                    'validee' => $validee,
+                    'refusee' => $refusee,
+                ],
+                'fournisseurEnAttente' => $nbFourTotaleSansCompte,
+            ],
         ]);
     }
 
