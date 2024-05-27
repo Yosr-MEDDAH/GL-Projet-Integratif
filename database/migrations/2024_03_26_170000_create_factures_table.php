@@ -29,6 +29,7 @@ return new class extends Migration
             $table->boolean('isArchived')->nullable();
             $table->string('numOp')->nullable();
             $table->string('idFiscale')->nullable();
+            $table->string('structureOrd')->nullable();
             $table->json('pieces_jointes')->nullable();
             $table->unsignedBigInteger('objet_facture_id')->nullable();
             $table->foreign('objet_facture_id')->references('id')->on('objet_factures');

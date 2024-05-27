@@ -32,7 +32,8 @@ class Facture extends Model
         'pieces_jointes',
         'objet_facture_id',
         'numOp',
-        'idFiscale'
+        'idFiscale',
+        'structureOrd'
     ];
 
     public function typeFacture()
