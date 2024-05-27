@@ -488,7 +488,7 @@ class AdministrateurController extends Controller
         $enCours = Facture::where('etat_id', 2)->where('validePar', '!=', 'Agent Trésorerie')->count();
         $validee = Facture::where('etat_id', 2)->where('validePar', 'Agent Trésorerie')->count();
         $refusee = Facture::where('etat_id', 3)->count();
-
+        $totale = Facture::count();
         $nbFourTotaleSansCompte = FournisseursSansCompte::count();
 
         return response()->json([
@@ -506,6 +506,7 @@ class AdministrateurController extends Controller
                 ],
                 "system" => $diskSpaceInfo,
                 "facture" => [
+                    'totale' => $totale,
                     "enAttente" => $enAttente,
                     'enCours' => $enCours,
                     'validee' => $validee,
