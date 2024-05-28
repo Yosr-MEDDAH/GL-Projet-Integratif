@@ -308,7 +308,7 @@ class DataBaseSeederGeneral extends Seeder
 
         $donneesObjetsFacture = [
             ['objet_name' => 'NOUVELLE FACTURE'],
-            ['objet_name' => 'ANNULE ET REMPLACE'],
+            ['objet_name' => 'ANNULER ET REMPLACER'],
             ['objet_name' => 'PÉNALITÉ'],
             ['objet_name' => 'PÉNALITÉ DE RETARD'],
             ['objet_name' => 'NOTE DE REMBOURSEMENT'],
@@ -330,6 +330,7 @@ class DataBaseSeederGeneral extends Seeder
 
 
         $donneesPiecesJointes = [
+            "FACTURE",
             "PV DE RÉCEPTION",
             "BON DE COMMANDE",
             "BON DE LIVRAISON",
@@ -337,6 +338,7 @@ class DataBaseSeederGeneral extends Seeder
             "APPEL À LA FACTURATION",
             "RELEVÉ CONSOMMATION",
             "CIN",
+            "Autre..."
         ];
 
 

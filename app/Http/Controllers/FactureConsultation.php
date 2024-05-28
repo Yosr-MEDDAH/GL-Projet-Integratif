@@ -125,7 +125,7 @@ class FactureConsultation extends Controller
             $agentBof = User::find($facture->agent_bof_id);
             $agentBof->makeHidden(['refresh_token', 'refreshToken_created_at']);
         }
-        $facture->makeHidden(['objet_facture_id', 'bon_de_commande_id']);
+        $facture->makeHidden(['bon_de_commande_id']);
         $steps = Etapes::where('facture_id', $facture->id)
             ->orderBy('created_at', 'asc')
             ->get();

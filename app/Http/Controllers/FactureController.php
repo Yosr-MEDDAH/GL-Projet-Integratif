@@ -377,8 +377,8 @@ class FactureController extends Controller
         ];
 
         $validator = Validator::make($request->all(), [
-            'num_commande' => 'required|numeric', // changer nom _
-            'id_fiscale' => 'required|string|max:255',
+            'num_commande' => 'numeric', // changer nom _
+            'id_fiscale' => 'string|max:255',
         ], $messages);
 
         if ($validator->fails()) {
@@ -411,11 +411,11 @@ class FactureController extends Controller
 
         //ajouter messages spécifiques ou pas ?? ********** ///////
         $validator = Validator::make($request->all(), [
-            'number' => 'required|numeric',
-            'currency' => 'required|string|max:3',
-            'billing_date' => 'required|date_format:Y-m-d', // à revoir 
-            'amount' => 'required|numeric',
-            'payment_period' => 'required|max:255',
+            'number' => 'numeric',
+            'currency' => 'string|max:3',
+            'billing_date' => 'date_format:Y-m-d', // à revoir 
+            'amount' => 'numeric',
+            'payment_period' => 'max:255',
             'objet_facture_id' => 'integer', // annuler ou non 
             //'pieces_jointes' => 'json', //changer
             // 'invoice_file_path.*' => 'required|file|mimes:pdf|max:102400', //changer
@@ -430,13 +430,13 @@ class FactureController extends Controller
             ]);
         }
 
-        if (Facture::where('number', $request->input('number'))->first()) {
+        /*if (Facture::where('number', $request->input('number'))->first()) {
             return response()->json([
                 'success' => false,
                 'message' => "vérifier le numero de la facture", // question le numero de la facture est unique ?? 
                 'data' => [],
             ]);
-        }
+        }*/
 
         if ($role->id === 3) {
             $facture->update([
@@ -452,6 +452,7 @@ class FactureController extends Controller
                 'created_by' => $role->name,
                 'fournisseur_id' => $user->id,
                 'agent_bof_id' => null,
+                'objet_facture_id' => $request->input('objet_facture_id'),
                 //'objet_facture_id' => $request->input('objet_facture_id'),
                 //'pieces_jointes' => json_decode($request->input('pieces_jointes'), true), //explode(',', $request->input('pieces_jointes')),
             ]);
@@ -469,6 +470,7 @@ class FactureController extends Controller
                 'created_by' => $role->name,
                 'fournisseur_id' => null,
                 'agent_bof_id' => $user->id,
+                'objet_facture_id' => $request->input('objet_facture_id'),
             ]);
         }
 
