@@ -209,7 +209,7 @@ class AdministrateurController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Fournisseurs importés avec succès depuis le système global.'
+            'message' => 'Fournisseurs importés avec succès .'
         ]);
     }
 
