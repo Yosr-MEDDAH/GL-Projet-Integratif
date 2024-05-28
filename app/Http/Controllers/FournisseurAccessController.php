@@ -83,7 +83,7 @@ class FournisseurAccessController extends Controller
             'password' => Hash::make($password),
             'phone' => $four1->phone,
             'image' => "test/test",
-            'isActive' => 0,
+            'isActive' => 1,
             'code_2FA' => null,
             "code_2fa_created_at" => null,
             'isTwoFactorEnabled' => 0,
