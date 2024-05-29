@@ -621,7 +621,11 @@ class AdministrateurController extends Controller
                     'phone' => $agent->phone,
                     'name' => $agent->name,
                     'isActive' => $agent->isActive,
-                    'typeFacture' => $typeFac
+                    'typeFacture' => $typeFac,
+                    'role' => [
+                        'role_id' => $agent->role_id,
+                        'role_name' => Role::find($agent->role_id)->name,
+                    ]
                 ]
             ],
         ]);
