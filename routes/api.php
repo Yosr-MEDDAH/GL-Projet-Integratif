@@ -151,7 +151,7 @@ Route::controller(AdministrateurController::class)->group(function () {
     Route::post('ajoutBonDeCommande', 'ajoutBonDeCommande')->middleware('jwt.auth');
     Route::get('rolesUser', 'rolesUser')->middleware('jwt.auth');
     Route::get('afficheUsers', 'afficheUsers')->middleware('jwt.auth');
-    Route::get('editAgent', 'editUser')->middleware('jwt.auth');
+    Route::put('editAgent', 'editUser')->middleware('jwt.auth');
     Route::get('toggleUserStatus', 'toggleUserStatus')->middleware('jwt.auth');
     Route::get('dashboardAdmin', 'dashboardAdmin')->middleware('jwt.auth');
     Route::get('afficheAgent', 'afficheAgent')->middleware('jwt.auth');
