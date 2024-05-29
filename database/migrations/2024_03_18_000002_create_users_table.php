@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('password')->default("12345678");
             $table->string('phone')->nullable();
             $table->string('image')->nullable();
-            $table->boolean('notification_toggle')->default(1);
+            $table->boolean('isNotificationsEnabled')->default(1);
+            $table->boolean('isRealTimeDashboardEnabled')->default(0);
             $table->boolean('isActive')->default(1);
             $table->unsignedBigInteger('code_2FA')->nullable();
             $table->timestamp('code_2fa_created_at')->nullable();

@@ -7,6 +7,7 @@ use App\Models\Facture;
 use App\Models\Fournisseur;
 use App\Models\FournisseursSansCompte;
 use App\Models\Role;
+use App\Models\TypesFactures;
 use App\Models\User;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Client\Response as ClientResponse;
@@ -571,5 +572,58 @@ class AdministrateurController extends Controller
         }
 
         return $size;
+    }
+
+
+
+
+
+    function afficheAgent(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403);
+        }
+
+        $agent = User::find($request->input('agentID'));
+
+        if (!$agent) {
+            return response()->json([
+                'success' => false,
+                'message' => "L'utilisateur n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        $typeFac = [];
+        if ($agent->type_facture_ids) {
+            foreach ($agent->type_facture_ids as $id) {
+                $type = TypesFactures::find($id);
+                if ($type) {
+                    $typeFac[] = ['values' => $type->id, 'label' => $type->typeName];
+                }
+            }
+        }
+
+
+        return response()->json([
+            'success' => true, // Correction du succès à true, il semble qu'il soit erroné dans le code original
+            'message' => "Agent récupéré avec succès",
+            'data' => [
+                'agent' => [
+                    'email' => $agent->email,
+                    'phone' => $agent->phone,
+                    'name' => $agent->name,
+                    'isActive' => $agent->isActive,
+                    'typeFacture' => $typeFac
+                ]
+            ],
+        ]);
     }
 }

@@ -51,6 +51,7 @@ Route::controller(InfosController::class)->group((function () {
     Route::get('user/', 'getUser')->middleware('jwt.auth');
     Route::put('user/update', 'updateGeneralInfo')->middleware('jwt.auth');
     Route::put('user/toggleNotification', 'toggleNotification')->middleware('jwt.auth');
+    Route::put('user/toggleRealTimeDashStatus', 'toggleRealTimeDashStatus')->middleware('jwt.auth');
     Route::post('user/image', 'updateImage')->middleware('jwt.auth');
     Route::put('user/password', 'updatePassword')->middleware('jwt.auth');
     Route::get('users/{userID}/userUploads/img/{imageName}', 'getImage')->middleware('jwt.auth');
@@ -153,6 +154,7 @@ Route::controller(AdministrateurController::class)->group(function () {
     Route::get('editAgent', 'editUser')->middleware('jwt.auth');
     Route::get('toggleUserStatus', 'toggleUserStatus')->middleware('jwt.auth');
     Route::get('dashboardAdmin', 'dashboardAdmin')->middleware('jwt.auth');
+    Route::get('afficheAgent', 'afficheAgent')->middleware('jwt.auth');
 });
 
 

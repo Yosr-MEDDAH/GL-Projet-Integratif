@@ -40,7 +40,8 @@ class User extends Authenticatable implements JWTSubject
         'refresh_token',
         'refreshToken_created_at',
         'type_facture_ids',
-        'notification_toggle'
+        'isNotificationsEnabled',
+        'isRealTimeDashboardEnabled'
     ];
 
 
@@ -162,7 +163,13 @@ class User extends Authenticatable implements JWTSubject
 
     public function toggleNotif($bool)
     {
-        $this->notification_toggle = $bool;
+        $this->isNotificationsEnabled  = $bool;
+        $this->save();
+    }
+
+    public function toggleReal($bool)
+    {
+        $this->isRealTimeDashboardEnabled  = $bool;
         $this->save();
     }
 

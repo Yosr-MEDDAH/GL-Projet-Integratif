@@ -269,4 +269,19 @@ class InfosController extends Controller
             'message' => $bool ? 'Notification activée' : 'Notification désactivée'
         ]);
     }
+
+
+    function toggleRealTimeDashStatus(Request $request)
+    {
+        $bool = $request->input('toggleReal');
+        $user = JWTAuth::user();
+        $user->toggleReal($bool);
+
+        $message = $bool ? 'Tableau de bord en temps réel activé' : 'Tableau de bord en temps réel désactivé';
+
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ]);
+    }
 }
