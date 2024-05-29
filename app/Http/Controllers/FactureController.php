@@ -408,6 +408,20 @@ class FactureController extends Controller
             }
         }
 
+        $messages = [
+            'number.numeric' => 'Le numéro doit être un nombre.',
+            'currency.string' => 'La devise doit être une chaîne de caractères.',
+            'currency.max' => 'La devise ne doit pas dépasser 3 caractères.',
+            'billing_date.date_format' => 'La date de facturation doit être au format YYYY-MM-DD.',
+            'amount.numeric' => 'Le montant doit être un nombre.',
+            'payment_period.max' => 'La période de paiement ne doit pas dépasser 255 caractères.',
+            'objet_facture_id.integer' => 'L\'ID de l\'objet de la facture doit être un entier.',
+            //'pieces_jointes.json' => 'Les pièces jointes doivent être au format JSON.',
+            // 'invoice_file_path.*.required' => 'Chaque fichier de facture est requis.',
+            // 'invoice_file_path.*.file' => 'Chaque fichier doit être un fichier valide.',
+            // 'invoice_file_path.*.mimes' => 'Chaque fichier doit être au format PDF.',
+            // 'invoice_file_path.*.max' => 'Chaque fichier ne doit pas dépasser 100 Mo.',
+        ];
 
         //ajouter messages spécifiques ou pas ?? ********** ///////
         $validator = Validator::make($request->all(), [
@@ -419,7 +433,7 @@ class FactureController extends Controller
             'objet_facture_id' => 'integer', // annuler ou non 
             //'pieces_jointes' => 'json', //changer
             // 'invoice_file_path.*' => 'required|file|mimes:pdf|max:102400', //changer
-        ]);
+        ], $messages);
 
 
         if ($validator->fails()) {
@@ -1052,6 +1066,247 @@ class FactureController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'La facture a été ajoutée avec succès',
+            'data' => [],
+        ]);
+    }
+
+
+
+
+
+    function updateInvoiceLC(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+        $role_id = $role->id;
+
+        // Vérifiez si l'utilisateur a le droit d'accès (seul un agent BOF, role_id = 2)
+        if ($role_id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403);
+        }
+
+        // Rechercher la facture par ID
+        $facture = Facture::find($request->input('id'));
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => "La facture n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if ($facture->agent_bof_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => "Vous n'êtes pas autorisé à modifier cette facture",
+                'data' => [],
+            ]);
+        }
+
+        // Ajouter des règles de validation et des messages personnalisés
+        $messages = [
+            'organization.string' => 'L\'organisation doit être une chaîne de caractères.',
+            'organization.max' => 'L\'organisation ne doit pas dépasser 255 caractères.',
+            'number.required' => 'Le numéro de facture est obligatoire.',
+            'number.numeric' => 'Le numéro de facture doit être un nombre.',
+            'invoice_name.string' => 'Le nom de la facture doit être une chaîne de caractères.',
+            'invoice_name.max' => 'Le nom de la facture ne doit pas dépasser 255 caractères.',
+            'currency.required' => 'La devise est obligatoire.',
+            'currency.string' => 'La devise doit être une chaîne de caractères.',
+            'currency.max' => 'La devise ne doit pas dépasser 3 caractères.',
+            'billing_date.required' => 'La date de facturation est obligatoire.',
+            'billing_date.date_format' => 'La date de facturation doit être au format Y-m-d.',
+            'amount.required' => 'Le montant est obligatoire.',
+            'amount.numeric' => 'Le montant doit être un nombre.',
+            'payment_period.required' => 'La période de paiement est obligatoire.',
+            'payment_period.max' => 'La période de paiement ne doit pas dépasser 255 caractères.',
+            'objet_facture_id.integer' => 'L\'ID de l\'objet de facture doit être un entier.',
+            //'pieces_jointes.json' => 'Les pièces jointes doivent être au format JSON.',
+            'numOp.required' => 'L\'ordre de paiement est obligatoire.',
+            'numOp.string' => 'L\'ordre de paiement doit être une chaîne de caractères.',
+            'idFiscale.required' => 'L\'ID fiscale est obligatoire.',
+            'idFiscale.string' => 'L\'ID fiscale doit être une chaîne de caractères.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'organization' => 'string|max:255',
+            'number' => 'required|numeric',
+            'invoice_name' => 'string|max:255',
+            'currency' => 'required|string|max:3',
+            'billing_date' => 'required|date_format:Y-m-d',
+            'amount' => 'required|numeric',
+            'payment_period' => 'required|max:255',
+            'objet_facture_id' => 'integer',
+            //'pieces_jointes' => 'json',
+            'numOp' => 'required|string|max:255',
+            'idFiscale' => 'required|string|max:255',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => [],
+            ]);
+        }
+
+        // Mettre à jour la facture avec les nouvelles informations
+        $facture->update([
+            'number' => $request->input('number'),
+            'invoice_name' => $request->input('invoice_name'),
+            'organization' => $request->input('organization'),
+            'billing_date' => $request->input('billing_date'),
+            'amount' => $request->input('amount'),
+            'type_facture_id' => 2,
+            'reception_date' => Carbon::now(),
+            'isArchived' => false,
+            'etat_id' => 1,
+            'objet_facture_id' => $request->input('objet_facture_id'),
+            //'pieces_jointes' => json_decode($request->input('pieces_jointes'), true),
+            'created_by' => $role->name,
+            'fournisseur_id' => null,
+            'agent_bof_id' => $user->id,
+            'numOp' => $request->input('numOp'),
+            'idFiscale' => $request->input('idFiscale'),
+            'currency' => $request->input('currency'),
+        ]);
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'La facture a été mise à jour avec succès',
+            'data' => [],
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+    function updateInvoiceOper(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+        $role_id = $role->id;
+
+        // Vérifiez si l'utilisateur a le droit d'accès (seul un agent BOF, role_id = 2 ou fournisseur, role_id = 3)
+        if ($role_id !== 3 && $role_id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403);
+        }
+
+        // Rechercher la facture par ID
+        $facture = Facture::find($request->input('id'));
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => "La facture n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        // Vérifier si l'utilisateur a le droit de modifier cette facture
+        if ($role_id === 2 && $facture->agent_bof_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => "Vous n'êtes pas autorisé à modifier cette facture",
+                'data' => [],
+            ]);
+        } elseif ($role_id === 3 && $facture->fournisseur_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => "Vous n'êtes pas autorisé à modifier cette facture",
+                'data' => [],
+            ]);
+        }
+
+        // Ajouter des règles de validation et des messages personnalisés
+        $messages = [
+            'structureOrd.string' => 'La structure ordinatrice doit être une chaîne de caractères.',
+            'structureOrd.required' => 'La structure ordinatrice est obligatoire.',
+            'organization.string' => 'L\'organisation doit être une chaîne de caractères.',
+            'organization.max' => 'L\'organisation ne doit pas dépasser 255 caractères.',
+            'number.required' => 'Le numéro de facture est obligatoire.',
+            'number.numeric' => 'Le numéro de facture doit être un nombre.',
+            'invoice_name.string' => 'Le nom de la facture doit être une chaîne de caractères.',
+            'invoice_name.max' => 'Le nom de la facture ne doit pas dépasser 255 caractères.',
+            'currency.required' => 'La devise est obligatoire.',
+            'currency.string' => 'La devise doit être une chaîne de caractères.',
+            'currency.max' => 'La devise ne doit pas dépasser 3 caractères.',
+            'billing_date.required' => 'La date de facturation est obligatoire.',
+            'billing_date.date_format' => 'La date de facturation doit être au format Y-m-d.',
+            'amount.required' => 'Le montant est obligatoire.',
+            'amount.numeric' => 'Le montant doit être un nombre.',
+            'payment_period.required' => 'La période de paiement est obligatoire.',
+            'payment_period.max' => 'La période de paiement ne doit pas dépasser 255 caractères.',
+            'objet_facture_id.integer' => 'L\'ID de l\'objet de facture doit être un entier.',
+            'pieces_jointes.json' => 'Les pièces jointes doivent être au format JSON.',
+            'numOp.required' => 'L\'ordre de paiement est obligatoire.',
+            'numOp.string' => 'L\'ordre de paiement doit être une chaîne de caractères.',
+            'idFiscale.required' => 'L\'ID fiscale est obligatoire.',
+            'idFiscale.string' => 'L\'ID fiscale doit être une chaîne de caractères.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'organization' => 'string|max:255',
+            'number' => 'required|numeric',
+            'invoice_name' => 'string|max:255',
+            'currency' => 'required|string|max:3',
+            'billing_date' => 'required|date_format:Y-m-d',
+            'amount' => 'required|numeric',
+            'payment_period' => 'required|max:255',
+            'objet_facture_id' => 'integer',
+            'pieces_jointes' => 'json',
+            'numOp' => 'required|string|max:255',
+            'idFiscale' => 'required|string|max:255',
+            'structureOrd' => 'required|string',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => [],
+            ]);
+        }
+
+        // Mettre à jour la facture avec les nouvelles informations
+        $facture->update([
+            'number' => $request->input('number'),
+            'invoice_name' => $request->input('invoice_name'),
+            'organization' => $request->input('organization'),
+            'billing_date' => $request->input('billing_date'),
+            'amount' => $request->input('amount'),
+            'type_facture_id' => 8,
+            'reception_date' => Carbon::now(),
+            'isArchived' => false,
+            'etat_id' => 1,
+            'objet_facture_id' => $request->input('objet_facture_id'),
+            'pieces_jointes' => json_decode($request->input('pieces_jointes'), true),
+            'created_by' => $role->name,
+            'fournisseur_id' => null,
+            'agent_bof_id' => $user->id,
+            'numOp' => $request->input('numOp'),
+            'idFiscale' => $request->input('idFiscale'),
+            'currency' => $request->input('currency'),
+            'structureOrd' => $request->input('structureOrd'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'La facture a été mise à jour avec succès',
             'data' => [],
         ]);
     }
