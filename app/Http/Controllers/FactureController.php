@@ -749,7 +749,7 @@ class FactureController extends Controller
 
             $client = new Client();
             foreach ($users as $userAg) {
-                if ($userAg->notification_toggle) {
+                if ($userAg->isNotificationsEnabled ) {
                     $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                         'json' => [
                             'emails' => [$userAg->email],

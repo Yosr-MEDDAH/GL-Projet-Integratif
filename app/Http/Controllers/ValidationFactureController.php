@@ -454,7 +454,7 @@ class ValidationFactureController extends Controller
 
                 $users = User::whereIn('email', $emails)->get();
                 foreach ($users as $userAg) {
-                    if ($userAg->notification_toggle) {
+                    if ($userAg->isNotificationsEnabled ) {
                         $client = new Client();
                         $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                             'json' => [
@@ -546,7 +546,7 @@ class ValidationFactureController extends Controller
                         ->toArray();
                     $users = User::whereIn('email', $emails)->get();
                     foreach ($users as $userAg) {
-                        if ($userAg->notification_toggle) {
+                        if ($userAg->isNotificationsEnabled ) {
                             $client = new Client();
                             $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                                 'json' => [

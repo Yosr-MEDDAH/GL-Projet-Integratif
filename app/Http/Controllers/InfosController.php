@@ -197,6 +197,8 @@ class InfosController extends Controller
                 "image" => $user->image,
                 "accountActive" => $user->isActive,
                 "isTwoFactorEnabled" => $user->isTwoFactorEnabled,
+                "isNotificationsEnabled" => $user->isNotificationsEnabled,
+                "isRealTimeDashboardEnabled" => $user->isRealTimeDashboardEnabled,
                 "role_id" => $user->role_id,
                 "role_name" => $user->role->name,
             ];

@@ -123,7 +123,7 @@ class ReclamationController extends Controller
             $emails = User::where('role_id', 2)->pluck('email')->toArray();
             $users = User::whereIn('email', $emails)->get();
             foreach ($users as $userAg) {
-                if ($userAg->notification_toggle) {
+                if ($userAg->isNotificationsEnabled ) {
                     $client = new Client();
                     $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                         'json' => [
@@ -460,7 +460,7 @@ class ReclamationController extends Controller
                 $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
                 $users = User::whereIn('email', $emailFour)->get();
                 foreach ($users as $userAg) {
-                    if ($userAg->notification_toggle) {
+                    if ($userAg->isNotificationsEnabled ) {
                         $client = new Client();
                         $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                             'json' => [

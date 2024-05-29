@@ -606,7 +606,7 @@ class AdministrateurController extends Controller
             foreach ($agent->type_facture_ids as $id) {
                 $type = TypesFactures::find($id);
                 if ($type) {
-                    $typeFac[] = ['values' => $type->id, 'label' => $type->typeName];
+                    $typeFac[] = ['value' => $type->id, 'label' => $type->typeName];
                 }
             }
         }
