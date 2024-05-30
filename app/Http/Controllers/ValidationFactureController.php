@@ -457,7 +457,7 @@ class ValidationFactureController extends Controller
 
                 $users = User::whereIn('email', $emails)->get();
                 foreach ($users as $userAg) {
-                    if ($userAg->isNotificationsEnabled) {
+                    if ($userAg->isNotificationsEnabled && $userAg->role_id !== 3) {
                         $client = new Client();
                         $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                             'json' => [
@@ -465,17 +465,37 @@ class ValidationFactureController extends Controller
                                 'message' => 'Une nouvelle facture à valider.'
                             ]
                         ]);
+
+                        Notification::create([
+                            'user_id' => $userAg->id,
+                            'type' => 'FactureAvalider',
+                            'titre' => 'Une nouvelle facture a été envoyée',
+                            'num_facture' => $facture->number,
+                            'id_facture' => $facture->id,
+                            'id_reclamation' => null,
+                            'titre_reclamation' => null,
+                            'nom_creator' => $user->name,
+                        ]);
+                    } else {
+                        $client = new Client();
+                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                            'json' => [
+                                'emails' => [$userAg->email],
+                                'message' => 'Une nouvelle facture validée.'
+                            ]
+                        ]);
+
+                        Notification::create([
+                            'user_id' => $userAg->id,
+                            'type' => 'FactureValidee',
+                            'titre' => 'Une nouvelle facture a été validée',
+                            'num_facture' => $facture->number,
+                            'id_facture' => $facture->id,
+                            'id_reclamation' => null,
+                            'titre_reclamation' => null,
+                            'nom_creator' => $user->name,
+                        ]);
                     }
-                    Notification::create([
-                        'user_id' => $userAg->id,
-                        'type' => 'FactureAvalider',
-                        'titre' => 'Une nouvelle facture a été envoyée',
-                        'num_facture' => $facture->number,
-                        'id_facture' => $facture->id,
-                        'id_reclamation' => null,
-                        'titre_reclamation' => null,
-                        'nom_creator' => $user->name,
-                    ]);
                 }
 
                 $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
