@@ -123,7 +123,7 @@ class ReclamationController extends Controller
             $emails = User::where('role_id', 2)->pluck('email')->toArray();
             $users = User::whereIn('email', $emails)->get();
             foreach ($users as $userAg) {
-                if ($userAg->isNotificationsEnabled ) {
+                if ($userAg->isNotificationsEnabled) {
                     $client = new Client();
                     $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                         'json' => [
@@ -201,6 +201,11 @@ class ReclamationController extends Controller
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
             $reclamations = Reclamation::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
+            foreach ($reclamations as $reclamation) {
+                if ($reclamation->etat === "Recu") {
+                    $reclamation->etat = "Reçue";
+                }
+            }
             return response()->json([
                 'success' => true,
                 'message' => "voici les réclamtions",
@@ -213,6 +218,11 @@ class ReclamationController extends Controller
 
         //pour agent bof
         $reclamations = Reclamation::orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
+        foreach ($reclamations as $reclamation) {
+            if ($reclamation->etat === "Recu") {
+                $reclamation->etat = "Reçue";
+            }
+        }
         return response()->json([
             'success' => true,
             'message' => "voici les réclamations",
@@ -256,6 +266,9 @@ class ReclamationController extends Controller
                 'data' => [],
             ]);
         } else {
+            if ($reclamation->etat === "Recu") {
+                $reclamation->etat = "Reçue";
+            }
             return response()->json([
                 'success' => true,
                 'message' => "voici votre réclamations",
@@ -265,6 +278,9 @@ class ReclamationController extends Controller
             ]);
         }
 
+        if ($reclamation->etat === "Recu") {
+            $reclamation->etat = "Reçue";
+        }
         //pour agent bof
         return response()->json([
             'success' => true,
@@ -460,7 +476,7 @@ class ReclamationController extends Controller
                 $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
                 $users = User::whereIn('email', $emailFour)->get();
                 foreach ($users as $userAg) {
-                    if ($userAg->isNotificationsEnabled ) {
+                    if ($userAg->isNotificationsEnabled) {
                         $client = new Client();
                         $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                             'json' => [
