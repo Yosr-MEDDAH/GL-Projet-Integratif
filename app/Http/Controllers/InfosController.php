@@ -21,6 +21,10 @@ class InfosController extends Controller
                 'email.email' => 'L\'adresse email doit être une adresse email valide.',
                 'email.unique' => 'Cette adresse email est déjà utilisée par un autre utilisateur.',
                 'email.regex' => 'L\'adresse email doit être une adresse email valide.',
+                'name.string' => 'Le nom doit être une chaîne de caractères.',
+                'name.max' => 'Le nom ne peut pas dépasser 255 caractères.',
+                'phone.numeric' => 'Le numéro de téléphone doit être numérique.',
+                'phone.digits_between' => 'Le numéro de téléphone doit comporter entre 8 et 15 chiffres.',
             ];
 
             $validator = Validator::make($request->all(), [
@@ -157,7 +161,7 @@ class InfosController extends Controller
             if (!Hash::check($oldPassword, $user->password)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Le mot de passe actuel que vous avez fourni ne correspond pas à celui enregistré',
+                    'message' => 'Votre ancien mot de passe est incorrect',
                     'data' => []
                 ]);
             }

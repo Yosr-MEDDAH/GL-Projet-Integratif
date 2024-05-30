@@ -445,8 +445,11 @@ class ValidationFactureController extends Controller
                     $typeFactureId = $facture->type_facture_id;
                     if ($facture->fournisseur_id) {
                         $fourId = $facture->fournisseur_id;
-                        $emails = User::where('role_id', 6)
+                        /*$emails = User::where('role_id', 6)
                             ->whereJsonContains('type_facture_ids', $typeFactureId)
+                            ->pluck('email')
+                            ->toArray();*/
+                        $emails = User::where('id', $fourId)
                             ->pluck('email')
                             ->toArray();
                     }
@@ -454,7 +457,7 @@ class ValidationFactureController extends Controller
 
                 $users = User::whereIn('email', $emails)->get();
                 foreach ($users as $userAg) {
-                    if ($userAg->isNotificationsEnabled ) {
+                    if ($userAg->isNotificationsEnabled) {
                         $client = new Client();
                         $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                             'json' => [
@@ -546,7 +549,7 @@ class ValidationFactureController extends Controller
                         ->toArray();
                     $users = User::whereIn('email', $emails)->get();
                     foreach ($users as $userAg) {
-                        if ($userAg->isNotificationsEnabled ) {
+                        if ($userAg->isNotificationsEnabled) {
                             $client = new Client();
                             $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                                 'json' => [

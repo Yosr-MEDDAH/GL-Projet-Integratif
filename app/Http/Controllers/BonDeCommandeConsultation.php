@@ -177,7 +177,7 @@ class BonDeCommandeConsultation extends Controller
         $nb = $request->query('nb', 10);
         if ($role->id === 3) {
             $purOrders = BonDeCommande::where('num_commande', 'LIKE', '%' . $request->input('num_commande') . '%')
-                ->where('four_idFiscale', $user->idDiscale)->paginate($nb, ['*'], 'page', $page);
+                ->where('four_idFiscale', $user->idFiscale)->paginate($nb, ['*'], 'page', $page);
             if (!$purOrders) {
                 return response()->json([
                     'success' => false,
