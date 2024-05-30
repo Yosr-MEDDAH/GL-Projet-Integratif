@@ -176,10 +176,7 @@ class DashboardPersonnelDCF extends Controller
         }
         $agents = collect($agents)->sortByDesc('nbFacTraitees')->values()->all();
 
-        $nombrefacturesRejetes = Facture::where('etat_id', 3)->count();
-        $nombrefacturesValidees = Facture::where('etat_id', 2)
-            ->where('validePar', 'Agent Trésorerie')
-            ->count();
+
 
         // Agent Bof et RecentReclamations  
         if ($role->id === 2) {
@@ -200,10 +197,10 @@ class DashboardPersonnelDCF extends Controller
             $nbFourTotaleAvecCompte = User::where('role_id', 3)->count();
             $nbFourTotaleSansCompte = FournisseursSansCompte::count();
             $nombrefacturesAtraiter = Facture::where('validePar', null)->count();
-            /*$nombrefacturesRejetes = Facture::where('etat_id', 3)->count();
+            $nombrefacturesRejetes = Facture::where('etat_id', 3)->count();
             $nombrefacturesValidees = Facture::where('etat_id', 2)
                 ->where('validePar', 'Agent Trésorerie')
-                ->count();*/
+                ->count();
 
 
 
@@ -243,14 +240,26 @@ class DashboardPersonnelDCF extends Controller
         }
         if ($role->id === 4) {
             $nombrefacturesAtraiter = Facture::where('validePar', "Agent Bof")->count();
+            $nombrefacturesRejetes = Facture::where('etat_id', 3)->where('validePar', 'Agent Ap')->count();
+            $nombrefacturesValidees = Facture::where('etat_id', 2)
+                ->where('validePar', 'Agent Ap')
+                ->count();
         }
 
         if ($role->id === 5) {
             $nombrefacturesAtraiter = Facture::where('validePar', "Agent Ap")->count();
+            $nombrefacturesRejetes = Facture::where('etat_id', 3)->where('validePar', 'Agent Fiscaliste')->count();
+            $nombrefacturesValidees = Facture::where('etat_id', 2)
+                ->where('validePar', 'Agent Fiscaliste')
+                ->count();
         }
 
         if ($role->id === 6) {
             $nombrefacturesAtraiter = Facture::where('validePar', "Agent Fiscaliste")->count();
+            $nombrefacturesRejetes = Facture::where('etat_id', 3)->where('validePar', 'Agent Trésorerie')->count();
+            $nombrefacturesValidees = Facture::where('etat_id', 2)
+                ->where('validePar', 'Agent Trésorerie')
+                ->count();
         }
 
 
