@@ -176,6 +176,10 @@ class DashboardPersonnelDCF extends Controller
         }
         $agents = collect($agents)->sortByDesc('nbFacTraitees')->values()->all();
 
+        $nombrefacturesRejetes = Facture::where('etat_id', 3)->count();
+        $nombrefacturesValidees = Facture::where('etat_id', 2)
+            ->where('validePar', 'Agent Trésorerie')
+            ->count();
 
         // Agent Bof et RecentReclamations  
         if ($role->id === 2) {
@@ -196,6 +200,12 @@ class DashboardPersonnelDCF extends Controller
             $nbFourTotaleAvecCompte = User::where('role_id', 3)->count();
             $nbFourTotaleSansCompte = FournisseursSansCompte::count();
             $nombrefacturesAtraiter = Facture::where('validePar', null)->count();
+            /*$nombrefacturesRejetes = Facture::where('etat_id', 3)->count();
+            $nombrefacturesValidees = Facture::where('etat_id', 2)
+                ->where('validePar', 'Agent Trésorerie')
+                ->count();*/
+
+
 
             return response()->json([
                 'success' => true,
@@ -216,6 +226,8 @@ class DashboardPersonnelDCF extends Controller
                         "topAgents" => $agents,
                         "recentReclamations" => $recentRecalamation,
                         "nombrefacturesAtraiter" => $nombrefacturesAtraiter,
+                        "nombrefacturesRejetes" => $nombrefacturesRejetes,
+                        "nombrefacturesValidees" => $nombrefacturesValidees,
                         "fournisseur" => [
                             "nbFournisseurSansCompte" => $nbFourTotaleSansCompte,
                             "nbFournisseurAvecCompte" => $nbFourTotaleAvecCompte,
@@ -261,6 +273,8 @@ class DashboardPersonnelDCF extends Controller
                     "topAgents" => $agents,
                     "recentReclamations" => null,
                     "nombrefacturesAtraiter" => $nombrefacturesAtraiter,
+                    "nombrefacturesRejetes" => $nombrefacturesRejetes,
+                    "nombrefacturesValidees" => $nombrefacturesValidees,
                     "fournisseur" => [
                         "nbFournisseurSansCompte" => null,
                         "nbFournisseurAvecCompte" => null,
