@@ -136,9 +136,9 @@ class FiltreRechercheController extends Controller
 
 
 
+    // recherche po
 
-
-    function recherchePoBof(Request $request) //done
+    /*function recherchePoBof(Request $request) //done
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -149,7 +149,7 @@ class FiltreRechercheController extends Controller
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
             ], 403); // 403 accés refusé
-        }*/
+        }
 
         if ($role->id === 3) {
             return response()->json([
@@ -191,8 +191,52 @@ class FiltreRechercheController extends Controller
                 'purOrders' => $purOrders->items(),
             ]
         ]);
-    }
+    }*/
 
+    public function recherchePoBof(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        $search = $request->input('search');
+        $date = $request->input('date');
+
+        $query = BonDeCommande::query();
+
+        if ($search) {
+            $query->where('num_commande', 'LIKE', '%' . $search . '%');
+        }
+
+        if ($date) {
+            $query->whereDate('created_at', $date);
+        }
+
+        $purOrders = $query->paginate($nb, ['*'], 'page', $page);
+
+        foreach ($purOrders as $purOrder) {
+            $nbFactures = Facture::where('bon_de_commande_id', $purOrder->id)->count();
+            $purOrder->nbFactures = $nbFactures;
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'voici vos bons de commandes',
+            'data' => [
+                'totalPages' => $purOrders->lastPage(),
+                'purOrders' => $purOrders->items(),
+            ]
+        ]);
+    }
 
 
 
@@ -629,11 +673,11 @@ class FiltreRechercheController extends Controller
                     ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                     ->orderBy('created_at', 'desc')
                     ->paginate($nb, ['*'], 'page', $page);
-                    foreach ($reclamations as $reclamation) {
-                        if($reclamation->etat === "Recu"){
-                            $reclamation->etat = "Reçue";
-                        }
+                foreach ($reclamations as $reclamation) {
+                    if ($reclamation->etat === "Recu") {
+                        $reclamation->etat = "Reçue";
                     }
+                }
             }
             if (!$reclamations) {
                 return response()->json([
@@ -776,7 +820,7 @@ class FiltreRechercheController extends Controller
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
 
-        $fournisseurs = User::where('idFiscale', 'LIKE', '%' . $request->input('search') . '%')
+        $fournisseurs = User::where('idFiscale', 'LIKE', '%' . $request->input('search') . '%')->where("role_id", 3)
             ->paginate($nb, ['*'], 'page', $page);
 
 

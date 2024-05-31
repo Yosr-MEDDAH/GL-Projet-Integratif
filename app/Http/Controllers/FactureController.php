@@ -669,6 +669,7 @@ class FactureController extends Controller
             $bord->folder = Carbon::now()->toDateString();
             $bord->status = 'En cours';
             $bord->reference = Str::random(8) . '/' . Carbon::now()->toDateString();
+            $bord->nature = "3WM";
             $bord->save();
         } else {
             Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $fileName, $pdf->output());
@@ -749,7 +750,7 @@ class FactureController extends Controller
 
             $client = new Client();
             foreach ($users as $userAg) {
-                if ($userAg->isNotificationsEnabled ) {
+                if ($userAg->isNotificationsEnabled) {
                     $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
                         'json' => [
                             'emails' => [$userAg->email],
@@ -900,6 +901,7 @@ class FactureController extends Controller
             $bord->folder = Carbon::now()->toDateString();
             $bord->status = 'En cours';
             $bord->reference = Str::random(8) . '/' . Carbon::now()->toDateString();
+            $bord->nature = "Lettre De Credit";
             $bord->save();
         } else {
             Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $fileName, $pdf->output());
@@ -1032,6 +1034,7 @@ class FactureController extends Controller
             $bord->folder = Carbon::now()->toDateString();
             $bord->status = 'En cours';
             $bord->reference = Str::random(8) . '/' . Carbon::now()->toDateString();
+            $bord->nature = "Operateur";
             $bord->save();
         } else {
             Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $fileName, $pdf->output());
