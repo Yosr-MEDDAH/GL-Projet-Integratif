@@ -266,7 +266,7 @@ class FactureConsultation extends Controller
 
 
 
-    function getfacturesParBonDeCommande(Request $request)
+    /* function getfacturesParBonDeCommande(Request $request)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -277,7 +277,7 @@ class FactureConsultation extends Controller
                 'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
                 'data' => []
             ], 403); // 403 accés refusé
-        }*/
+        }
 
 
         $page = $request->query('page', 1);
@@ -303,7 +303,7 @@ class FactureConsultation extends Controller
                 'message' => "Aucune facture ne correspond à ce bon de commande.",
                 'data' => [],
             ]);
-        }*/
+        }
 
         $factures = Facture::where('bon_de_commande_id', $purOrder->id)->paginate($nb, ['*'], 'page', $page);
 
@@ -355,6 +355,76 @@ class FactureConsultation extends Controller
         return response()->json([
             'success' => true,
             'message' => "Voici les factures qui correspondent à ce bon de commande.",
+            'data' => [
+                'totalPages' => $factures->lastPage(),
+                'factures' => $factures->items(),
+            ],
+        ]);
+    }*/
+
+
+    public function rechercheFacturesParBonDeCommande(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "Vous n'êtes pas autorisé à accéder à cette ressource",
+                'data' => [],
+            ], 403);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        $num_commande = $request->input('num_commande');
+        $num_facture = $request->input('num_facture');
+
+        if (!$num_commande) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Numéro de commande requis',
+                'data' => [],
+            ], 400);
+        }
+
+        $query = Facture::query();
+
+        if (!empty($num_facture)) {
+            $query->where('number', 'LIKE', '%' . $num_facture . '%');
+        }
+
+        $bonDeCommande = BonDeCommande::where('num_commande', $num_commande)->first();
+
+        if (!$bonDeCommande) {
+            return response()->json([
+                'success' => false,
+                'message' => "Aucun bon de commande trouvé pour ce numéro",
+                'data' => [],
+            ]);
+        }
+
+        $query->where('bon_de_commande_id', $bonDeCommande->id);
+
+        $factures = $query->paginate($nb, ['*'], 'page', $page);
+
+        foreach ($factures as $facture) {
+            $facture->etat_name = $facture->etat()->first()->name_etat;
+            $etat = $facture->etat()->first();
+            if ($etat === null || $etat->name_etat === null) {
+                $facture->etat = null;
+            } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+                $facture->etat->id = 4;
+                $facture->etat->name_etat = "En Cours";
+            } else {
+                $facture->etat = $etat;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Voici les factures associées au bon de commande spécifié.",
             'data' => [
                 'totalPages' => $factures->lastPage(),
                 'factures' => $factures->items(),
