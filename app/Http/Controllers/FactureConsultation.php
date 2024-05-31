@@ -368,13 +368,6 @@ class FactureConsultation extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id === 3) {
-            return response()->json([
-                'success' => false,
-                'message' => "Vous n'êtes pas autorisé à accéder à cette ressource",
-                'data' => [],
-            ], 403);
-        }
 
         $page = $request->query('page', 1);
         $nb = $request->query('nb', 10);
