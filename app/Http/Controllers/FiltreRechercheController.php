@@ -823,12 +823,13 @@ class FiltreRechercheController extends Controller
         $fournisseurs = User::where('idFiscale', 'LIKE', '%' . $request->input('search') . '%')->where("role_id", 3)
             ->paginate($nb, ['*'], 'page', $page);
 
-
+        $fournisseursSancCompte = FournisseursSansCompte::count();
         return response()->json([
             'success' => true,
             'message' => 'les fournisseurs avec comptes:',
             'data' => [
                 'totalPages' => $fournisseurs->lastPage(),
+                'nombreFournisseurEnAttente' => $fournisseursSancCompte,
                 'fournisseurs' => $fournisseurs->items(),
             ]
         ]);
