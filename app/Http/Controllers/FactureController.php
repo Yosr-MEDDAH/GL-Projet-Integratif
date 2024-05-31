@@ -1297,7 +1297,7 @@ class FactureController extends Controller
             'isArchived' => false,
             'etat_id' => 1,
             'objet_facture_id' => $request->input('objet_facture_id'),
-            'pieces_jointes' => json_decode($request->input('pieces_jointes'), true),
+            //'pieces_jointes' => json_decode($request->input('pieces_jointes'), true),
             'created_by' => $role->name,
             'fournisseur_id' => null,
             'agent_bof_id' => $user->id,
