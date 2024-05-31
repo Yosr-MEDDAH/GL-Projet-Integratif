@@ -1239,8 +1239,8 @@ class FactureController extends Controller
         $messages = [
             'structureOrd.string' => 'La structure ordinatrice doit être une chaîne de caractères.',
             'structureOrd.required' => 'La structure ordinatrice est obligatoire.',
-            'organization.string' => 'L\'organisation doit être une chaîne de caractères.',
-            'organization.max' => 'L\'organisation ne doit pas dépasser 255 caractères.',
+            //'organization.string' => 'L\'organisation doit être une chaîne de caractères.',
+            //'organization.max' => 'L\'organisation ne doit pas dépasser 255 caractères.',
             'number.required' => 'Le numéro de facture est obligatoire.',
             'number.numeric' => 'Le numéro de facture doit être un nombre.',
             'invoice_name.string' => 'Le nom de la facture doit être une chaîne de caractères.',
@@ -1263,7 +1263,7 @@ class FactureController extends Controller
         ];
 
         $validator = Validator::make($request->all(), [
-            'organization' => 'string|max:255',
+            //'organization' => 'string|max:255',
             'number' => 'required|numeric',
             'invoice_name' => 'string|max:255',
             'currency' => 'required|string|max:3',
@@ -1289,7 +1289,7 @@ class FactureController extends Controller
         $facture->update([
             'number' => $request->input('number'),
             'invoice_name' => $request->input('invoice_name'),
-            'organization' => $request->input('organization'),
+            //'organization' => $request->input('organization'),
             'billing_date' => $request->input('billing_date'),
             'amount' => $request->input('amount'),
             'type_facture_id' => 8,
