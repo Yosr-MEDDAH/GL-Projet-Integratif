@@ -234,7 +234,8 @@ class DashboardPersonnelDCF extends Controller
                             'recalamtionEnAttente' => $recalamtionEnAttente,
                             'recalamtionRecue' => $recalamtionRecue,
                         ]
-                    ]
+                    ],
+                    "isDashboardLive" => $user->isRealTimeDashboardEnabled,
                 ]
             ]);
         }
@@ -288,7 +289,8 @@ class DashboardPersonnelDCF extends Controller
                         "nbFournisseurSansCompte" => null,
                         "nbFournisseurAvecCompte" => null,
                     ],
-                ]
+                ],
+                "isDashboardLive" => $user->isRealTimeDashboardEnabled,
             ]
         ]);
     }

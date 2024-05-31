@@ -206,7 +206,8 @@ class DashboardFournisseur extends Controller
                         'nbrecalamtionEnAttente' => $recalamtionEnAttente,
                     ],
                     'recentReclamations' => $recentRecalamation,
-                ]
+                ],
+                "isDashboardLive" => $user->isRealTimeDashboardEnabled,
             ]
         ]);
     }

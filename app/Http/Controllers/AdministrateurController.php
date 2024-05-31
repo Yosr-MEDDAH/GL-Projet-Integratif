@@ -514,6 +514,7 @@ class AdministrateurController extends Controller
                     'refusee' => $refusee,
                 ],
                 'fournisseurEnAttente' => $nbFourTotaleSansCompte,
+                "isDashboardLive" => $user->isRealTimeDashboardEnabled,
             ],
         ]);
     }
@@ -546,7 +547,7 @@ class AdministrateurController extends Controller
             'status' => $status,
             'directories' => [
                 'storage_directory' => $this->formatBytes($storageDirectorySize)
-            ]
+            ],
         ];
     }
 
