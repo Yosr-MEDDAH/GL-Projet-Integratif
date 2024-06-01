@@ -258,7 +258,7 @@ class ReclamationController extends Controller
                 'data' => [],
             ]);
         }
-
+        $reclamation->etat_id = 0;
         if ($role->id === 3 && $reclamation->fournisseur_id !== $user->id) {
             return response()->json([
                 'success' => false,
@@ -268,6 +268,7 @@ class ReclamationController extends Controller
         } else {
             if ($reclamation->etat === "Recu") {
                 $reclamation->etat = "Reçue";
+                $reclamation->etat_id = 1;
             }
             return response()->json([
                 'success' => true,
@@ -280,6 +281,7 @@ class ReclamationController extends Controller
 
         if ($reclamation->etat === "Recu") {
             $reclamation->etat = "Reçue";
+            $reclamation->etat_id = 1;
         }
         //pour agent bof
         return response()->json([

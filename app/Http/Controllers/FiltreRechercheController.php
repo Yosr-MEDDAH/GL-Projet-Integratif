@@ -752,6 +752,11 @@ class FiltreRechercheController extends Controller
                 ->whereDate('created_at', 'LIKE', '%' . $request->input('date') . '%')
                 ->orderBy('created_at', 'desc')
                 ->paginate($nb, ['*'], 'page', $page);
+            foreach ($reclamations as $reclamation) {
+                if ($reclamation->etat === "Recu") {
+                    $reclamation->etat = "Reçue";
+                }
+            }
         }
 
         foreach ($reclamations as $reclamation) {
