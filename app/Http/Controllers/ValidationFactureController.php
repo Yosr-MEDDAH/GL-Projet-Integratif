@@ -129,13 +129,26 @@ class ValidationFactureController extends Controller
                 $facture->typeFacture = $typeFacture;
             }
 
-            $etat = $facture->etat()->first();
+            /*$etat = $facture->etat()->first();
 
             if ($etat === null || $etat->name_etat === null) {
                 $facture->etat = null;
             } else {
                 $facture->etat = $etat;
+            }*/
+
+
+            $facture->etat_name = $facture->etat()->first()->name_etat;
+            $etat = $facture->etat()->first();
+            if ($etat === null || $etat->name_etat === null) {
+                $facture->etat = null;
+            } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+                $facture->etat->id = 4;
+                $facture->etat->name_etat = "En Cours";
+            } else {
+                $facture->etat = $etat;
             }
+
 
             if ($facture->fournisseur_id !== null) {
                 $user = User::select('role_id', 'name', 'idFiscale')->where('id', $facture->fournisseur_id)->first();
