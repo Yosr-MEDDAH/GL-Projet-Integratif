@@ -440,7 +440,7 @@ class ReclamationController extends Controller
     }
 
 
-    function changerEtatReclamation(Request $request)
+    /*function changerEtatReclamation(Request $request)
     {
         $user = JWTAuth::user();
         $role = $user->role()->first();
@@ -535,5 +535,123 @@ class ReclamationController extends Controller
                 'data' => [],
             ]);
         }
+    }*/
+
+
+    function changerEtatReclamation(Request $request)
+{
+    $user = JWTAuth::user();
+    $role = $user->role()->first();
+
+    if ($role->id !== 2) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+            'data' => []
+        ], 403); // 403 accès refusé
     }
+
+    $reclamation = Reclamation::find($request->input('id'));
+    if (!$reclamation) {
+        return response()->json([
+            'success' => false,
+            'message' => "Réclamation n'existe pas",
+            'data' => [],
+        ]);
+    }
+
+    $etatInput = $request->input('etat');
+    if ($etatInput === "1") {
+        $etat = 'Recu';
+    } elseif ($etatInput === "0") {
+        $etat = 'En Attente';
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => "État invalide",
+            'data' => [],
+        ]);
+    }
+
+    $reclamation->update([
+        'etat' => $etat,
+    ]);
+
+    // Refresh the reclamation instance
+    $reclamation = Reclamation::find($request->input('id'));
+
+    try {
+        $emailFour = User::where('idFiscale', $reclamation->idFiscale)->pluck('email')->toArray();
+        $message = "";
+
+        if ($etatInput === "1") {
+            $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
+        } elseif ($etatInput === "0") {
+            $message = "Votre réclamation intitulée '" . $reclamation->title . "' est en attente.";
+        }
+
+        $users = User::whereIn('email', $emailFour)->get();
+        foreach ($users as $userAg) {
+            if ($userAg->isNotificationsEnabled) {
+                $client = new Client();
+                $client->post(env('NOTIFICATION_MAIL_URL'), [
+                    'json' => [
+                        'emails' => [$userAg->email],
+                        'message' => $message
+                    ]
+                ]);
+            }
+            Notification::create([
+                'user_id' => $userAg->id,
+                'type' => $etatInput === "1" ? 'ReclamationRecue' : 'ReclamationEnAttente',
+                'titre' => $etatInput === "1" ? 'Une réclamation a été reçue' : 'Une réclamation est en attente',
+                'num_facture' => null,
+                'id_facture' => null,
+                'id_reclamation' => $reclamation->id,
+                'titre_reclamation' => $reclamation->title,
+                'nom_creator' => $user->name,
+            ]);
+        }
+
+        // Handle obsolete notifications
+        $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+            ->where('lu', true)
+            ->get();
+        foreach ($notificationsObsoletes as $notification) {
+            $notification->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "État a été changé avec succès",
+            'data' => [],
+        ]);
+    } catch (\Exception $e) {
+        Notification::create([
+            'user_id' => $user->id,
+            'type' => $etatInput === "1" ? 'ReclamationRecue' : 'ReclamationEnAttente',
+            'titre' => $etatInput === "1" ? 'Une réclamation a été reçue' : 'Une réclamation est en attente',
+            'num_facture' => null,
+            'id_facture' => null,
+            'id_reclamation' => $reclamation->id,
+            'titre_reclamation' => $reclamation->title,
+            'nom_creator' => $user->name,
+        ]);
+
+        // Handle obsolete notifications
+        $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+            ->where('lu', true)
+            ->get();
+        foreach ($notificationsObsoletes as $notification) {
+            $notification->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "État a été changé avec succès",
+            'data' => [],
+        ]);
+    }
+}
+
 }
