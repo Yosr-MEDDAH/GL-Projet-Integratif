@@ -511,9 +511,14 @@ class FiltreRechercheController extends Controller
             if ($request->input('type_facture')) {
                 $query->where('type_facture_id', $request->input('type_facture'));
             }
-
             if ($request->input('etat')) {
-                $query->where('etat_id', $request->input('etat'));
+                if ($request->input('etat') === "2") {
+                    $query->where('etat_id', 2)->where("validePar", "Agent Trésorerie");
+                } else if ($request->input('etat') === "4") {
+                    $query->where('etat_id', 2)->where("validePar", "!=", "Agent Trésorerie");
+                } else {
+                    $query->where('etat_id', $request->input('etat'));
+                }
             }
         });
 
