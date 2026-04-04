@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 use PhpParser\Node\NullableType;
+use App\Factories\UserFactoryProvider;
 
 class AdministrateurController extends Controller
 {
@@ -154,6 +155,98 @@ class AdministrateurController extends Controller
         ]);
     }
 
+    
+     // =========================================================================
+    // CRÉATION D'UTILISATEUR — Factory Method Pattern
+    // =========================================================================
+
+    /**
+     * Crée un Agent (BOF, AP, Fiscaliste, Trésorerie) via le Factory Method Pattern.
+     *
+     * AVANT refactoring (couplage fort) :
+     *   $user = User::create([...]);
+     *   $user->type_facture_ids = ...;
+     *   $user->NotificationCredentialsAgent(...);
+     *
+     * APRÈS refactoring (couplage faible) :
+     *   $user = UserFactoryProvider::make($roleId, $data);
+     *   → la factory concrète gère tout selon le rôle
+     */
+    public function createAgentFactory(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data'    => []
+            ], 403);
+        }
+
+        $messages = [
+            'email.required'   => 'Le champ email est requis.',
+            'email.email'      => 'L\'adresse email doit être valide.',
+            'email.unique'     => 'Cette adresse email est déjà utilisée.',
+            'name.max'         => 'Le nom ne peut pas dépasser 30 caractères.',
+            'role_id.required' => 'Le champ rôle est requis.',
+            'role_id.in'       => 'Le rôle doit être un Agent (BOF, AP, Fiscaliste ou Trésorerie).',
+            'phone.required'   => 'Le champ téléphone est requis.',
+        ];
+
+        $validator = Validator::make($request->all(), [
+            'email'            => [
+                'required', 'email', 'string', 'max:255',
+                'unique:users,email',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            ],
+            'name'             => ['string', 'max:30'],
+            'phone'            => 'required',
+            'role_id'          => 'required|in:2,4,5,6',
+            'direction'        => 'nullable|string|max:255',
+            'type_facture_ids' => 'nullable',
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data'    => [],
+            ]);
+        }
+
+        try {
+            // ✅ Factory Method Pattern :
+            //    UserFactoryProvider résout la bonne factory selon role_id,
+            //    puis délègue la création à createUser().
+            //    → role_id = 2  →  AgentBofFactory
+            //    → role_id = 4  →  PersonnelDCFFactory (Agent AP)
+            //    → role_id = 5  →  PersonnelDCFFactory (Agent Fiscaliste)
+            //    → role_id = 6  →  PersonnelDCFFactory (Agent Trésorerie)
+            $newUser = UserFactoryProvider::make(
+                (int) $request->input('role_id'),
+                $request->only(['email', 'name', 'phone', 'direction', 'type_facture_ids'])
+            );
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data'    => [],
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "L'agent a été créé avec succès",
+            'data'    => [
+                'userCredentials' => [
+                    'email'    => $newUser->email,
+                    'password' => $newUser->plainPassword,
+                ]
+            ]
+        ]);
+    }
 
 
 

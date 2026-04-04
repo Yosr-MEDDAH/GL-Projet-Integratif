@@ -115,6 +115,7 @@ Route::controller(ConfigurationController::class)->group(function () {
 
 Route::controller(FournisseurAccessController::class)->group(function () {
     Route::post('/approuverFournisseur', 'accessFournisseur')->middleware('jwt.auth');
+    Route::post('/approuverFournisseurFactory', 'accessFournisseurFactory')->middleware('jwt.auth');
     Route::put('update/email/adress', 'updateEmail')->middleware('jwt.auth');
     Route::get('/fournisseursSansCompte', 'getFournisseurSansCompte')->middleware('jwt.auth');
     Route::get('/fournisseursAvecCompte', 'getFournisseurAvecCompte')->middleware('jwt.auth'); // avec compte
@@ -150,6 +151,7 @@ Route::controller(FiltreRechercheController::class)->group(function () {
 Route::controller(AdministrateurController::class)->group(function () {
     Route::post('update/default/picture_profile', 'storeDefaultProfilePicture')->middleware('jwt.auth');
     Route::post('createAgent', 'createAgent')->middleware('jwt.auth');
+    Route::post('createAgentFactory', 'createAgentFactory')->middleware('jwt.auth');   
     Route::post('ajoutFournisseurs', 'ajoutFournisseurs')->middleware('jwt.auth');
     Route::post('ajoutBonDeCommande', 'ajoutBonDeCommande')->middleware('jwt.auth');
     Route::get('rolesUser', 'rolesUser')->middleware('jwt.auth');
