@@ -53,16 +53,13 @@ class GestionDocumentsFacade
             return ['success' => false, 'message' => 'Accès refusé', 'code' => 403];
         }
 
-        // Récupérer le bon de commande
         $purOrder = BonDeCommande::where('num_commande', $request->input('num_commande'))->first();
         if (!$purOrder) {
             return ['success' => false, 'message' => 'Bon de commande introuvable', 'code' => 404];
         }
 
-        // Gérer le bordereau du jour
         $bord = $this->factureService->gererBordereau('3WM');
 
-        // Fusionner les PDFs
         $fourName = User::where('idFiscale', $purOrder->four_idFiscale)->first()->name;
         $count = Facture::where('borderau_id', $bord->id)->count();
         $pdfResult = $this->factureService->fusionnerPdfs(
@@ -71,7 +68,6 @@ class GestionDocumentsFacade
             $count
         );
 
-        // Créer la facture
         $factureData = [
             'number'           => $request->input('number'),
             'invoice_name'     => $request->input('invoice_name'),
@@ -96,7 +92,6 @@ class GestionDocumentsFacade
         $purOrder->hasInvoice = 1;
         $purOrder->save();
 
-        // Notifier les agents BOF
         $this->factureService->notifierAgentsBof($facture, $user, $request->input('number'));
 
         return ['success' => true, 'message' => 'Facture créée avec succès', 'code' => 200];

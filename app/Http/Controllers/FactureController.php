@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 use Webklex\PDFMerger\Facades\PDFMergerFacade;
-use app\Services\GestionDocumentsFacade;
+use App\Services\GestionDocumentsFacade;
 
 class FactureController extends Controller
 {

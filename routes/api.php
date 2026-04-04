@@ -169,6 +169,8 @@ Route::controller(ValidationFactureController::class)->group(function () {
     Route::put('/valideInvoice', 'valideInvoice')->middleware('jwt.auth');
     Route::get('/invoiceTypeToValidate', 'invoiceTypeToValidate')->middleware('jwt.auth');
     Route::get('/motifsDeRejet', 'motifsDeRejet')->middleware('jwt.auth');
+    Route::put('/validerFactureStrategy', 'validerFactureStrategy')->middleware('jwt.auth');
+    Route::put('/rejeterFactureStrategy', 'rejeterFactureStrategy')->middleware('jwt.auth');    
 });
 
 Route::controller(DashboardPersonnelDCF::class)->group((function () {
