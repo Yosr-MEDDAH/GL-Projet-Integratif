@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Strategies\ValidationContext;
 
 class ValidationFactureController extends Controller
 {
@@ -723,4 +724,49 @@ class ValidationFactureController extends Controller
             ],
         ]);
     }
+    public function validerFactureStrategy(Request $request){
+    $user = JWTAuth::user();
+    $facture = Facture::find($request->input('id'));
+
+    if (!$facture) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Facture introuvable',
+            'data'    => []
+        ], 404);
+    }
+
+    $context = new ValidationContext($facture);
+    $result = $context->valider($facture, $user);
+
+    return response()->json([
+        'success' => $result['success'],
+        'message' => $result['message'],
+        'data'    => []
+    ]);
+}
+
+public function rejeterFactureStrategy(Request $request)
+{
+    $user = JWTAuth::user();
+    $facture = Facture::find($request->input('id'));
+
+    if (!$facture) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Facture introuvable',
+            'data'    => []
+        ], 404);
+    }
+
+    $motif = $request->input('motif', '');
+    $context = new ValidationContext($facture);
+    $result = $context->rejeter($facture, $user, $motif);
+
+    return response()->json([
+        'success' => $result['success'],
+        'message' => $result['message'],
+        'data'    => []
+    ]);
+}
 }

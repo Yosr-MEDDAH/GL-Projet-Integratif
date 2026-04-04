@@ -106,13 +106,13 @@ class FactureService
                 ]);
             }
 
-            // Nettoyer les notifications obsolètes
+            
             Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
                 ->where('lu', true)
                 ->delete();
 
         } catch (\Exception $e) {
-            // Log silencieux — les notifications ne bloquent pas la création
+            
         }
     }
 }
