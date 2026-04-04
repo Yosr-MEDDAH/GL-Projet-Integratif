@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Factories\UserFactoryProvider;
 
 class FournisseurAccessController extends Controller
 {
@@ -106,6 +107,91 @@ class FournisseurAccessController extends Controller
         ]);
     }
 
+
+    function accessFournisseurFactory(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas d'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'idFiscale' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => [],
+            ]);
+        }
+
+        $four1 = FournisseursSansCompte::where('idFiscale', $request->input('idFiscale'))->first();
+        $four2 = User::where('idFiscale', $request->input('idFiscale'))->first();
+
+        if (!$four1 && $four2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'fournisseur posséde un compte',
+                'data' => [],
+            ]);
+        }
+
+        if (!$four1 && !$four2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'fournisseur n\'existe pas',
+                'data' => [],
+            ]);
+        }
+
+        if ($four1 && $four2) {
+            return response()->json([
+                'success' => false,
+                'message' => "erreur, Le fournisseur existe dans les deux tables",
+                'data' => [],
+            ]);
+        }
+
+        $exist = User::where('email', $four1->email)->first();
+
+        if ($exist) {
+            return response()->json([
+                'success' => false,
+                'message' => "l'adresse email existe, s'il vous plait changer un autre adresse email",
+                'data' => [],
+            ]);
+        }
+
+        // ✅ Factory Method Pattern :
+        //    role_id = 3 → FournisseurFactory
+        //    hash password + champs spécifiques (idFiscale, idErp, adress, nationnalites)
+        //    + notification → tout géré par la factory
+        UserFactoryProvider::make(3, [
+            'name'          => $four1->name,
+            'email'         => $four1->email,
+            'phone'         => $four1->phone,
+            'idErp'         => $four1->idErp,
+            'idFiscale'     => $four1->idFiscale,
+            'adress'        => $four1->adress,
+            'nationnalites' => $four1->nationnalites,
+        ]);
+
+        $four1->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'le fournisseur a été crée avec succés',
+            'data' => [],
+        ]);
+    }
 
     function updateEmail(Request $request)
     {
