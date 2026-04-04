@@ -16,6 +16,18 @@ class Etapes extends Model
         'traitParId',
         'traitParNom',
     ];
+    protected static function boot()
+    {
+        parent::boot();
+ 
+        // Contrainte OCL : DateEtapePosterieure
+        // context Etapes
+        // inv DateEtapePosterieure:
+        //   self.created_at > self.facture.dateReception
+        static::creating(function ($etape) {
+            EtapeConstraints::checkDateEtapePosterieure($etape);
+        });
+    }
 
     public function etat()
     {
