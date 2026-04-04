@@ -8,6 +8,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\OCL\BordereauOCL;
 
 class GestionDocumentsFacade
 {
@@ -60,6 +61,15 @@ class GestionDocumentsFacade
 
         $bord = $this->factureService->gererBordereau('3WM');
 
+        // vérification ocl 
+        $oclBordereau = new BordereauOCL();
+        if (!$oclBordereau->peutAjouterFacture($bord, 1)) {
+            return [
+                'success' => false,
+                'message' => 'Contrainte OCL violée : le bordereau contient des factures de type différent',
+                'code'    => 422
+            ];
+        }
         $fourName = User::where('idFiscale', $purOrder->four_idFiscale)->first()->name;
         $count = Facture::where('borderau_id', $bord->id)->count();
         $pdfResult = $this->factureService->fusionnerPdfs(
