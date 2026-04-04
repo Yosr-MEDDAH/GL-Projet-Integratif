@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 use Webklex\PDFMerger\Facades\PDFMergerFacade;
+use app\Services\GestionDocumentsFacade;
 
 class FactureController extends Controller
 {
@@ -1312,5 +1313,34 @@ class FactureController extends Controller
             'message' => 'La facture a été mise à jour avec succès',
             'data' => [],
         ]);
+    }
+    /**
+     * Supprimer une facture via la Facade
+     */
+    public function supprimerFactureFacade(Request $request)
+    {
+        $facade = new GestionDocumentsFacade();
+        $result = $facade->supprimerFacture($request);
+
+        return response()->json([
+            'success' => $result['success'],
+            'message' => $result['message'],
+            'data'    => []
+        ], $result['code']);
+    }
+
+    /**
+     * Créer une facture via la Facade
+     */
+    public function creerFactureFacade(Request $request)
+    {
+        $facade = new GestionDocumentsFacade();
+        $result = $facade->creerFacture($request);
+
+        return response()->json([
+            'success' => $result['success'],
+            'message' => $result['message'],
+            'data'    => []
+        ], $result['code']);
     }
 }

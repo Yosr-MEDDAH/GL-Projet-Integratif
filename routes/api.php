@@ -71,6 +71,8 @@ Route::controller(FactureController::class)->prefix('facture')->group(function (
     Route::post('/createInvoiceOper', 'createInvoiceOper')->middleware('jwt.auth');
     Route::put('/updateLC', 'updateInvoiceLC')->middleware('jwt.auth');
     Route::put('/updateInvoiceOper', 'updateInvoiceOper')->middleware('jwt.auth');
+    Route::post('/facture/createFacade', 'creerFactureFacade')->middleware('jwt.auth');
+    Route::delete('/facture/deleteFacade', 'supprimerFactureFacade')->middleware('jwt.auth');
 });
 
 Route::controller(FactureConsultation::class)->group(function () {
