@@ -197,6 +197,14 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        
+        //New
+        // PATTERN ADAPTER — lie ErpAdapterInterface → OracleErpAdapter
+        // Grâce à cette ligne, Laravel sait que partout où un contrôleur
+        // ou service déclare ErpAdapterInterface dans son constructeur,
+        // il doit injecter OracleErpAdapter configuré avec Oracle ERP.
+        App\Providers\ErpAdapterServiceProvider::class,
+
     ],
 
     /*

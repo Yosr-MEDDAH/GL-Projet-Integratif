@@ -18,9 +18,29 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 use PhpParser\Node\NullableType;
 use App\Factories\UserFactoryProvider;
+//New
+use App\Adapters\ErpAdapterInterface;
+
 
 class AdministrateurController extends Controller
 {
+
+    //New
+    // =========================================================
+    // PATTERN ADAPTER : injection de ErpAdapterInterface
+    // =========================================================
+    // Laravel résout ErpAdapterInterface automatiquement via
+    // ErpAdapterServiceProvider (enregistré dans config/app.php).
+    // Le contrôleur ne connaît pas Oracle — il parle toujours à
+    // l'interface cible : peu importe si demain c'est SAP ou mock.
+    private ErpAdapterInterface $erpAdapter;
+
+    public function __construct(ErpAdapterInterface $erpAdapter)
+    {
+        $this->erpAdapter = $erpAdapter;
+    }
+
+    //Old
     public function storeDefaultProfilePicture(Request $request)
     {
         $user = JWTAuth::user();
@@ -255,7 +275,7 @@ class AdministrateurController extends Controller
 
 
 
-
+    //Before
     function ajoutFournisseurs(Request $request)
     {
 
@@ -307,7 +327,49 @@ class AdministrateurController extends Controller
         ]);
     }
 
+    //After
+     // =========================================================
+    // ADAPTER : synchronise les fournisseurs depuis Oracle ERP
+    // =========================================================
+    // Avant : on recevait un tableau JSON dans la requête HTTP
+    //         et on créait manuellement chaque FournisseursSansCompte.
+    //
+    // Après : on appelle $this->erpAdapter->syncAllFournisseurs()
+    //         qui interroge Oracle ERP via OracleErpApiClient,
+    //         traduit les champs Oracle (VendorId, VendorName, TaxId…)
+    //         vers les champs App (idErp, name, idFiscale…),
+    //         puis fait un updateOrCreate en base automatiquement.
+    //
+    // Le contrôleur ne connaît ni Oracle ni son format de données.
+    // Si on change d'ERP demain, seul l'Adapter change.
+    // =========================================================
+    function ajoutFournisseursADP(Request $request)
+    {
+        try {
+            // L'Adapter interroge Oracle ERP et synchronise localement
+            $fournisseurs = $this->erpAdapter->syncAllFournisseurs();
 
+            return response()->json([
+                'success' => true,
+                'message' => count($fournisseurs) . ' fournisseur(s) synchronisés depuis Oracle ERP.',
+                'data'    => ['total' => count($fournisseurs)],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur lors de la synchronisation ERP : ' . $e->getMessage(),
+                'data'    => [],
+            ], 500);
+        }
+    }
+
+
+
+
+
+
+
+    //Before
     public function ajoutBonDeCommande(Request $request)
     {
         $bons_de_commande = $request->input('bons_de_commande');
@@ -346,6 +408,52 @@ class AdministrateurController extends Controller
             'message' => 'Bons de commande importés avec succès.'
         ]);
     }
+
+    //After
+     // =========================================================
+    // ADAPTER : synchronise les bons de commande Oracle ERP
+    //           pour un fournisseur donné (par idFiscale)
+    // =========================================================
+    // L'Adapter appelle Oracle → getPurchaseOrdersByVendor(taxId)
+    // qui retourne les PO Oracle (PONumber, VendorTaxId, PaymentTermsDays…)
+    // L'Adapter traduit vers nos champs (num_commande, four_idFiscale,
+    // delai_paiement…) et fait updateOrCreate en base.
+    // =========================================================
+    public function ajoutBonDeCommandeADP(Request $request)
+    {
+        $idFiscale = $request->input('idFiscale');
+
+        if (!$idFiscale) {
+            return response()->json([
+                'success' => false,
+                'message' => "Le champ idFiscale est requis pour synchroniser depuis Oracle ERP.",
+                'data'    => [],
+            ], 422);
+        }
+
+        try {
+            // L'Adapter interroge Oracle ERP et synchronise localement
+            $bons = $this->erpAdapter->syncBonsDeCommandePourFournisseur($idFiscale);
+
+            return response()->json([
+                'success' => true,
+                'message' => count($bons) . ' bon(s) de commande synchronisés depuis Oracle ERP.',
+                'data'    => ['total' => count($bons)],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de synchronisation ERP : ' . $e->getMessage(),
+                'data'    => [],
+            ], 500);
+        }
+    }
+
+
+
+
+
+
 
 
     function rolesUser(Request $request)
