@@ -151,9 +151,16 @@ Route::controller(FiltreRechercheController::class)->group(function () {
 Route::controller(AdministrateurController::class)->group(function () {
     Route::post('update/default/picture_profile', 'storeDefaultProfilePicture')->middleware('jwt.auth');
     Route::post('createAgent', 'createAgent')->middleware('jwt.auth');
-    Route::post('createAgentFactory', 'createAgentFactory')->middleware('jwt.auth');   
+    Route::post('createAgentFactory', 'createAgentFactory')->middleware('jwt.auth'); 
+    //Before  
     Route::post('ajoutFournisseurs', 'ajoutFournisseurs')->middleware('jwt.auth');
+    //After
+    Route::post('ajoutFournisseursADP', 'ajoutFournisseursADP')->middleware('jwt.auth');
+    //Before
     Route::post('ajoutBonDeCommande', 'ajoutBonDeCommande')->middleware('jwt.auth');
+    //After
+    Route::post('ajoutBonDeCommandeADP', 'ajoutBonDeCommandeADP')->middleware('jwt.auth');
+    //Old
     Route::get('rolesUser', 'rolesUser')->middleware('jwt.auth');
     Route::get('afficheUsers', 'afficheUsers')->middleware('jwt.auth');
     Route::put('editAgent', 'editUser')->middleware('jwt.auth');
@@ -164,11 +171,29 @@ Route::controller(AdministrateurController::class)->group(function () {
 
 
 Route::controller(ValidationFactureController::class)->group(function () {
+    //Before
     Route::get('/invoicesToValidate', 'invoicesToValidate')->middleware('jwt.auth');
+    //After
+    Route::get('/invoiceTypeToValidateCOF', 'invoiceTypeToValidateCOF')->middleware('jwt.auth');
+    //Before
     Route::get('/invoiceToValidate', 'invoiceToValidate')->middleware('jwt.auth');
+    //After
+    Route::get('/invoiceToValidateCOF', 'invoiceToValidateCOF')->middleware('jwt.auth');
+    //Before
     Route::put('/valideInvoice', 'valideInvoice')->middleware('jwt.auth');
+    //After
+    Route::put('/valideInvoiceCOF', 'valideInvoiceCOF')->middleware('jwt.auth');
+       //Before
     Route::get('/invoiceTypeToValidate', 'invoiceTypeToValidate')->middleware('jwt.auth');
+    //After
+    Route::get('/invoiceTypeToValidateCOF', 'invoiceTypeToValidateCOF')->middleware('jwt.auth');
+   //Before
     Route::get('/motifsDeRejet', 'motifsDeRejet')->middleware('jwt.auth');
+    //After
+    Route::get('/motifsDeRejetCOF', 'motifsDeRejetCOF')->middleware('jwt.auth');
+    //New
+    Route::post('/verifierLotFactures', 'verifierLotFactures')->middleware('jwt.auth'); 
+    //Old
     Route::put('/validerFactureStrategy', 'validerFactureStrategy')->middleware('jwt.auth');
     Route::put('/rejeterFactureStrategy', 'rejeterFactureStrategy')->middleware('jwt.auth');    
 });
