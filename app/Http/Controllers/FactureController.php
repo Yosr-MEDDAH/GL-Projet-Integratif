@@ -18,6 +18,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Str;
 use Webklex\PDFMerger\Facades\PDFMergerFacade;
 use App\Services\GestionDocumentsFacade;
+use App\Services\NotificationService;
 
 class FactureController extends Controller
 {
@@ -745,67 +746,26 @@ class FactureController extends Controller
             $purOrder->hasInvoice = 1;
             $purOrder->save();
         }
-        try {
-            $emails = User::where('role_id', 2)->pluck('email')->toArray();
-            $users = User::whereIn('email', $emails)->get();
+    $notifService = NotificationService::getInstance();
 
-            $client = new Client();
-            foreach ($users as $userAg) {
-                if ($userAg->isNotificationsEnabled) {
-                    $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
-                        'json' => [
-                            'emails' => [$userAg->email],
-                            'message' => 'Une nouvelle facture a été ajoutée par un fournisseur'
-                        ]
-                    ]);
-                    if ($response->getStatusCode() === 200) {
-                        Notification::create([
-                            'user_id' => $userAg->id,
-                            'type' => 'FactureEnvoyee',
-                            'titre' => 'Une nouvelle facture a été envoyée',
-                            'num_facture' => $request->input('number'),
-                            'id_facture' => $fac->id,
-                            'id_reclamation' => null,
-                            'titre_reclamation' => null,
-                            'nom_creator' => $user->name,
-                        ]);
-                    }
-                }
-            }
-            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
-                ->where('lu', true)
-                ->get();
-            foreach ($notificationsObsoletes as $notification) {
-                $notification->delete();
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'La facture a été ajoutée avec succès',
-                'data' => [],
-            ]);
-        } catch (\Exception $e) {
-            Notification::create([
-                'user_id' => $user->id,
-                'type' => 'FactureEnvoyee',
-                'titre' => 'Une nouvelle facture a été envoyée',
-                'num_facture' => $request->input('number'),
-                'id_facture' => $fac->id,
-                'id_reclamation' => null,
-                'titre_reclamation' => null,
-                'nom_creator' => $user->name,
-            ]);
-            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
-                ->where('lu', true)
-                ->get();
-            foreach ($notificationsObsoletes as $notification) {
-                $notification->delete();
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'La facture a été ajoutée avec succès',
-                'data' => [],
-            ]);
-        }
+    $notifService->notifierParRole(
+        roleId: 2,
+        message: 'Une nouvelle facture a été ajoutée par un fournisseur',
+        type: 'FactureEnvoyee',
+        titre: 'Une nouvelle facture a été envoyée',
+        extra: [
+            'num_facture' => $request->input('number'),
+            'id_facture' => $fac->id,
+            'nom_creator' => $user->name,
+        ]
+    );
+
+    return response()->json([
+        'success' => true,
+        'message' => 'La facture a été ajoutée avec succès',
+        'data' => [],
+    ]);
+}
     }
 
 
