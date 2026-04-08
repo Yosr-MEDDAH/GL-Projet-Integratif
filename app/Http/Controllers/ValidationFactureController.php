@@ -12,6 +12,7 @@ use App\Models\PieceJointeFacture;
 use App\Models\Role;
 use App\Models\TypesFactures;
 use App\Models\User;
+use App\States\FactureStateFactory;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -550,70 +551,61 @@ class ValidationFactureController extends Controller
         $user = JWTAuth::user();
         $role = $user->role()->first();
 
-        if ($role->id === 3) {
-            return response()->json([
-                'success' => false,
-                'message' => "vous n'avez pas autorisé",
-                'data' => [],
-            ]);
-        }
+function valideInvoice(Request $request)
+{
+    $user = JWTAuth::user();
+    $role = $user->role()->first();
 
-        $page = $request->query('page', 1);
-        $nb = $request->query('nb', 10);
+    // Vérification du rôle
+    if ($role->id === 3) {
+        return response()->json([
+            'success' => false,
+            'message' => "Vous n'avez pas l'autorisation",
+            'data' => [],
+        ]);
+    }
 
-        $facture = Facture::find($request->input('id'));
-        //dd($request->input('id'));
-        if (!$facture) {
-            return response()->json([
-                'success' => false,
-                'message' => "la facture n'existe pas",
-                'data' => [],
-            ]);
-        }
+    // Récupération de la facture
+    $facture = Facture::find($request->input('id'));
+    if (!$facture) {
+        return response()->json([
+            'success' => false,
+            'message' => "La facture n'existe pas",
+            'data' => [],
+        ]);
+    }
 
-        if ($role->id === 2 && $request->input('etat_id') === "1") {
-            if ($facture->validePar === $role->name) {
-                $facture->validePar = null;
-                $facture->etat_id = 1;
-                $facture->save();
-                return  response()->json([
-                    'success' => true,
-                    'message' => "l'état de la facture est En Attente",
-                    'data' => [],
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => "vous n'avez pas la possibilité de changer l'état de la facture" . $facture->id . "vers en Attente car elle est déja en cours de traitemebt par un autre agent",
-                    'data' => [],
-                ]);
-            }
-        }
+    // Vérification si la facture est déjà en cours par ce rôle
+    if ($facture->validePar === $role->name) {
+        return response()->json([
+            'success' => false,
+            'message' => "La facture est déjà en cours de traitement par ce rôle",
+            'data' => [],
+        ]);
+    }
 
-        if ($facture->validePar === $role->name) {
-            return  response()->json([
-                'success' => false,
-                'message' => "la facture est déja en cours de traitement par un autre agent",
-                'data' => [],
-            ]);
-        }
+    // Vérification si une étape existe déjà pour ce rôle
+    $etape = Etapes::where('facture_id', $facture->id)
+        ->where('traitParRoleNom', $role->name)
+        ->first();
+    if ($etape) {
+        return response()->json([
+            'success' => false,
+            'message' => "La facture est déjà en cours de traitement par ce rôle",
+            'data' => [],
+        ]);
+    }
 
-        $etape = Etapes::where('facture_id', $request->input('id'))
-            ->where('traitParRoleNom', $role->name)
-            ->first();
+    // Résolution du State
+    $state = FactureStateFactory::resolve($facture);
 
-        if ($etape) {
-            return  response()->json([
-                'success' => false,
-                'message' => "la facture est déja en cours de traitement par un autre agent",
-                'data' => [],
-            ]);
-        }
+    // ----------------------
+    // Validation de la facture
+    // ----------------------
+    if ($request->input('etat_id') === "2") {
+        try {
+            $facture->valider($role->name);
 
-        if ($request->input('etat_id') === "2") {
-            $facture->validePar = $role->name;
-            $facture->etat_id = 2;
-            $facture->save();
             Etapes::create([
                 'facture_id' => $facture->id,
                 'etat_id' => 2,
@@ -621,144 +613,42 @@ class ValidationFactureController extends Controller
                 'traitParId' => $user->id,
                 'traitParNom' => $user->name,
             ]);
-            $facture = Facture::find($request->input('id'));
-            $typeFactureId = $facture->type_facture_id;
 
-            try {
-                if ($role->id === 2) {
-                    $facture = Facture::find($request->input('id'));
-                    $typeFactureId = $facture->type_facture_id;
-                    $emails = User::where('role_id', 4)
-                        ->whereJsonContains('type_facture_ids', $typeFactureId)
-                        ->pluck('email')
-                        ->toArray();
-                } elseif ($role->id === 4) {
-                    $facture = Facture::find($request->input('id'));
-                    $typeFactureId = $facture->type_facture_id;
-                    $emails = User::where('role_id', 5)
-                        ->whereJsonContains('type_facture_ids', $typeFactureId)
-                        ->pluck('email')
-                        ->toArray();
-                } elseif ($role->id === 5) {
-                    $facture = Facture::find($request->input('id'));
-                    $typeFactureId = $facture->type_facture_id;
-                    $emails = User::where('role_id', 6)
-                        ->whereJsonContains('type_facture_ids', $typeFactureId)
-                        ->pluck('email')
-                        ->toArray();
-                } elseif ($role->id === 6) {
-                    $facture = Facture::find($request->input('id'));
-                    $typeFactureId = $facture->type_facture_id;
-                    if ($facture->fournisseur_id) {
-                        $fourId = $facture->fournisseur_id;
-                        /*$emails = User::where('role_id', 6)
-                            ->whereJsonContains('type_facture_ids', $typeFactureId)
-                            ->pluck('email')
-                            ->toArray();*/
-                        $emails = User::where('id', $fourId)
-                            ->pluck('email')
-                            ->toArray();
-                    }
-                }
+            // Notifications
+            sendFactureNotifications($facture, $role, $user, 'valide');
 
-                $users = User::whereIn('email', $emails)->get();
-                foreach ($users as $userAg) {
-                    if ($userAg->isNotificationsEnabled && $userAg->role_id !== 3) {
-                        $client = new Client();
-                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
-                            'json' => [
-                                'emails' => [$userAg->email],
-                                'message' => 'Une nouvelle facture à valider.'
-                            ]
-                        ]);
+            return response()->json([
+                'success' => true,
+                'message' => "La facture est validée par : " . $user->name,
+                'data' => []
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => []
+            ]);
+        }
+    }
 
-                        Notification::create([
-                            'user_id' => $userAg->id,
-                            'type' => 'FactureAvalider',
-                            'titre' => 'Une nouvelle facture a été envoyée',
-                            'num_facture' => $facture->number,
-                            'id_facture' => $facture->id,
-                            'id_reclamation' => null,
-                            'titre_reclamation' => null,
-                            'nom_creator' => $user->name,
-                        ]);
-                    } else {
-                        $client = new Client();
-                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
-                            'json' => [
-                                'emails' => [$userAg->email],
-                                'message' => 'Une nouvelle facture validée.'
-                            ]
-                        ]);
-
-                        Notification::create([
-                            'user_id' => $userAg->id,
-                            'type' => 'FactureValidee',
-                            'titre' => 'Une nouvelle facture a été validée',
-                            'num_facture' => $facture->number,
-                            'id_facture' => $facture->id,
-                            'id_reclamation' => null,
-                            'titre_reclamation' => null,
-                            'nom_creator' => $user->name,
-                        ]);
-                    }
-                }
-
-                $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
-                    ->where('lu', true)
-                    ->get();
-                foreach ($notificationsObsoletes as $notification) {
-                    $notification->delete();
-                }
-
-                return response()->json([
-                    'success' => true,
-                    'message' => "la facture est validé par : " . $user->name,
-                    'data' => []
-                ]);
-            } catch (\Exception $e) {
-                Notification::create([
-                    'user_id' => $userAg->id,
-                    'type' => 'FactureAvalider',
-                    'titre' => 'Une nouvelle facture a été envoyée',
-                    'num_facture' => $facture->number,
-                    'id_facture' => $facture->id,
-                    'id_reclamation' => null,
-                    'titre_reclamation' => null,
-                    'nom_creator' => $user->name,
-                ]);
-                $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
-                    ->where('lu', true)
-                    ->get();
-                foreach ($notificationsObsoletes as $notification) {
-                    $notification->delete();
-                }
-                return response()->json([
-                    'success' => true,
-                    'message' => "la facture est validé par : " . $user->name,
-                    'data' => []
-                ]);
-            }
+    // ----------------------
+    // Rejet de la facture
+    // ----------------------
+    if ($request->input('etat_id') === "3") {
+        if (!$request->input('motif_rejet')) {
+            return response()->json([
+                'success' => false,
+                'message' => "Le motif de rejet doit être ajouté",
+                'data' => [],
+            ]);
         }
 
+        try {
+            $facture->rejeter($role->name);
 
-
-
-
-
-
-        if ($request->input('etat_id') === "3") {
-            if ($request->input('motif_rejet') === [] || !$request->input('motif_rejet')) {
-                return  response()->json([
-                    'success' => false,
-                    'message' => "Le motif de rejet doit être ajouté",
-                    'data' => [],
-                ]);
-            }
-            $facture->validePar = $role->name;
-            $facture->etat_id = 3;
             $facture->motif_rejet = $request->input('motif_rejet');
             $facture->save();
+
             Etapes::create([
                 'facture_id' => $facture->id,
                 'etat_id' => 3,
@@ -766,74 +656,93 @@ class ValidationFactureController extends Controller
                 'traitParId' => $user->id,
                 'traitParNom' => $user->name,
             ]);
-            $facture = Facture::find($request->input('id'));
-            if ($facture->fournisseur_id) {
-                $fourId = $facture->fournisseur_id;
-                try {
-                    $emails = User::where('id', $fourId)
-                        ->pluck('email')
-                        ->toArray();
-                    $users = User::whereIn('email', $emails)->get();
-                    foreach ($users as $userAg) {
-                        if ($userAg->isNotificationsEnabled) {
-                            $client = new Client();
-                            $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
-                                'json' => [
-                                    'emails' => [$userAg->email],
-                                    'message' => 'Votre facture numéro ' . $facture->number . ' a été validée et est prête à être payée.'
-                                ]
-                            ]);
-                        }
-                        Notification::create([
-                            'user_id' => $userAg->id,
-                            'type' => 'FactureRefusee',
-                            'titre' => 'Une nouvelle facture a été refusée',
-                            'num_facture' => $facture->number,
-                            'id_facture' => $facture->id,
-                            'id_reclamation' => null,
-                            'titre_reclamation' => null,
-                            'nom_creator' => $user->name,
-                        ]);
-                    }
-                    $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
-                        ->where('lu', true)
-                        ->get();
-                    foreach ($notificationsObsoletes as $notification) {
-                        $notification->delete();
-                    }
-                    return response()->json([
-                        'success' => true,
-                        'message' => "la facture est refusé par : " . $user->name,
-                        'data' => []
-                    ]);
-                } catch (\Exception $e) {
-                    // Gérer l'exception ici
-                    // Ajouter la création de la notification et la suppression des notifications obsolètes
-                    Notification::create([
-                        'user_id' => $userAg->id,
-                        'type' => 'FactureRefusee',
-                        'titre' => 'Une nouvelle facture a été refusée',
-                        'num_facture' => $facture->number,
-                        'id_facture' => $facture->id,
-                        'id_reclamation' => null,
-                        'titre_reclamation' => null,
-                        'nom_creator' => $user->name,
-                    ]);
-                    $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
-                        ->where('lu', true)
-                        ->get();
-                    foreach ($notificationsObsoletes as $notification) {
-                        $notification->delete();
-                    }
-                    return response()->json([
-                        'success' => true,
-                        'message' => "la facture est refusé par : " . $user->name,
-                        'data' => []
-                    ]);
-                }
-            }
+
+            // Notifications
+            sendFactureNotifications($facture, $role, $user, 'refuse');
+
+            return response()->json([
+                'success' => true,
+                'message' => "La facture est refusée par : " . $user->name,
+                'data' => []
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data' => []
+            ]);
+        }
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => "Action non autorisée pour cette facture",
+        'data' => [],
+    ]);
+}
+
+
+function sendFactureNotifications($facture, $role, $user, $action)
+{
+    $typeFactureId = $facture->type_facture_id;
+    $emails = [];
+
+    // Détermination des destinataires selon le rôle
+    if ($role->id === 2) {
+        $emails = User::where('role_id', 4)
+            ->whereJsonContains('type_facture_ids', $typeFactureId)
+            ->pluck('email')
+            ->toArray();
+    } elseif ($role->id === 4) {
+        $emails = User::where('role_id', 5)
+            ->whereJsonContains('type_facture_ids', $typeFactureId)
+            ->pluck('email')
+            ->toArray();
+    } elseif ($role->id === 5) {
+        $emails = User::where('role_id', 6)
+            ->whereJsonContains('type_facture_ids', $typeFactureId)
+            ->pluck('email')
+            ->toArray();
+    } elseif ($role->id === 6 && $facture->fournisseur_id) {
+        $emails = User::where('id', $facture->fournisseur_id)
+            ->pluck('email')
+            ->toArray();
+    }
+
+    $users = User::whereIn('email', $emails)->get();
+    $client = new Client();
+
+    foreach ($users as $userAg) {
+        $message = $action === 'valide' ? 'Une nouvelle facture validée.' : 'Votre facture a été refusée.';
+        $typeNotif = $action === 'valide' ? 'FactureValidee' : 'FactureRefusee';
+        $titre = $action === 'valide' ? 'Une nouvelle facture a été validée' : 'Une nouvelle facture a été refusée';
+
+        if ($userAg->isNotificationsEnabled && $userAg->role_id !== 3) {
+            $client->post(env('NOTIFICATION_MAIL_URL'), [
+                'json' => [
+                    'emails' => [$userAg->email],
+                    'message' => $message
+                ]
+            ]);
         }
 
+        Notification::create([
+            'user_id' => $userAg->id,
+            'type' => $typeNotif,
+            'titre' => $titre,
+            'num_facture' => $facture->number,
+            'id_facture' => $facture->id,
+            'id_reclamation' => null,
+            'titre_reclamation' => null,
+            'nom_creator' => $user->name,
+        ]);
+    }
+
+    // Suppression des notifications obsolètes
+    Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+        ->where('lu', true)
+        ->delete();
+}
 
 
 

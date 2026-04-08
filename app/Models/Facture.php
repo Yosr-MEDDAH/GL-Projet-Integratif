@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\States\FactureStateFactory;
+use App\States\FactureStateInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -74,4 +76,19 @@ class Facture extends Model
     protected $casts = [
         'pieces_jointes' => 'array',
     ];
+
+    public function getState(): FactureStateInterface
+    {
+        return FactureStateFactory::resolve($this);
+    }
+
+    public function valider(string $agentRole): void
+    {
+        $this->getState()->valider($this, $agentRole);
+    }
+
+    public function rejeter(string $agentRole): void
+    {
+        $this->getState()->rejeter($this, $agentRole);
+    }
 }
