@@ -18,19 +18,15 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Strategies\ValidationContext;
-use App\States\FactureStateFactory;
-use Carbon\Carbon;
-use GuzzleHttp\Client;
-use JWTAuth;
-use Illuminate\Http\Request;
-use App\Models\Facture;
-use App\Models\Etapes;
-use App\Models\User;
-use App\Models\Notification;
+//New
+use App\ChainOfResponsibility\ValidationChainBuilder;
+use App\Models\Personnel_DCF;
+use App\OCL\PersonnelDCFConstraints;
 
 
 class ValidationFactureController extends Controller
 {
+    //Before
     function invoicesToValidate(Request $request)
     {
 
@@ -213,13 +209,109 @@ class ValidationFactureController extends Controller
         ]);
     }
 
+    //After
+     function invoicesToValidateCOF(Request $request)
+    {
+
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+
+        //agent bof
+        if ($role->id === 2) {
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by', 'validePar', 'payment_period')
+                ->where('etat_id', 1);
+        }
+
+        //agent Ap
+        if ($role->id === 4) {
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by', 'validePar', 'payment_period')
+                ->where('etat_id', 2)
+                ->where('validePar', 'Agent Bof')
+                ->whereIn('type_facture_id', $user->type_facture_ids);
+        }
+
+        // Agent Fiscaliste
+        if ($role->id === 5) {
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by', 'validePar', 'payment_period')
+                ->where('etat_id', 2)
+                ->where('validePar', 'Agent Ap')
+                ->whereIn('type_facture_id', $user->type_facture_ids);
+        }
+
+        // Agent Trésorerie
+        if ($role->id === 6) {
+            $factures = Facture::select('id', 'number', 'billing_date', 'created_at', 'updated_at', 'etat_id', 'type_facture_id', 'fournisseur_id', 'agent_bof_id', 'amount', 'created_by', 'validePar', 'payment_period')
+                ->where('etat_id', 2)
+                ->where('validePar', 'Agent Fiscaliste')
+                ->whereIn('type_facture_id', $user->type_facture_ids);
+        }
+
+        if ($request->input('numero') || $request->input('idFiscale') || $request->input('type') || $request->input('jours')) {
+            $factures->where('number', 'LIKE', '%' . $request->input('numero') . '%');
+
+            if ($request->input('type')) {
+                $factures->where('type_facture_id', $request->input('type'));
+            }
+
+            if ($request->input('idFiscale')) {
+                $factures->whereHas('fournisseur', function ($query) use ($request) {
+                    $query->where('idFiscale', 'LIKE', '%' . $request->input('idFiscale') . '%');
+                });
+            }
+
+            if ($request->input('jours')) {
+                $factures->whereRaw('(payment_period - DATEDIFF(CURRENT_DATE(), DATE(created_at))) <= ?', [$request->input('jours')]);
+            }
+        }
+        $factures = $factures->paginate($nb, ['*'], 'page', $page);
+
+        foreach ($factures as $facture) {
+            $typeFacture = $facture->typeFacture()->first();
+            if ($typeFacture === null || $typeFacture->typeName === null) {
+                $facture->typeFacture = null;
+            } else {
+                $facture->typeFacture = $typeFacture;
+            }
+
+            $facture->etat_name = $facture->etat()->first()->name_etat;
+            $etat = $facture->etat()->first();
+            if ($etat === null || $etat->name_etat === null) {
+                $facture->etat = null;
+            } elseif ($etat->id === 2 && $facture->validePar !== "Agent Trésorerie") {
+                $facture->etat->id = 4;
+                $facture->etat->name_etat = "En Cours";
+            } else {
+                $facture->etat = $etat;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "les factures",
+            'data'    => [
+                'totalPages' => $factures->lastPage(),
+                'factures'   => $factures->items(),
+            ],
+        ]);
+    }
 
 
 
 
 
 
-
+    //Before
     function invoiceToValidate(Request $request)
     {
         $user = JWTAuth::user();
@@ -375,8 +467,89 @@ class ValidationFactureController extends Controller
         ]);
     }
 
+    //After
+       function invoiceToValidateCOF(Request $request)
+    {
+        $user   = JWTAuth::user();
+        $role   = $user->role()->first();
+        $page   = $request->query('page', 1);
+        $nb     = $request->query('nb', 10);
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data'    => [],
+            ]);
+        }
+
+        $facture = Facture::find($request->input('id'));
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => "la facture n'existe pas",
+                'data'    => [],
+            ]);
+        }
+
+        $steps = Etapes::where('facture_id', $request->input('id'))->get();
+
+        $stepsInvoice = $steps->mapWithKeys(function ($step, $index) {
+            return [$index => [
+                'id'             => $step->id,
+                'facture_id'     => $step->facture_id,
+                'etat_id'        => $step->etat_id,
+                'traitParRoleNom'=> $step->traitParRoleNom,
+                'traitParId'     => $step->traitParId,
+                'traitParNom'    => $step->traitParNom,
+                'created_at'     => $step->created_at,
+                'updated_at'     => $step->updated_at,
+            ]];
+        });
+
+        $facture->etapes    = $stepsInvoice;
+        $facture->typeFacture = $facture->typeFacture()->first();
+        $facture->etat      = $facture->etat()->first();
+        $facture->fournisseur = User::find($facture->fournisseur_id);
+
+        // ── OCL peutTraiterFacture() — lecture seule ─────────────────
+        // On indique au front si l'agent connecté est autorisé à
+        // traiter cette facture selon son rôle (sans lever d'exception).
+        //
+        // context PersonnelDCF
+        // inv RoleCorrespondTypeFacture:
+        //   self.role.typesFactures->includes(facture.typeFacture)
+        $facture->peutEtreTraiteeParAgent = false;
+        if ($role->id !== 3) { // Exclure les fournisseurs
+            $personnel = Personnel_DCF::find($user->id);
+            if ($personnel) {
+                // peutTraiterFacture() = version booléenne sans exception.
+                // Utilisée ici pour enrichir la réponse JSON (lecture seule),
+                // pas pour bloquer — le blocage est dans valideInvoice().
+                $facture->peutEtreTraiteeParAgent = PersonnelDCFConstraints::peutTraiterFacture(
+                    $personnel,
+                    $facture
+                );
+            }
+        }
+        // ─────────────────────────────────────────────────────────────
+
+        return response()->json([
+            'success' => true,
+            'message' => "la facture",
+            'data'    => ['facture' => $facture],
+        ]);
+    }
 
 
+
+
+
+    //Before
+    function valideInvoice(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
 
 function valideInvoice(Request $request)
 {
@@ -610,7 +783,156 @@ function sendFactureNotifications($facture, $role, $user, $action)
         }
     }
 
+    //After
+    // =========================================================
+    // MÉTHODE PRINCIPALE DE VALIDATION
+    // Utilise le Pattern Chain of Responsibility :
+    //   BOF → AP → Fiscaliste → Trésorerie
+    //
+    // Intègre aussi la contrainte OCL RoleCorrespondTypeFacture :
+    //   Un PersonnelDCF ne peut traiter une Facture que si son
+    //   rôle correspond au TypeFacture de la facture.
+    // =========================================================
+    function valideInvoiceCOF(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
 
+        // Fournisseurs non autorisés
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data'    => [],
+            ]);
+        }
+
+        $facture = Facture::find($request->input('id'));
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => "la facture n'existe pas",
+                'data'    => [],
+            ]);
+        }
+
+        // ── Cas spécial BOF : retour en "En Attente" (etat_id = 1) ──
+        if ($role->id === 2 && $request->input('etat_id') === "1") {
+            if ($facture->validePar === $role->name) {
+                $facture->validePar = null;
+                $facture->etat_id   = 1;
+                $facture->save();
+                return response()->json([
+                    'success' => true,
+                    'message' => "l'état de la facture est En Attente",
+                    'data'    => [],
+                ]);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas la possibilité de changer l'état de la facture {$facture->id} vers En Attente car elle est déjà en cours de traitement par un autre agent",
+                'data'    => [],
+            ]);
+        }
+
+        // ── CONTRAINTE OCL : RoleCorrespondTypeFacture ──────────────
+        // context PersonnelDCF
+        // inv RoleCorrespondTypeFacture:
+        //   self.role.typesFactures->includes(facture.typeFacture)
+        //
+        // Seuls les agents non-BOF (AP, Fiscaliste, Trésorerie) ont
+        // des restrictions de type ; le BOF (role_id=2) traite tout.
+        if ($role->id !== 2) {
+            $personnel = Personnel_DCF::find($user->id);
+            if ($personnel) {
+                try {
+                    // ── CONTRAINTE OCL :checkRoleCorrespondTypeFacture
+                    PersonnelDCFConstraints::checkRoleCorrespondTypeFacture($personnel, $facture);
+                } catch (\InvalidArgumentException $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                        'data'    => [],
+                    ], 403);
+                }
+            }
+        }
+
+        // ── PATTERN CHAIN OF RESPONSIBILITY ─────────────────────────
+        // Routing selon etat_id demandé :
+        //   etat_id = "2"  → validation (avancer dans la chaîne)
+        //   etat_id = "3"  → rejet
+        if ($request->input('etat_id') === "2") {
+
+            // Construire la chaîne : BOF → AP → Fiscaliste → Trésorerie
+            $chain  = ValidationChainBuilder::build();
+            $result = $chain->handle($facture, $user);
+
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+                'data'    => [],
+            ], $result['success'] ? 200 : 422);
+        }
+
+        if ($request->input('etat_id') === "3") {
+            $motif = $request->input('motif_rejet');
+
+            if (empty($motif)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Le motif de rejet doit être ajouté",
+                    'data'    => [],
+                ]);
+            }
+
+            // Construire la chaîne et déléguer le rejet
+            $chain  = ValidationChainBuilder::build();
+            $result = $chain->handleRejet($facture, $user, $motif);
+
+            return response()->json([
+                'success' => $result['success'],
+                'message' => $result['message'],
+                'data'    => [],
+            ], $result['success'] ? 200 : 422);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => "etat_id invalide. Valeurs acceptées : 2 (valider), 3 (rejeter).",
+            'data'    => [],
+        ], 422);
+    }
+
+       function invoiceTypeToValidateCOF(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data'    => [],
+            ]);
+        }
+
+        $typesFactures = TypesFactures::all();
+
+        return response()->json([
+            'success' => true,
+            'message' => "les types de factures",
+            'data'    => ['types_factures' => $typesFactures],
+        ]);
+    }
+
+
+
+
+
+
+
+    //Before
     function motifsDeRejet(Request $request)
     {
 
@@ -639,6 +961,109 @@ function sendFactureNotifications($facture, $role, $user, $action)
             ],
         ]);
     }
+
+    //After
+       function motifsDeRejetCOF(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas autorisé",
+                'data'    => [],
+            ]);
+        }
+
+        $motifs = MotifDeRejet::all();
+
+        return response()->json([
+            'success' => true,
+            'message' => "les motifs de rejet",
+            'data'    => ['motifs' => $motifs],
+        ]);
+    }
+
+
+
+
+
+    //New
+      // =========================================================
+    // CONTRAINTE OCL — checkForAllFactures()
+    // =========================================================
+    // Vérifie qu'un agent peut traiter un lot de factures
+    // (ex: toutes les factures d'un bordereau).
+    //
+    // Correspond à l'expression OCL :
+    //   context PersonnelDCF
+    //   inv RoleCorrespondTypeFacture:
+    //     self.factures->forAll(f |
+    //       self.role.typesFactures->includes(f.typeFacture)
+    //     )
+    //
+    // Appelé par la route POST /validation/verifier-lot
+    // Body JSON : { "facture_ids": [1, 2, 3] }
+    // =========================================================
+    public function verifierLotFactures(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id === 3) {
+            return response()->json([
+                'success' => false,
+                'message' => "Les fournisseurs ne peuvent pas valider des factures.",
+                'data'    => [],
+            ], 403);
+        }
+
+        $ids      = $request->input('facture_ids', []);
+        $factures = Facture::whereIn('id', $ids)->get();
+
+        if ($factures->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => "Aucune facture trouvée pour les IDs fournis.",
+                'data'    => [],
+            ], 404);
+        }
+
+        $personnel = Personnel_DCF::find($user->id);
+
+        if (!$personnel) {
+            return response()->json([
+                'success' => false,
+                'message' => "Personnel DCF introuvable.",
+                'data'    => [],
+            ], 404);
+        }
+
+        try {
+            // checkForAllFactures() = OCL ->forAll(f | ...) sur toute la collection.
+            // Lève une InvalidArgumentException à la première facture non autorisée.
+            // Utilisé ici pour valider un lot AVANT de lancer le workflow en masse.
+            PersonnelDCFConstraints::checkForAllFactures($personnel, $factures);
+
+            return response()->json([
+                'success' => true,
+                'message' => "L'agent '{$user->name}' est autorisé à traiter les " . count($factures) . " facture(s) du lot.",
+                'data'    => ['facture_ids' => $ids],
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'data'    => [],
+            ], 403);
+        }
+    }
+
+
+
+
+    
     public function validerFactureStrategy(Request $request){
     $user = JWTAuth::user();
     $facture = Facture::find($request->input('id'));
