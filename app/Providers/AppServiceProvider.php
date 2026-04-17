@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Facture;
+use App\Observers\FactureObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Observer centralise la detection des changements de statut des factures.
+        Facture::observe(FactureObserver::class);
     }
 }
