@@ -548,11 +548,6 @@ class ValidationFactureController extends Controller
 
 
     //Before
-    function valideInvoice(Request $request)
-    {
-        $user = JWTAuth::user();
-        $role = $user->role()->first();
-
 function valideInvoice(Request $request)
 {
     $user = JWTAuth::user();
@@ -783,7 +778,7 @@ function sendFactureNotifications($facture, $role, $user, $action)
                 ]
             ]);
         }
-    }
+
 
     //After
     // =========================================================
