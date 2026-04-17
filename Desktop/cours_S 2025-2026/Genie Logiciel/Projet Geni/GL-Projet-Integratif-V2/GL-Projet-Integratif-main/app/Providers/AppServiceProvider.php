@@ -2,28 +2,6 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-// AVANT (DIP)
-class AppServiceProvider extends ServiceProvider
-{
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
-    }
-}
-
-
 // APRÈS (DIP)
 use App\Interfaces\ValidationFactureInterface;
 use App\Services\ValidationFactureService;
@@ -53,6 +31,23 @@ use App\Factories\UserFactoryProvider;
  */
 class AppServiceProvider extends ServiceProvider
 {
+    // AVANT (DIP)
+
+        /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+    }
     /**
      * Register any application services.
      *
@@ -60,7 +55,7 @@ class AppServiceProvider extends ServiceProvider
      *   Quand Laravel voit ValidationFactureInterface dans un
      *   constructeur, il instancie ValidationFactureService.
      */
-    public function register(): void
+    public function registerDIP(): void
     {
         // SOLID DIP — Validation de factures
         $this->app->bind(
@@ -73,13 +68,5 @@ class AppServiceProvider extends ServiceProvider
             UtilisateurFactoryInterface::class,
             UserFactoryProvider::class
         );
-    }
-
-    /**
-     * Bootstrap any application services.
-     */
-    public function boot(): void
-    {
-        //
     }
 }

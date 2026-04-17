@@ -22,7 +22,9 @@ use App\Strategies\ValidationContext;
 use App\ChainOfResponsibility\ValidationChainBuilder;
 use App\Models\Personnel_DCF;
 use App\OCL\PersonnelDCFConstraints;
-
+// APRÈS (DIP)
+use App\Interfaces\ValidationFactureInterface;
+use Illuminate\Http\JsonResponse;
 
 class ValidationFactureController extends Controller
 {
@@ -1109,11 +1111,11 @@ public function rejeterFactureStrategy(Request $request)
         'data'    => []
     ]);
 }
-}
 
 // APRÈS (DIP)
-use App\Interfaces\ValidationFactureInterface;
-use Illuminate\Http\JsonResponse;
+
+
+
 
 /**
  * ============================================================
@@ -1180,8 +1182,7 @@ use Illuminate\Http\JsonResponse;
  *   POST /validation/verifier-lot      -> verifierLotFactures()
  * ============================================================
  */
-class ValidationFactureController extends Controller
-{
+
     /**
      * Service de validation injecté via l'interface.
      *
@@ -1214,19 +1215,11 @@ class ValidationFactureController extends Controller
      * Liste des factures à valider pour l'agent connecté (Before).
      * Délègue à ValidationFactureInterface::getInvoicesToValidate().
      */
-    public function invoicesToValidate(Request $request): JsonResponse
+    public function invoicesToValidateDIP(Request $request): JsonResponse
     {
         return $this->validationService->getInvoicesToValidate($request);
     }
 
-    /**
-     * Liste des factures à valider — version COF (Chain of Responsibility).
-     * Délègue à ValidationFactureInterface::getInvoicesToValidateCOF().
-     */
-    public function invoicesToValidateCOF(Request $request): JsonResponse
-    {
-        return $this->validationService->getInvoicesToValidateCOF($request);
-    }
 
     // --------------------------------------------------------
     // CONSULTATION — Détail d'une facture
@@ -1236,20 +1229,10 @@ class ValidationFactureController extends Controller
      * Détail complet d'une facture à valider, avec progression (Before).
      * Délègue à ValidationFactureInterface::getInvoiceToValidate().
      */
-    public function invoiceToValidate(Request $request): JsonResponse
+    public function invoiceToValidateDIP(Request $request): JsonResponse
     {
         return $this->validationService->getInvoiceToValidate($request);
     }
-
-    /**
-     * Détail d'une facture avec enrichissement OCL (COF).
-     * Délègue à ValidationFactureInterface::getInvoiceToValidateCOF().
-     */
-    public function invoiceToValidateCOF(Request $request): JsonResponse
-    {
-        return $this->validationService->getInvoiceToValidateCOF($request);
-    }
-
     // --------------------------------------------------------
     // ACTIONS — Validation / Rejet
     // --------------------------------------------------------
@@ -1258,25 +1241,17 @@ class ValidationFactureController extends Controller
      * Valide ou rejette une facture via States (Before).
      * Délègue à ValidationFactureInterface::validerOuRejeter().
      */
-    public function valideInvoice(Request $request): JsonResponse
+    public function valideInvoiceDIP(Request $request): JsonResponse
     {
         return $this->validationService->validerOuRejeter($request);
     }
 
-    /**
-     * Valide ou rejette une facture via Chain of Responsibility + OCL (COF).
-     * Délègue à ValidationFactureInterface::validerOuRejeterCOF().
-     */
-    public function valideInvoiceCOF(Request $request): JsonResponse
-    {
-        return $this->validationService->validerOuRejeterCOF($request);
-    }
 
     /**
      * Valide une facture via le Pattern Strategy.
      * Délègue à ValidationFactureInterface::validerViaStrategy().
      */
-    public function validerFactureStrategy(Request $request): JsonResponse
+    public function validerFactureStrategyDIP(Request $request): JsonResponse
     {
         return $this->validationService->validerViaStrategy($request);
     }
@@ -1285,7 +1260,7 @@ class ValidationFactureController extends Controller
      * Rejette une facture via le Pattern Strategy.
      * Délègue à ValidationFactureInterface::rejeterViaStrategy().
      */
-    public function rejeterFactureStrategy(Request $request): JsonResponse
+    public function rejeterFactureStrategyDIP(Request $request): JsonResponse
     {
         return $this->validationService->rejeterViaStrategy($request);
     }
@@ -1298,37 +1273,22 @@ class ValidationFactureController extends Controller
      * Types de factures accessibles à l'agent (Before).
      * Délègue à ValidationFactureInterface::getInvoiceTypes().
      */
-    public function invoiceTypeToValidate(Request $request): JsonResponse
+    public function invoiceTypeToValidateDIP(Request $request): JsonResponse
     {
         return $this->validationService->getInvoiceTypes($request);
     }
 
-    /**
-     * Tous les types de factures (COF).
-     * Délègue à ValidationFactureInterface::getInvoiceTypesCOF().
-     */
-    public function invoiceTypeToValidateCOF(Request $request): JsonResponse
-    {
-        return $this->validationService->getInvoiceTypesCOF($request);
-    }
 
     /**
      * Motifs de rejet disponibles (Before).
      * Délègue à ValidationFactureInterface::getMotifsDeRejet().
      */
-    public function motifsDeRejet(Request $request): JsonResponse
+    public function motifsDeRejetDIP(Request $request): JsonResponse
     {
         return $this->validationService->getMotifsDeRejet($request);
     }
 
-    /**
-     * Motifs de rejet disponibles (COF).
-     * Délègue à ValidationFactureInterface::getMotifsDeRejetCOF().
-     */
-    public function motifsDeRejetCOF(Request $request): JsonResponse
-    {
-        return $this->validationService->getMotifsDeRejetCOF($request);
-    }
+
 
     // --------------------------------------------------------
     // OCL — Validation d'un lot de factures
@@ -1340,7 +1300,7 @@ class ValidationFactureController extends Controller
      *
      * Body JSON attendu : { "facture_ids": [1, 2, 3] }
      */
-    public function verifierLotFactures(Request $request): JsonResponse
+    public function verifierLotFacturesDIP(Request $request): JsonResponse
     {
         return $this->validationService->verifierLotFactures($request);
     }
