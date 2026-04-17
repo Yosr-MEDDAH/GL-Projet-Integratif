@@ -6,6 +6,7 @@ use App\Models\BonDeCommande;
 use App\Models\Bordereau;
 use App\Models\Etat;
 use App\Models\Facture;
+use App\Models\Fournisseur;
 use App\Models\Notification;
 use App\Models\ObjetFacture;
 use App\Models\User;
@@ -691,6 +692,7 @@ class FactureController extends Controller
                 ], 403);
             }
 
+            /*
             $fac = Facture::create([
                 'number' => $request->input('number'),
                 'invoice_name' => $request->input('invoice_name'),
@@ -710,6 +712,27 @@ class FactureController extends Controller
                 'fournisseur_id' => $user->id,
                 'agent_bof_id' => null,
             ]);
+            */
+
+            $fournisseur = Fournisseur::find($user->id);
+            $fac = $fournisseur->createFacture([
+                'number' => $request->input('number'),
+                'invoice_name' => $request->input('invoice_name'),
+                'organization' => $request->input('organization'),
+                'billing_date' => $request->input('billing_date'),
+                'amount' => $request->input('amount'),
+                'type_facture_id' => 1,
+                'invoice_file_path' => $filePath,
+                'reception_date' => Carbon::now(),
+                'isArchived' => 0,
+                'etat_id' => 1,
+                'objet_facture_id' => $request->input('objet_facture_id'),
+                'pieces_jointes' => json_decode($request->input('pieces_jointes'), true),
+                'borderau_id' => $bord->id,
+                'bon_de_commande_id' => $purOrder->id,
+                'created_by' => $role->name,
+                'agent_bof_id' => null,
+            ]);
             $purOrder->hasInvoice = 1;
             $purOrder->save();
         } elseif ($role_id === 2 && $fourExist = User::where('idFiscale', $request->input('id_fiscale'))->first()) {
@@ -723,6 +746,7 @@ class FactureController extends Controller
                 ], 403);
             }
 
+            /*
             Facture::create([
                 'number' => $request->input('number'),
                 'invoice_name' => $request->input('invoice_name'),
@@ -740,6 +764,27 @@ class FactureController extends Controller
                 'bon_de_commande_id' => $purOrder->id,
                 'created_by' => $role->name,
                 'fournisseur_id' => $fourExist->id,
+                'agent_bof_id' => null,
+            ]);
+            */
+
+            $fournisseur = Fournisseur::find($fourExist->id);
+            $fournisseur->createFacture([
+                'number' => $request->input('number'),
+                'invoice_name' => $request->input('invoice_name'),
+                'organization' => $request->input('organization'),
+                'billing_date' => $request->input('billing_date'),
+                'amount' => $request->input('amount'),
+                'type_facture_id' => 1,
+                'invoice_file_path' => $filePath,
+                'reception_date' => Carbon::now(),
+                'isArchived' => 0,
+                'etat_id' => 1,
+                'objet_facture_id' => $request->input('objet_facture_id'),
+                'pieces_jointes' => json_decode($request->input('pieces_jointes'), true),
+                'borderau_id' => $bord->id,
+                'bon_de_commande_id' => $purOrder->id,
+                'created_by' => $role->name,
                 'agent_bof_id' => null,
             ]);
             $purOrder->hasInvoice = 1;

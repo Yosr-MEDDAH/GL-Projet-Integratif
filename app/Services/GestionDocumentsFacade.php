@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Facture;
 use App\Models\BonDeCommande;
+use App\Models\Fournisseur;
 use App\Models\User;
 use App\Services\FactureCreationPolicy;
 use Carbon\Carbon;
@@ -107,7 +108,13 @@ class GestionDocumentsFacade
             }
         }
 
-        $facture = Facture::create($factureData);
+        // $facture = Facture::create($factureData);
+        if ($role_id === 3) {
+            $fournisseur = Fournisseur::find($user->id);
+            $facture = $fournisseur->createFacture($factureData);
+        } else {
+            $facture = Facture::create($factureData);
+        }
         $purOrder->hasInvoice = 1;
         $purOrder->save();
 
