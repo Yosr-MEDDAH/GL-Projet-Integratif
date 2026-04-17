@@ -9,6 +9,7 @@ use App\Models\Facture;
 use App\Models\Notification;
 use App\Models\ObjetFacture;
 use App\Models\User;
+use App\Services\FactureCreationPolicy;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -680,6 +681,16 @@ class FactureController extends Controller
         }
         $fac = new Facture();
         if ($role_id === 3) {
+            // Enforce OCL: fournisseur must be active before creating a facture.
+            $guard = FactureCreationPolicy::validateActiveFournisseur($user->id);
+            if (!$guard['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $guard['message'],
+                    'data' => [],
+                ], 403);
+            }
+
             $fac = Facture::create([
                 'number' => $request->input('number'),
                 'invoice_name' => $request->input('invoice_name'),
@@ -702,6 +713,16 @@ class FactureController extends Controller
             $purOrder->hasInvoice = 1;
             $purOrder->save();
         } elseif ($role_id === 2 && $fourExist = User::where('idFiscale', $request->input('id_fiscale'))->first()) {
+            // Enforce OCL: fournisseur must be active before creating a facture.
+            $guard = FactureCreationPolicy::validateActiveFournisseur($fourExist->id);
+            if (!$guard['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $guard['message'],
+                    'data' => [],
+                ], 403);
+            }
+
             Facture::create([
                 'number' => $request->input('number'),
                 'invoice_name' => $request->input('invoice_name'),
@@ -870,6 +891,18 @@ class FactureController extends Controller
             $bord->date_sent = Carbon::now();
         }
 
+        if ($role_id === 3) {
+            // Enforce OCL: fournisseur must be active before creating a facture.
+            $guard = FactureCreationPolicy::validateActiveFournisseur($user->id);
+            if (!$guard['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $guard['message'],
+                    'data' => [],
+                ], 403);
+            }
+        }
+
         Facture::create([
             'number' => $request->input('number'),
             'invoice_name' => $request->input('invoice_name'),
@@ -1001,6 +1034,18 @@ class FactureController extends Controller
             Storage::disk('facture')->put(Carbon::now()->toDateString() . '/' .  $fileName, $pdf->output());
             $filePath = Carbon::now()->toDateString() . '/' .  $fileName;
             $bord->date_sent = Carbon::now();
+        }
+
+        if ($role_id === 3) {
+            // Enforce OCL: fournisseur must be active before creating a facture.
+            $guard = FactureCreationPolicy::validateActiveFournisseur($user->id);
+            if (!$guard['allowed']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $guard['message'],
+                    'data' => [],
+                ], 403);
+            }
         }
 
         Facture::create([

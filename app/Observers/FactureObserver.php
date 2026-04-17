@@ -5,10 +5,17 @@ namespace App\Observers;
 use App\Models\Facture;
 use App\Models\Notification;
 use App\Models\User;
+use App\Services\FactureCreationPolicy;
 use App\Services\NotificationService;
 
 class FactureObserver
 {
+    public function creating(Facture $facture): void
+    {
+        // Central guard to prevent creation for inactive or non-approved fournisseurs.
+        FactureCreationPolicy::assertActiveFournisseur($facture->fournisseur_id);
+    }
+
     public function updated(Facture $facture): void
     {
         // Status progression is represented by both `etat_id` and `validePar` in this codebase.

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Facture;
 use App\Models\BonDeCommande;
 use App\Models\User;
+use App\Services\FactureCreationPolicy;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -97,6 +98,14 @@ class GestionDocumentsFacade
             'fournisseur_id'   => $role_id === 3 ? $user->id : null,
             'agent_bof_id'     => $role_id === 2 ? $user->id : null,
         ];
+
+        if ($role_id === 3) {
+            // Enforce OCL: fournisseur must be active before creating a facture.
+            $guard = FactureCreationPolicy::validateActiveFournisseur($user->id);
+            if (!$guard['allowed']) {
+                return ['success' => false, 'message' => $guard['message'], 'code' => 403];
+            }
+        }
 
         $facture = Facture::create($factureData);
         $purOrder->hasInvoice = 1;
