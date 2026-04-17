@@ -1,0 +1,657 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\BonDeCommande;
+use App\Models\Facture;
+use App\Models\Notification;
+use App\Models\Reclamation;
+use App\Models\User;
+use Carbon\Carbon;
+use Dotenv\Validator;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Str;
+use Webklex\PDFMerger\Facades\PDFMergerFacade;
+
+class ReclamationController extends Controller
+{
+    function create(Request $request) // nombre de réclamation par fournisseur ?
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        //if ($role->id !== 3 && $role->id !== 2) {
+        if ($role->id !== 3) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ]); // 403 accés refusé
+        }
+
+        /* $facture = Facture::where('number', $request->input('numFacture'))->first();
+
+        if (!$facture) {
+            return response()->json([
+                'success' => false,
+                'message' => "La facture n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if ($facture->fournisseur_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'vérifier le numéro de votre facture',
+                'data' => [],
+            ]);
+        }
+
+        $purOrder = BonDeCommande::where('num_commande', $request->input('numCommande'))->first();
+
+        if (!$purOrder || ($purOrder->four_idFiscale !== $user->idFiscale)) {
+            return response()->json([
+                'success' => false,
+                'message' => "vérifier votre numero du bon de commande",
+                'data' => [],
+            ]);
+        }*/
+
+        /*if ($request->input('idFiscale') !== $user->idFiscale) {
+            return response()->json([
+                'success' => false,
+                'message' => "vérifier votre matricule fiscale",
+                'data' => [],
+            ]);
+        }*/
+
+        $messages = [
+            'title.required' => 'Le titre est requis.',
+            'title.string' => 'Le titre doit être une chaîne de caractères.',
+            'title.max' => 'Le titre ne doit pas dépasser : 255 caractères',
+            'text.required' => 'Le texte est requis.',
+            'text.string' => 'Le texte doit être une chaîne de caractères.',
+            'idFiscale.string' => 'L\'identifiant fiscal doit être une chaîne de caractères.',
+        ];
+
+        $validator = Validator($request->all(), [
+            'title' => 'required|string|max:255',
+            'text' => 'required|string',
+            'idFiscale' => 'nullable|string',
+            'numFacture' => 'nullable|string',
+            'numCommande' => 'nullable|string',
+            'attached_file.*' => 'nullable||file|mimes:pdf|max:102400'
+        ], $messages);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors(),
+                'data' => [],
+            ]);
+        }
+
+        $count = Reclamation::all()->count();
+        $attachedFile = "";
+        if ($request->hasFile('attached_file')) {
+            $files = $request->file('attached_file');
+            $pdf = PDFMergerFacade::init();
+            foreach ($files as $file) {
+                $pdf->addPDF($file->getPathName(), 'all');
+            }
+            $fileName = 'reclamation_' . $user->name . " " . " nb_" . $count = $count + 1 . ".pdf"; //. '.' . $file->getClientOriginalExtension();
+            $pdf->merge();
+            Storage::disk('reclamation')->put("users/" . $user->id . "/userUploads/reclamation/" .  $fileName, $pdf->output());
+            $attachedFile = "users/" . $user->id . "/userUploads/reclamation/" .  $fileName;
+        }
+
+        $rec = new Reclamation();
+        $rec = Reclamation::create([
+            'title' => $request->input('title'),
+            'text' => $request->input('text'),
+            'idFiscale' => $user->idFiscale,
+            'numFacture' => $request->input('numFacture'),
+            'numCommande' => $request->input('numCommande'),
+            'attached_file' => $attachedFile,
+            'etat' => 'En Attente',
+            'fournisseur_id' => $user->id,
+        ]);
+        try {
+            $emails = User::where('role_id', 2)->pluck('email')->toArray();
+            $users = User::whereIn('email', $emails)->get();
+            foreach ($users as $userAg) {
+                if ($userAg->isNotificationsEnabled) {
+                    $client = new Client();
+                    $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                        'json' => [
+                            'emails' => [$userAg->email],
+                            'message' => 'Une nouvelle réclamation a été ajoutée par un fournisseur'
+                        ]
+                    ]);
+                }
+                Notification::create([
+                    'user_id' => $userAg->id,
+                    'type' => 'ReclamationEnvoyee',
+                    'titre' => 'Une nouvelle réclamation a été envoyée',
+                    'num_facture' => null,
+                    'id_facture' => null,
+                    'id_reclamation' => $rec->id,
+                    'titre_reclamation' => $request->input('title'),
+                    'nom_creator' => $user->name,
+                ]);
+            }
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'La réclamation a été ajouté avec succés',
+                'data' => [],
+            ]);
+        } catch (\Exception $e) {
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'ReclamationEnvoyee',
+                'titre' => 'Une nouvelle réclamation a été envoyée',
+                'num_facture' => null,
+                'id_facture' => null,
+                'id_reclamation' => $rec->id,
+                'titre_reclamation' => $request->input('title'),
+                'nom_creator' => $user->name,
+            ]);
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'La réclamation a été ajouté avec succés',
+                'data' => [],
+            ]);
+        }
+    }
+
+
+
+
+    function getAllReclamation(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $reclamations = Reclamation::where('fournisseur_id', $user->id)->orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
+            foreach ($reclamations as $reclamation) {
+                if ($reclamation->etat === "Recu") {
+                    $reclamation->etat = "Reçue";
+                }
+            }
+            return response()->json([
+                'success' => true,
+                'message' => "voici les réclamtions",
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'reclamations' => $reclamations->items(),
+                ]
+            ]);
+        }
+
+        //pour agent bof
+        $reclamations = Reclamation::orderBy('created_at', 'desc')->paginate($nb, ['*'], 'page', $page);
+        foreach ($reclamations as $reclamation) {
+            if ($reclamation->etat === "Recu") {
+                $reclamation->etat = "Reçue";
+            }
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "voici les réclamations",
+            'data' => [
+                'totalPages' => $reclamations->lastPage(),
+                'reclamations' => $reclamations->items(),
+            ]
+        ]);
+    }
+
+
+    function getReclamation(Request $request)
+    {
+
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $reclamation = Reclamation::where('id', $request->input('id'))->first();
+        $reclamation->nomFournisseur = User::where('idFiscale', $reclamation->idFiscale)->first()->name;
+
+        if (!$reclamation) {
+            return response()->json([
+                'success' => false,
+                'message' => "la réclamtion n'existe pas",
+                'data' => [],
+            ]);
+        }
+        $reclamation->etat_id = 0;
+        if ($role->id === 3 && $reclamation->fournisseur_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        } else {
+            if ($reclamation->etat === "Recu") {
+                $reclamation->etat = "Reçue";
+                $reclamation->etat_id = 1;
+            }
+            return response()->json([
+                'success' => true,
+                'message' => "voici votre réclamations",
+                'data' => [
+                    'reclamation' => $reclamation,
+                ]
+            ]);
+        }
+
+        if ($reclamation->etat === "Recu") {
+            $reclamation->etat = "Reçue";
+            $reclamation->etat_id = 1;
+        }
+        //pour agent bof
+        return response()->json([
+            'success' => true,
+            'message' => "voici la réclaamtion",
+            'data' => [
+                'reclamation' => $reclamation,
+            ]
+        ]);
+    }
+
+
+
+
+
+
+    function deleteReclamation(Request $request)
+    {
+
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $reclamation = Reclamation::where('id', $request->input('id'))->first();
+
+        if (!$reclamation) {
+            return response()->json([
+                'success' => false,
+                'message' => "la réclamtion n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if (($role->id === 3 && $reclamation->fournisseur_id !== $user->id) || $reclamation->etat !== "En Attente") {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $reclamation->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => "La réclamation a été supprimer avec succes",
+            'data' => [],
+        ]);
+    }
+
+
+
+
+
+
+
+
+
+    function getReclamationSpec(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => "vous n'avez pas l'autorisation",
+                'data' => [],
+            ]);
+        }
+
+        $page = $request->query('page', 1);
+        $nb = $request->query('nb', 10);
+        if ($role->id === 3) {
+            $reclamations = Reclamation::select('title', 'text', 'etat')->where('fournisseur_id', $user->id)->paginate($nb, ['*'], 'page', $page);
+            foreach ($reclamations as $reclamation) {
+                $reclamation->text = Str::limit($reclamation->text, 197);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => "voici les réclamtions",
+                'data' => [
+                    'totalPages' => $reclamations->lastPage(),
+                    'reclamations' => $reclamations->items(),
+                ]
+            ]);
+        }
+
+        //pour agent bof
+        $reclamations = Reclamation::select('title', 'text', 'etat')->paginate($nb, ['*'], 'page', $page);
+        foreach ($reclamations as $reclamation) {
+            $reclamation->text = Str::limit($reclamation->text, 197);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => "voici les réclamations",
+            'data' => [
+                'totalPages' => $reclamations->lastPage(),
+                'reclamations' => $reclamations->items(),
+            ]
+        ]);
+    }
+
+
+
+
+
+
+    function getFileReclamation(Request $request, $userId, $fileName)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 3 && $role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+
+        $filePath = "users/" . $userId . "/userUploads/reclamation/" .  $fileName;
+
+        if ($role->id === 3) {
+            $recFile = Reclamation::where('attached_file', $filePath)
+                ->where('fournisseur_id', $user->id)->first(); // pour etre true => il faut le fichier recherché doit etre existe avec le meme path et doit etre id = $user->id
+        } else {
+            $recFile = Reclamation::where('attached_file', $filePath)->first();
+        }
+        if (!$recFile) {
+            return response()->json([
+                'success' => false,
+                'message' => "le fichier  n'existe pas", //BD
+                'data' => [],
+            ]);
+        }
+        if (Storage::disk('reclamation')->exists($filePath)) {
+            $fileContents = Storage::disk('reclamation')->get($filePath);
+            return response()->make($fileContents, 200, [
+                'Content-Type' => 'application/pdf'
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => "le fichier n'existe pas",
+                'data' => []
+            ]); //disk
+        }
+    }
+
+
+    /*function changerEtatReclamation(Request $request)
+    {
+        $user = JWTAuth::user();
+        $role = $user->role()->first();
+
+        if ($role->id !== 2) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+                'data' => []
+            ], 403); // 403 accés refusé
+        }
+        $reclamation = Reclamation::find($request->input('id'));
+        if (!$reclamation) {
+            return response()->json([
+                'success' => false,
+                'message' => "reclamation n'existe pas",
+                'data' => [],
+            ]);
+        }
+
+        if ($request->input('etat') === "1") {
+            $etat = 'Recu';
+        } else {
+            $etat = 'En Attente';
+        }
+
+        $reclamation->update([
+            'etat' => $etat,
+        ]);
+
+        $reclamation = Reclamation::find($request->input('id'));
+        try {
+            $emailFour = User::where('idFiscale', $reclamation->idFiscale)->pluck('email')->toArray();
+            if ($request->input('etat') === "1") {
+                $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
+                $users = User::whereIn('email', $emailFour)->get();
+                foreach ($users as $userAg) {
+                    if ($userAg->isNotificationsEnabled) {
+                        $client = new Client();
+                        $response = $client->post(env('NOTIFICATION_MAIL_URL'), [
+                            'json' => [
+                                'emails' => [$userAg->email],
+                                'message' => $message
+                            ]
+                        ]);
+                    }
+                    Notification::create([
+                        'user_id' => $userAg->id,
+                        'type' => 'ReclamationRecue',
+                        'titre' => 'Une réclamation a été reçue',
+                        'num_facture' => null,
+                        'id_facture' => null,
+                        'id_reclamation' => $reclamation->id,
+                        'titre_reclamation' => $reclamation->title,
+                        'nom_creator' => $user->name,
+                    ]);
+                }
+                $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                    ->where('lu', true)
+                    ->get();
+                foreach ($notificationsObsoletes as $notification) {
+                    $notification->delete();
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'message' => "etat a été changé avec succes",
+                    'data' => [],
+                ]);
+            }
+        } catch (\Exception $e) {
+            Notification::create([
+                'user_id' => $user->id,
+                'type' => 'ReclamationRecue',
+                'titre' => 'Une réclamation a été reçue',
+                'num_facture' => null,
+                'id_facture' => null,
+                'id_reclamation' => $reclamation->id,
+                'titre_reclamation' => $reclamation->title,
+                'nom_creator' => $user->name,
+            ]);
+            $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+                ->where('lu', true)
+                ->get();
+            foreach ($notificationsObsoletes as $notification) {
+                $notification->delete();
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "etat a été changé avec succes",
+                'data' => [],
+            ]);
+        }
+    }*/
+
+
+    function changerEtatReclamation(Request $request)
+{
+    $user = JWTAuth::user();
+    $role = $user->role()->first();
+
+    if ($role->id !== 2) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Vous n\'êtes pas autorisé à accéder à cette ressource',
+            'data' => []
+        ], 403); // 403 accès refusé
+    }
+
+    $reclamation = Reclamation::find($request->input('id'));
+    if (!$reclamation) {
+        return response()->json([
+            'success' => false,
+            'message' => "Réclamation n'existe pas",
+            'data' => [],
+        ]);
+    }
+
+    $etatInput = $request->input('etat');
+    if ($etatInput === "1") {
+        $etat = 'Recu';
+    } elseif ($etatInput === "0") {
+        $etat = 'En Attente';
+    } else {
+        return response()->json([
+            'success' => false,
+            'message' => "État invalide",
+            'data' => [],
+        ]);
+    }
+
+    $reclamation->update([
+        'etat' => $etat,
+    ]);
+
+    // Refresh the reclamation instance
+    $reclamation = Reclamation::find($request->input('id'));
+
+    try {
+        $emailFour = User::where('idFiscale', $reclamation->idFiscale)->pluck('email')->toArray();
+        $message = "";
+
+        if ($etatInput === "1") {
+            $message = "Votre réclamation intitulée '" . $reclamation->title . "' a été consultée par un agent BOF.";
+        } elseif ($etatInput === "0") {
+            $message = "Votre réclamation intitulée '" . $reclamation->title . "' est en attente.";
+        }
+
+        $users = User::whereIn('email', $emailFour)->get();
+        foreach ($users as $userAg) {
+            if ($userAg->isNotificationsEnabled) {
+                $client = new Client();
+                $client->post(env('NOTIFICATION_MAIL_URL'), [
+                    'json' => [
+                        'emails' => [$userAg->email],
+                        'message' => $message
+                    ]
+                ]);
+            }
+            Notification::create([
+                'user_id' => $userAg->id,
+                'type' => $etatInput === "1" ? 'ReclamationRecue' : 'ReclamationEnAttente',
+                'titre' => $etatInput === "1" ? 'Une réclamation a été reçue' : 'Une réclamation est en attente',
+                'num_facture' => null,
+                'id_facture' => null,
+                'id_reclamation' => $reclamation->id,
+                'titre_reclamation' => $reclamation->title,
+                'nom_creator' => $user->name,
+            ]);
+        }
+
+        // Handle obsolete notifications
+        $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+            ->where('lu', true)
+            ->get();
+        foreach ($notificationsObsoletes as $notification) {
+            $notification->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "État a été changé avec succès",
+            'data' => [],
+        ]);
+    } catch (\Exception $e) {
+        Notification::create([
+            'user_id' => $user->id,
+            'type' => $etatInput === "1" ? 'ReclamationRecue' : 'ReclamationEnAttente',
+            'titre' => $etatInput === "1" ? 'Une réclamation a été reçue' : 'Une réclamation est en attente',
+            'num_facture' => null,
+            'id_facture' => null,
+            'id_reclamation' => $reclamation->id,
+            'titre_reclamation' => $reclamation->title,
+            'nom_creator' => $user->name,
+        ]);
+
+        // Handle obsolete notifications
+        $notificationsObsoletes = Notification::where('updated_at', '<', Carbon::now()->subHours(env('NOTIFICATION_DELETE_DELAY', 24)))
+            ->where('lu', true)
+            ->get();
+        foreach ($notificationsObsoletes as $notification) {
+            $notification->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "État a été changé avec succès",
+            'data' => [],
+        ]);
+    }
+}
+
+}
