@@ -1304,3 +1304,4 @@ class FactureController extends Controller
         ], $result['code']);
     }
 }
+
