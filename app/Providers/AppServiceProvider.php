@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Models\Facture;
 use App\Observers\FactureObserver;
 use Illuminate\Support\ServiceProvider;
+use App\Interfaces\UtilisateurFactoryInterface;
+use App\Services\UtilisateurFactory;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            UtilisateurFactoryInterface::class,
+            UtilisateurFactory::class
+        );
     }
 
     /**
