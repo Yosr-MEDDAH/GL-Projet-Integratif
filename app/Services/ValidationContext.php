@@ -2,30 +2,38 @@
 
 namespace App\Services;
 
-use App\Interfaces\ValidationStrategyInterface;
+use App\Interfaces\ValideurInterface;
+use App\Interfaces\RejeteurInterface;
 use App\Models\Facture;
 
 class ValidationContext
 {
-    private ValidationStrategyInterface $strategy;
+    private ValideurInterface $valideur;
+    private RejeteurInterface $rejeteur;
 
-    public function __construct(ValidationStrategyInterface $strategy)
+    public function __construct(ValideurInterface $valideur, RejeteurInterface $rejeteur)
     {
-        $this->strategy = $strategy;
+        $this->valideur = $valideur;
+        $this->rejeteur = $rejeteur;
     }
 
-    public function setStrategy(ValidationStrategyInterface $strategy): void
+    public function setValideur(ValideurInterface $valideur): void
     {
-        $this->strategy = $strategy;
+        $this->valideur = $valideur;
+    }
+
+    public function setRejeteur(RejeteurInterface $rejeteur): void
+    {
+        $this->rejeteur = $rejeteur;
     }
 
     public function executerValidation(Facture $facture, int $userId): array
     {
-        return $this->strategy->valider($facture, $userId);
+        return $this->valideur->valider($facture, $userId);
     }
 
     public function executerRejet(Facture $facture, int $userId, string $motif): array
     {
-        return $this->strategy->rejeter($facture, $userId, $motif);
+        return $this->rejeteur->rejeter($facture, $userId, $motif);
     }
 }

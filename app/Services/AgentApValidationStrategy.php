@@ -2,15 +2,13 @@
 
 namespace App\Services;
 
-use App\Interfaces\ValidationStrategyInterface;
+use App\Interfaces\ValideurInterface;
+use App\Interfaces\RejeteurInterface;
 use App\Models\Etapes;
 use App\Models\Facture;
 use Carbon\Carbon;
 
-/**
- * Stratégie de validation pour le rôle Agent AP (role_id = 4).
- */
-class AgentApValidationStrategy implements ValidationStrategyInterface
+class AgentApValidationStrategy implements ValideurInterface, RejeteurInterface
 {
     public function valider(Facture $facture, int $userId): array
     {
@@ -25,12 +23,12 @@ class AgentApValidationStrategy implements ValidationStrategyInterface
         $facture->save();
 
         Etapes::create([
-            'facture_id'       => $facture->id,
-            'traitParId'       => $userId,
-            'traitParRoleNom'  => 'Agent Ap',
-            'action'           => 'Validée',
-            'created_at'       => Carbon::now(),
-            'updated_at'       => Carbon::now(),
+            'facture_id'      => $facture->id,
+            'traitParId'      => $userId,
+            'traitParRoleNom' => 'Agent Ap',
+            'action'          => 'Validée',
+            'created_at'      => Carbon::now(),
+            'updated_at'      => Carbon::now(),
         ]);
 
         return [
@@ -46,13 +44,13 @@ class AgentApValidationStrategy implements ValidationStrategyInterface
         $facture->save();
 
         Etapes::create([
-            'facture_id'       => $facture->id,
-            'traitParId'       => $userId,
-            'traitParRoleNom'  => 'Agent Ap',
-            'action'           => 'Rejetée',
-            'motif'            => $motif,
-            'created_at'       => Carbon::now(),
-            'updated_at'       => Carbon::now(),
+            'facture_id'      => $facture->id,
+            'traitParId'      => $userId,
+            'traitParRoleNom' => 'Agent Ap',
+            'action'          => 'Rejetée',
+            'motif'           => $motif,
+            'created_at'      => Carbon::now(),
+            'updated_at'      => Carbon::now(),
         ]);
 
         return [

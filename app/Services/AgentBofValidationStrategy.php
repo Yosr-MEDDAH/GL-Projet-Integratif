@@ -2,17 +2,16 @@
 
 namespace App\Services;
 
-use App\Interfaces\ValidationStrategyInterface;
+use App\Interfaces\ValideurInterface;
+use App\Interfaces\RejeteurInterface;
 use App\Models\Etapes;
 use App\Models\Facture;
 use Carbon\Carbon;
 
-
-class AgentBofValidationStrategy implements ValidationStrategyInterface
+class AgentBofValidationStrategy implements ValideurInterface, RejeteurInterface
 {
     public function valider(Facture $facture, int $userId): array
     {
-        // L'Agent BOF valide les factures en attente (etat_id = 1)
         if ($facture->etat_id !== 1) {
             return [
                 'success' => false,
@@ -20,17 +19,17 @@ class AgentBofValidationStrategy implements ValidationStrategyInterface
             ];
         }
 
-        $facture->etat_id    = 2;
-        $facture->validePar  = 'Agent Bof';
+        $facture->etat_id   = 2;
+        $facture->validePar = 'Agent Bof';
         $facture->save();
 
         Etapes::create([
-            'facture_id'       => $facture->id,
-            'traitParId'       => $userId,
-            'traitParRoleNom'  => 'Agent Bof',
-            'action'           => 'Validée',
-            'created_at'       => Carbon::now(),
-            'updated_at'       => Carbon::now(),
+            'facture_id'      => $facture->id,
+            'traitParId'      => $userId,
+            'traitParRoleNom' => 'Agent Bof',
+            'action'          => 'Validée',
+            'created_at'      => Carbon::now(),
+            'updated_at'      => Carbon::now(),
         ]);
 
         return [
@@ -46,13 +45,13 @@ class AgentBofValidationStrategy implements ValidationStrategyInterface
         $facture->save();
 
         Etapes::create([
-            'facture_id'       => $facture->id,
-            'traitParId'       => $userId,
-            'traitParRoleNom'  => 'Agent Bof',
-            'action'           => 'Rejetée',
-            'motif'            => $motif,
-            'created_at'       => Carbon::now(),
-            'updated_at'       => Carbon::now(),
+            'facture_id'      => $facture->id,
+            'traitParId'      => $userId,
+            'traitParRoleNom' => 'Agent Bof',
+            'action'          => 'Rejetée',
+            'motif'           => $motif,
+            'created_at'      => Carbon::now(),
+            'updated_at'      => Carbon::now(),
         ]);
 
         return [
